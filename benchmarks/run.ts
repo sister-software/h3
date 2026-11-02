@@ -253,9 +253,11 @@ console.log(JSON.stringify({ importMs: t1 - t0, initMs: t2 - t1, firstCallMs: t3
 
 const runs = (mode: string) =>
 	Array.from({ length: Math.min(SAMPLES, 9) }, () => JSON.parse(sh(process.execPath, [initScript, mode])))
+
 const lazyRuns = runs("lazy")
 const explicitRuns = runs("explicit")
 const inits = lazyRuns
+
 const initStats = {
 	importMs: stat(lazyRuns.map((x) => x.importMs)),
 	// Default path: the first call compiles and instantiates the embedded binary.
@@ -382,6 +384,7 @@ async function workerMemory(): Promise<unknown> {
 		entry,
 		`export * from ${JSON.stringify(join(root, "workerd.ts"))}\nexport { wasmMemoryBytes } from ${JSON.stringify(join(root, "lib/runtime/state.ts"))}\n`
 	)
+
 	sh(join(root, "node_modules/.bin/esbuild"), [
 		entry,
 		"--bundle",
@@ -392,6 +395,7 @@ async function workerMemory(): Promise<unknown> {
 		"--external:./h3.wasm",
 		`--outfile=${join(dir, "h3.mjs")}`,
 	])
+
 	writeFileSync(join(dir, "h3.wasm"), readFileSync(join(root, "wasm/h3.wasm")))
 
 	writeFileSync(

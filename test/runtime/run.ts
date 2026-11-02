@@ -473,6 +473,7 @@ let engines: [string, BrowserType][] = []
 
 try {
 	const pw = await import("playwright-core")
+
 	engines = [
 		["Chromium", pw.chromium],
 		["Firefox", pw.firefox],
@@ -527,6 +528,7 @@ for (const [label, buildFn] of [
 			const result = await page.evaluate(
 				() => (globalThis as unknown as { __result: Record<string, unknown> }).__result
 			)
+
 			const wasmRequests = requests.filter((p) => p.endsWith(".wasm"))
 			const where = `${label} in ${engineName} ${browser.version()}`
 
