@@ -166,7 +166,8 @@ const manifest = {
 	rustc,
 	target: TARGET,
 	profile: "release (Cargo.toml [profile.release])",
-	rustflags,
+	// Host paths are recorded as placeholders so the manifest is identical on every host.
+	rustflags: rustflags.map((f) => f.replace(root, "<checkout>").replace(cargoHome, "<cargo-home>")),
 	wasmBindgen: WASM_BINDGEN_VERSION,
 	wasmBindgenArgs: ["--target", "web", "--omit-default-module-path", "--out-name", "h3"],
 	optimizer: "none",

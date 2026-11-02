@@ -266,7 +266,14 @@ jobs:
           if npm view "@sister.software/h3@${VERSION}" version >/dev/null 2>&1; then
             echo "@sister.software/h3@${VERSION} is already on npm (recovery re-run) — skipping publish"
           else
-            npm publish --provenance --access public
+            # npm 11 refuses a prerelease without an explicit dist-tag ("You must specify a tag using
+            # --tag when publishing a prerelease version"). Prereleases go to `next`, releases to
+            # `latest`, so an rc never becomes the default install.
+            case "${VERSION}" in
+              *-*) DIST_TAG=next ;;
+              *) DIST_TAG=latest ;;
+            esac
+            npm publish --provenance --access public --tag "${DIST_TAG}"
           fi
 
       # The registry processes a publish asynchronously — `npm publish` returns "Your package is being
@@ -280,7 +287,9 @@ jobs:
           EXPECTED: ${{ steps.version.outputs.version }}
         run: |
           for attempt in $(seq 1 40); do
-            PUBLISHED="$(npm view @sister.software/h3 version 2>/dev/null || true)"
+            # Query the exact version: a prerelease is published under `next`, so the bare
+            # `version` field (the `latest` tag) would never report it.
+            PUBLISHED="$(npm view "@sister.software/h3@${EXPECTED}" version 2>/dev/null || true)"
             echo "attempt ${attempt}: npm reports '${PUBLISHED}', expected ${EXPECTED}"
             test "${PUBLISHED}" = "${EXPECTED}" && exit 0
             sleep 15

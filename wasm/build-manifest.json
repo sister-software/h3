@@ -4,8 +4,8 @@
 	"target": "wasm32-unknown-unknown",
 	"profile": "release (Cargo.toml [profile.release])",
 	"rustflags": [
-		"--remap-path-prefix=/home/lab/Projects/h3=/h3",
-		"--remap-path-prefix=/home/lab/.cargo=/cargo",
+		"--remap-path-prefix=<checkout>=/h3",
+		"--remap-path-prefix=<cargo-home>=/cargo",
 		"-Cdebuginfo=0"
 	],
 	"wasmBindgen": "0.2.130",
