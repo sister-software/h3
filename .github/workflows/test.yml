@@ -29,9 +29,8 @@ concurrency:
 
 env:
   WASM_BINDGEN_VERSION: "0.2.130"
+  # Run the JavaScript actions themselves (checkout, setup-node, cache) on Node 24, not the runner's older default.
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-  # Node versions that test:package runs the packed tarball under, besides .nvmrc.
-  H3_NODE_FLOOR: "24.22.1"
 
 jobs:
   test:
@@ -113,13 +112,19 @@ jobs:
       - name: Test
         run: yarn test --run
 
-      - name: Install Node ${{ env.H3_NODE_FLOOR }} for package tests
+      # test:package runs the tarball under the floor of every engines.node range; setup-node above provides .nvmrc.
+      - name: Install the engines floors for package tests
         run: |
+          NVMRC="$(sed 's/^v//' .nvmrc)"
+          FLOORS="$(node -p "require('./package.json').engines.node.split('||').map((r) => r.trim().replace(/^(\\^|>=)/, '')).join(' ')")"
           mkdir -p target/tools && cd target/tools
-          v="${H3_NODE_FLOOR}"
-          curl -fsSL -o "node-v${v}.tar.xz" "https://nodejs.org/dist/v${v}/node-v${v}-linux-x64.tar.xz"
-          curl -fsSL "https://nodejs.org/dist/v${v}/SHASUMS256.txt" | grep " node-v${v}-linux-x64.tar.xz$" | sed "s/node-v${v}-linux-x64.tar.xz/node-v${v}.tar.xz/" | sha256sum -c -
-          tar -xJf "node-v${v}.tar.xz"
+          for v in ${FLOORS}; do
+            [ "${v}" = "${NVMRC}" ] && continue
+            echo "installing Node ${v}"
+            curl -fsSL -o "node-v${v}.tar.xz" "https://nodejs.org/dist/v${v}/node-v${v}-linux-x64.tar.xz"
+            curl -fsSL "https://nodejs.org/dist/v${v}/SHASUMS256.txt" | grep " node-v${v}-linux-x64.tar.xz$" | sed "s/node-v${v}-linux-x64.tar.xz/node-v${v}.tar.xz/" | sha256sum -c -
+            tar -xJf "node-v${v}.tar.xz"
+          done
 
       - name: Package tests (npm tarball and native crate in clean consumers)
         run: yarn test:package

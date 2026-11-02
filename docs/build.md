@@ -2,17 +2,17 @@
 
 ## Toolchain (pinned)
 
-| Tool               | Version                                   | Pinned by                                      |
-| ------------------ | ----------------------------------------- | ---------------------------------------------- |
-| Rust               | 1.99.1, target `wasm32-unknown-unknown`   | `rust-toolchain.toml`                          |
-| wasm-bindgen       | 0.2.130 (crate `=0.2.130`, CLI `0.2.130`) | `Cargo.toml`, `scripts/build-wasm.ts`          |
-| wasm-opt           | not used                                  | the correctness build is unoptimized by design |
-| Node               | `.nvmrc` (>=24.22.1);                     | `.nvmrc`, `package.json` `engines`             |
-| Yarn               | 4.18.1                                    | `packageManager`                               |
-| esbuild            | 0.28.2                                    | `package.json` (exact)                         |
-| webpack            | 5.111.1                                   | `package.json` (exact)                         |
-| wrangler / workerd | 4.156.0 / 1.20261023.1                    | `package.json` (exact) / `yarn.lock`           |
-| playwright-core    | 1.64.1 (Chromium revision 1248)           | `package.json` (exact)                         |
+| Tool               | Version                                      | Pinned by                                      |
+| ------------------ | -------------------------------------------- | ---------------------------------------------- |
+| Rust               | 1.99.1, target `wasm32-unknown-unknown`      | `rust-toolchain.toml`                          |
+| wasm-bindgen       | 0.2.130 (crate `=0.2.130`, CLI `0.2.130`)    | `Cargo.toml`, `scripts/build-wasm.ts`          |
+| wasm-opt           | not used                                     | the correctness build is unoptimized by design |
+| Node               | 24.22.1; supported `^24.22.1 \|\| >=26.12.1` | `.nvmrc`, `package.json` `engines`             |
+| Yarn               | 4.18.1                                       | `packageManager`                               |
+| esbuild            | 0.28.2                                       | `package.json` (exact)                         |
+| webpack            | 5.111.1                                      | `package.json` (exact)                         |
+| wrangler / workerd | 4.156.0 / 1.20261023.1                       | `package.json` (exact) / `yarn.lock`           |
+| playwright-core    | 1.64.1 (Chromium revision 1248)              | `package.json` (exact)                         |
 
 Install the wasm-bindgen CLI once:
 
@@ -101,16 +101,26 @@ Reproduced by the `/restrictions` route of the runtime Worker probe on 2026-11-0
 
 ## Package verification
 
+### Node support policy
+
+Only Node LTS lines are supported, each from its latest security release: `engines.node` is
+`^24.22.1 || >=26.12.1` (24 "Krypton" and 26 "Lithium", security releases of 2026-10-20 and
+2026-10-21). When a line gets a security release, its floor moves to it. When a line reaches end of
+life, its range is removed. Raising a floor or dropping a line is a breaking change for consumers,
+so it ships in a minor version while the package is below 1.0. `test:package` reads the floors from
+`package.json`, so the policy and the tested versions cannot drift apart.
+
 `yarn test:package` packs the npm tarball, checks its file list (only `out/`, `wasm/h3.wasm`, the
 README, license and notices), installs it into a fresh consumer, and runs the README example, the
-export-map checks, and the C fixture probe under Node >=24.22.1 (the `engines` floor), the `.nvmrc`
-version, and the running Node. It also typechecks a TypeScript consumer against the shipped
+export-map checks, and the C fixture probe under the floor of every `engines` range (24.22.1 and
+26.12.1), the `.nvmrc` version, and the running Node when `engines` admits it. It also typechecks a TypeScript consumer against the shipped
 declarations with `skipLibCheck: false`, and builds and tests the unpacked `cargo package` output
 of `sister-h3` from a directory outside the repository.
 
 Node binaries for the version matrix are looked up in `target/tools/node-v<version>-linux-x64/`
 and then `~/.nvm/versions/node/`. Locally they were downloaded from nodejs.org into `target/tools`
-with SHA-256 verification against `SHASUMS256.txt`; CI does the same for >=24.22.1.
+with SHA-256 verification against `SHASUMS256.txt`; CI does the same for each floor that `.nvmrc`
+does not already provide.
 
 `cargo package` requires a committed tree; on an uncommitted working tree run it with
 `--allow-dirty` (as `yarn test:package` does). CI runs it without that flag.
