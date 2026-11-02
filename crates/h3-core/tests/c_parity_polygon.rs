@@ -2,8 +2,14 @@
 //!
 //! `polygonToCells` output order is unspecified by contract, but the native port reproduces C's
 //! hash-set buffer, so the non-zero entries are compared in C buffer order (stronger than set
-//! equality). Experimental fill is compared in C iteration order. Outlines are compared exactly,
-//! including vertex order and loop/polygon grouping.
+//! equality). Experimental fill is compared in C iteration order.
+//!
+//! `cellsToLinkedMultiPolygon` polygon order is unspecified (docs/api-decisions.md): C orders
+//! polygons by hashing vertex coordinates, so last-bit differences in the platform libm can
+//! permute them. On the reference platform (`common::EXACT`) the outline is compared bit for bit
+//! in C order, including loop/polygon grouping; elsewhere each expected polygon must match a
+//! distinct produced polygon with the same loops, vertex order, and coordinates within 1e-12
+//! degrees.
 
 mod common;
 use common::*;
@@ -79,30 +85,66 @@ fn polygon_to_cells_experimental() {
     }
 }
 
+type Outline = Vec<Vec<(f64, f64)>>;
+
+fn want_outline(wp: &Value) -> Outline {
+    wp.as_array()
+        .unwrap()
+        .iter()
+        .map(|wl| wl.as_array().unwrap().iter().map(|w| (f(&w[0]), f(&w[1]))).collect())
+        .collect()
+}
+
+/// Whether two polygons have the same loops, vertex counts, and vertex order, coordinates within tolerance.
+fn same_polygon(got: &Outline, want: &Outline) -> Result<f64, String> {
+    if got.len() != want.len() {
+        return Err(format!("loop count {} vs {}", got.len(), want.len()));
+    }
+    let mut worst: f64 = 0.0;
+    for (li, (gl, wl)) in got.iter().zip(want).enumerate() {
+        if gl.len() != wl.len() {
+            return Err(format!("loop {li}: vertex count {} vs {}", gl.len(), wl.len()));
+        }
+        for (g, w) in gl.iter().zip(wl) {
+            worst = worst.max(float_matches(g.0, w.0, Kind::Coord).map_err(|e| format!("loop {li}: {e}"))?);
+            worst = worst.max(float_matches(g.1, w.1, Kind::Coord).map_err(|e| format!("loop {li}: {e}"))?);
+        }
+    }
+    Ok(worst)
+}
+
 #[test]
 fn cells_to_linked_multi_polygon() {
+    let mut worst: f64 = 0.0;
     for r in load("cellsToLinkedMultiPolygon") {
         let (e, v) = err(raw::cells_to_linked_multi_polygon(&idxs(&r.args["indexes"])));
         assert_eq!(e, r.error, "line {}", r.line);
-        if let Some(v) = v {
-            let want = r.result["polygonsRadians"].as_array().unwrap();
-            assert_eq!(v.len(), want.len(), "line {}: polygon count", r.line);
-            for (pi, (gp, wp)) in v.iter().zip(want).enumerate() {
-                let wp = wp.as_array().unwrap();
-                assert_eq!(gp.len(), wp.len(), "line {} polygon {pi}: loop count", r.line);
-                for (li, (gl, wl)) in gp.iter().zip(wp).enumerate() {
-                    let wl = wl.as_array().unwrap();
-                    assert_eq!(gl.len(), wl.len(), "line {} polygon {pi} loop {li}: vertex count", r.line);
-                    for (g, w) in gl.iter().zip(wl) {
-                        assert_eq!(
-                            (g.lat.to_bits(), g.lng.to_bits()),
-                            (f(&w[0]).to_bits(), f(&w[1]).to_bits()),
-                            "line {} polygon {pi} loop {li}",
-                            r.line
-                        );
-                    }
+        let Some(v) = v else { continue };
+        let got: Vec<Outline> =
+            v.iter().map(|p| p.iter().map(|l| l.iter().map(|g| (g.lat, g.lng)).collect()).collect()).collect();
+        let want: Vec<Outline> = r.result["polygonsRadians"].as_array().unwrap().iter().map(want_outline).collect();
+        assert_eq!(got.len(), want.len(), "line {}: polygon count", r.line);
+        if EXACT {
+            for (pi, (g, w)) in got.iter().zip(&want).enumerate() {
+                if let Err(e) = same_polygon(g, w) {
+                    panic!("line {} polygon {pi}: {e}", r.line);
                 }
             }
+            continue;
+        }
+        // Order-independent: each expected polygon claims one distinct produced polygon.
+        let mut used = vec![false; got.len()];
+        for (pi, w) in want.iter().enumerate() {
+            let hit = got.iter().enumerate().find_map(|(gi, g)| match used[gi] {
+                true => None,
+                false => same_polygon(g, w).ok().map(|d| (gi, d)),
+            });
+            let Some((gi, d)) = hit else {
+                panic!("line {} expected polygon {pi}: no produced polygon matches", r.line);
+            };
+            used[gi] = true;
+            worst = worst.max(d);
         }
     }
+    report("cellsToLinkedMultiPolygon", worst);
 }

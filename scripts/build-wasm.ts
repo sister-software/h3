@@ -169,6 +169,11 @@ const manifest = {
 	// Host paths are recorded as placeholders so the manifest is identical on every host.
 	rustflags: rustflags.map((f) => f.replace(root, "<checkout>").replace(cargoHome, "<cargo-home>")),
 	wasmBindgen: WASM_BINDGEN_VERSION,
+	// The portable libm the binary computes with (sister-h3's `libm` feature). Native builds with
+	// the feature reproduce this binary's floats exactly only at the same version.
+	libm:
+		/\[\[package\]\]\nname = "libm"\nversion = "([^"]+)"/.exec(readFileSync(join(root, "Cargo.lock"), "utf8"))?.[1] ??
+		"absent",
 	wasmBindgenArgs: ["--target", "web", "--omit-default-module-path", "--out-name", "h3"],
 	optimizer: "none",
 	lockfiles: { "Cargo.lock": sha(readFileSync(join(root, "Cargo.lock"))) },

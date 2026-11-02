@@ -7,6 +7,7 @@ use crate::LatLng;
 use crate::cell::cell_to_boundary;
 use crate::constants::{EARTH_RADIUS_KM, M_PI};
 use crate::errors::H3Result;
+use crate::math::Trig;
 
 /// C `Adder` / `kadd`: Kahan compensated summation.
 #[derive(Default)]
@@ -30,12 +31,12 @@ impl Adder {
 fn cagnoli(mut x: LatLng, mut y: LatLng) -> f64 {
     x.lat = x.lat / 2.0 + M_PI / 4.0;
     y.lat = y.lat / 2.0 + M_PI / 4.0;
-    let sa = x.lat.sin() * y.lat.sin();
-    let ca = x.lat.cos() * y.lat.cos();
+    let sa = x.lat.h3_sin() * y.lat.h3_sin();
+    let ca = x.lat.h3_cos() * y.lat.h3_cos();
     let d = y.lng - x.lng;
-    let sd = d.sin();
-    let cd = d.cos();
-    -2.0 * (sa * sd).atan2(sa * cd + ca)
+    let sd = d.h3_sin();
+    let cd = d.h3_cos();
+    -2.0 * (sa * sd).h3_atan2(sa * cd + ca)
 }
 
 /// C `geoLoopAreaRads2`.

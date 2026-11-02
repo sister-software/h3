@@ -60,6 +60,7 @@
 		"build:wasm": "node scripts/build-wasm.ts",
 		"check:wasm-artifact": "node scripts/build-wasm.ts --check",
 		"check:fixtures": "node scripts/check-fixtures.ts",
+		"check:libm-wasm": "node scripts/check-libm-wasm.ts",
 		"generate:fixtures": "node scripts/generate-fixtures.ts",
 		"check-types": "tsc --build . && tsc -p tsconfig.tools.json",
 		"clean": "tsc -b --clean",

@@ -3,16 +3,13 @@
 //!
 //! Comparison rules (see docs/api-decisions.md, "Comparison rules"):
 //! - Index bits, counts, validity and C error codes: exact.
-//! - Coordinates (radians): native builds use the same platform libm as the C reference, so the
-//!   expected difference is zero; the asserted bound is `COORD_TOL` and the observed maximum is
-//!   printed with `--nocapture`.
+//! - Coordinates (radians): bit-exact on the reference platform (linux x86-64 glibc, default
+//!   features); elsewhere within 1e-12 degrees (`common::EXACT`, `common::check_float`). The
+//!   comparison mode and worst difference are printed with `--nocapture`.
 
 mod common;
 use common::*;
 use sister_h3::{LatLng, raw};
-
-/// Absolute tolerance for radian coordinates in native parity (observed maximum is reported).
-const COORD_TOL: f64 = 0.0;
 
 #[test]
 fn is_valid_cell() {
@@ -111,22 +108,22 @@ fn readme_example() {
 
 #[test]
 fn cell_to_lat_lng() {
-    let mut m = MaxErr::default();
+    let mut worst = 0.0;
     for r in load("cellToLatLng") {
         let (e, v) = err(raw::cell_to_lat_lng(idx(&r.args["index"])));
         assert_eq!(e, r.error, "line {}", r.line);
         if let Some(v) = v {
             let ctx = format!("line {}", r.line);
-            m.check(v.lat, f(&r.result["latRadians"]), COORD_TOL, &ctx);
-            m.check(v.lng, f(&r.result["lngRadians"]), COORD_TOL, &ctx);
+            check_float(&mut worst, v.lat, f(&r.result["latRadians"]), Kind::Coord, &ctx);
+            check_float(&mut worst, v.lng, f(&r.result["lngRadians"]), Kind::Coord, &ctx);
         }
     }
-    println!("cellToLatLng: {} values, max |diff| {:e} rad", m.count, m.max);
+    report("cellToLatLng", worst);
 }
 
 #[test]
 fn cell_to_boundary() {
-    let mut m = MaxErr::default();
+    let mut worst = 0.0;
     for r in load("cellToBoundary") {
         let (e, v) = err(raw::cell_to_boundary(idx(&r.args["index"])));
         assert_eq!(e, r.error, "line {}", r.line);
@@ -135,12 +132,12 @@ fn cell_to_boundary() {
             assert_eq!(v.len(), want.len(), "line {}: vertex count", r.line);
             for (k, (g, w)) in v.iter().zip(want).enumerate() {
                 let ctx = format!("line {} vertex {k}", r.line);
-                m.check(g.lat, f(&w[0]), COORD_TOL, &ctx);
-                m.check(g.lng, f(&w[1]), COORD_TOL, &ctx);
+                check_float(&mut worst, g.lat, f(&w[0]), Kind::Coord, &ctx);
+                check_float(&mut worst, g.lng, f(&w[1]), Kind::Coord, &ctx);
             }
         }
     }
-    println!("cellToBoundary: {} values, max |diff| {:e} rad", m.count, m.max);
+    report("cellToBoundary", worst);
 }
 
 #[test]
@@ -233,5 +230,20 @@ fn uncompact_cells() {
         if let Some(v) = v {
             assert_eq!(v, idxs(&r.result["indexes"]), "line {}", r.line);
         }
+    }
+}
+
+/// Guards against silently comparing loosely: CI sets `H3_EXPECT_EXACT=1` for the reference
+/// platform with default features and `0` elsewhere. (A `cargo test --workspace` would enable the
+/// `libm` feature through the WebAssembly adapter and fall back to tolerances; this catches that.)
+#[test]
+fn comparison_mode_is_the_expected_one() {
+    if let Ok(v) = std::env::var("H3_EXPECT_EXACT") {
+        assert_eq!(
+            EXACT,
+            v == "1",
+            "H3_EXPECT_EXACT={v} but this build compares {}",
+            if EXACT { "exactly" } else { "within tolerances" }
+        );
     }
 }

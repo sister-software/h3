@@ -211,26 +211,52 @@ most of that (`cellToLatLng` 479 → ~360 ns, `gridDisk` 1,955 → ~1,100 ns). I
 
 ## Comparison rules
 
-| Quantity                                    | Native Rust vs C                           | WASM vs native Rust                   |
-| ------------------------------------------- | ------------------------------------------ | ------------------------------------- |
-| Index bits, counts, validity, C error codes | exact                                      | exact                                 |
-| Coordinates (radians)                       | exact (same glibc libm); observed max 0    | per operation, recorded when measured |
-| Collections with C-guaranteed order         | exact order                                | exact order                           |
-| `polygonToCells*` output                    | set equality + no duplicates + cardinality | same                                  |
+| Quantity                                               | Native Rust vs C                                                      | WASM vs C                      |
+| ------------------------------------------------------ | --------------------------------------------------------------------- | ------------------------------ |
+| Index bits, counts, validity, C error codes            | exact                                                                 | exact                          |
+| Floats through libm (coordinates, measures)            | exact on linux x86-64 glibc, default features; bounds below elsewhere | bounds below                   |
+| Floats without libm (unit conversions, average tables) | exact                                                                 | exact                          |
+| Collections with C-guaranteed order                    | exact order                                                           | exact order                    |
+| `polygonToCells*` output                               | set equality + no duplicates + cardinality                            | same                           |
+| `cellsToLinkedMultiPolygon` polygon order              | exact C order on the reference platform; unspecified elsewhere        | unspecified (matched as a set) |
+
+The reference platform is the one the fixtures are generated on: linux x86-64, glibc, C built with
+`-ffp-contract=off`. `crates/h3-core/tests/common` (`EXACT`) selects the mode, and CI sets
+`H3_EXPECT_EXACT` so that a build silently falling back to tolerances fails. `cargo test
+--workspace` would do exactly that, because the WASM adapter enables the `libm` feature for the
+whole build. Native with `features = ["libm"]` and the WASM build use the same `libm` crate
+version and are checked to be bit-identical (`yarn check:libm-wasm`, 15,956 values).
+
+Polygon order of `cellsToLinkedMultiPolygon` / `cellsToMultiPolygon` is unspecified. C orders the
+polygons by hashing vertex coordinates, so last-bit libm differences can permute them. This was
+observed for one 122-cell fixture with C built on Apple Silicon. Loop grouping and vertex order
+within a loop are stable.
 
 `compactCells` is compared against C's whole output buffer (unused slots `0`) in C order.
 
-## Comparison tolerances (WASM versus native C)
+## Comparison tolerances (non-reference math versus C)
 
-Native Rust is bit-identical to C on every fixture. Compiled WASM uses Rust's portable libm instead
-of glibc, so transcendental results can differ in the last bits. Index results remain exact; the
-JavaScript parity suite (`test/shared/fixture-cases.ts`) bounds the rest:
+Off the reference platform, or with the portable libm (the WASM build and the `libm` feature),
+transcendental results can differ from the fixtures in the last bits. Index results remain exact
+on every fixture. Floats are bounded by the same limits in the JavaScript suite
+(`test/shared/fixture-cases.ts`) and the native suites (`crates/h3-core/tests/common`):
 
 | Quantity                     | Bound                                       | Observed maximum (2026-11-02) |
 | ---------------------------- | ------------------------------------------- | ----------------------------- |
 | Coordinates (degrees)        | 1e-12 absolute                              | 6.4e-14                       |
 | Lengths, distances (radians) | 1e-13 absolute, in radian units             | 8.9e-16                       |
 | Areas (square radians)       | 1e-14 × √area (error scales with perimeter) | 1.8e-15 (on a 0.1 sr cell)    |
+
+Native observations against the same bounds, as the worst difference divided by its bound:
+
+- **`libm` feature, linux x86-64:** coordinates 0.064, areas 0.56, lengths 0.006.
+- **C built on macOS arm64** (Apple libm, `-ffp-contract=off`) against the Linux fixtures:
+  coordinates up to 74 ULP, areas 0.07, lengths 0.006.
+
+Cell assignment depends on these coordinates. A point within about 1e-14 rad of a cell edge can
+change cells between math libraries. No fixture hits such a point, so integer outputs are exact
+on the fixtures but are not promised to be identical across libms in general (README,
+"Reproducibility across machines").
 
 ## Differences from h3-js 4.5.0
 

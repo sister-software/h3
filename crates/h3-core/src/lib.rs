@@ -47,6 +47,7 @@ mod faceijk;
 mod hierarchy;
 mod index;
 mod latlng;
+mod math;
 mod multipoly;
 mod polyfill;
 mod polygon;

@@ -478,13 +478,33 @@ const DISPATCH: Record<string, Dispatch> = {
 
 			if (g.length !== want.length) return `polygon count ${g.length} != ${want.length}`
 
-			for (let p = 0; p < g.length; p++) {
-				if (g[p]!.length !== want[p]!.length) return `polygon ${p} loop count`
+			// Polygon order is unspecified (docs/api-decisions.md): C orders polygons by hashing vertex
+			// coordinates, so last-bit libm differences can permute them. Each expected polygon must match
+			// a distinct produced polygon with the same loops and vertex order, coordinates within bounds.
+			const samePolygon = (gp: [number, number][][], wp: number[][][]) =>
+				gp.length === wp.length &&
+				gp.every(
+					(gl, l) =>
+						gl.length === wp[l]!.length &&
+						gl.every(
+							([lat, lng], i) =>
+								Math.abs(lat - wp[l]![i]![0]! * M_180_PI) <= COORD_TOLERANCE_DEGREES &&
+								Math.abs(lng - wp[l]![i]![1]! * M_180_PI) <= COORD_TOLERANCE_DEGREES
+						)
+				)
 
-				for (let l = 0; l < g[p]!.length; l++) {
-					const d = compareCoords("cellsToMultiPolygon", g[p]![l]!, want[p]![l]!)
+			const used = new Set<number>()
 
-					if (d) return `polygon ${p} loop ${l}: ${d}`
+			for (let p = 0; p < want.length; p++) {
+				const match = g.findIndex((gp, i) => !used.has(i) && samePolygon(gp, want[p]!))
+
+				if (match === -1) return `expected polygon ${p}: no produced polygon matches`
+
+				used.add(match)
+
+				// Record the observed differences for the matched pair.
+				for (let l = 0; l < want[p]!.length; l++) {
+					compareCoords("cellsToMultiPolygon", g[match]![l]!, want[p]![l]!)
 				}
 			}
 

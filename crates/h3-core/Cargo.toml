@@ -24,6 +24,16 @@ include = [
 name = "sister_h3"
 crate-type = ["rlib"]
 
+[features]
+# Route sin, cos, tan, acos, atan and atan2 through the pure-Rust `libm` crate instead of the
+# platform libm: identical results on every platform, and identical to the WebAssembly build.
+# Without it (the default), results match H3 C built on the same machine. See README.md,
+# "Reproducibility across machines".
+libm = ["dep:libm"]
+
+[dependencies]
+libm = { version = "0.2.16", optional = true }
+
 [lints]
 workspace = true
 

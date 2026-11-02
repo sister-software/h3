@@ -7,6 +7,7 @@
 | Rust               | 1.99.1, target `wasm32-unknown-unknown`      | `rust-toolchain.toml`                          |
 | wasm-bindgen       | 0.2.130 (crate `=0.2.130`, CLI `0.2.130`)    | `Cargo.toml`, `scripts/build-wasm.ts`          |
 | wasm-opt           | not used                                     | the correctness build is unoptimized by design |
+| libm (crate)       | 0.2.16; the WASM build's math library        | `Cargo.lock`, recorded in the build manifest   |
 | Node               | 24.22.1; supported `^24.22.1 \|\| >=26.12.1` | `.nvmrc`, `package.json` `engines`             |
 | Yarn               | 4.18.1                                       | `packageManager`                               |
 | esbuild            | 0.28.2                                       | `package.json` (exact)                         |
@@ -54,6 +55,12 @@ never need C. Regenerating them requires an explicit H3 C checkout at the pinned
 ```sh
 H3_C_SOURCE=/path/to/h3 yarn generate:fixtures
 ```
+
+Every C compile uses `-ffp-contract=off`, so the reference does not depend on whether the host
+compiler fuses multiply-adds. clang on arm64 does so by default, which changed last bits on Apple
+Silicon. The fixtures are bit-exact for linux x86-64 glibc. On other hosts, regenerated fixtures
+differ in floating-point last bits only (see `docs/api-decisions.md`, "Comparison rules"), so
+commit fixtures regenerated on that platform only.
 
 The script verifies `git rev-parse HEAD` equals `24946ad1c5e9016a6eab96d4f9ee4d0c993720e5` and
 `VERSION` is `4.5.0`, then builds C out of tree in `target/reference/h3-c`, runs CTest, compiles the
@@ -142,10 +149,17 @@ pinned C library. `H3_BENCH_SAMPLES` sets the sample count (default 15).
 
 `.github/workflows/test.yml` (job `test`) runs, in order: fixture checks, a check that
 `package.json` and the `sister-h3` crate share a version, `cargo fmt --check`, `cargo clippy -D
-warnings`, `cargo test`, `cargo package`, `yarn check:wasm-artifact` (installs `wasm-bindgen-cli`
-0.2.130 with `--locked`), `yarn lint`, `yarn compile`, `yarn check-types`, `yarn test --run`,
-`yarn test:package`, and `yarn test:runtimes` (after installing Playwright's Chromium and Firefox).
-It never builds C.
+warnings` (workspace, and `sister-h3` alone for the default math path), `cargo test -p sister-h3`
+bit-exact (`H3_EXPECT_EXACT=1`) and again with `--features libm`, the WASM adapter's tests,
+`cargo package`, `yarn check:wasm-artifact` (installs `wasm-bindgen-cli` 0.2.130 with
+`--locked`), `yarn check:libm-wasm`, `yarn lint`, `yarn compile`, `yarn check-types`,
+`yarn test --run`, `yarn test:package`, and `yarn test:runtimes` (after installing Playwright's
+Chromium and Firefox). It never builds C. It never runs `cargo test --workspace`: feature
+unification would enable `libm` for the core crate's tests through the WASM adapter.
+
+The `native` job runs the core crate's parity suites with the platform libm and with `--features
+libm` on macOS arm64, Linux arm64 glibc, Linux x86-64 musl, and Windows x86-64 MSVC, within the
+documented bounds. Only `test` is a required check.
 
 ## Releases
 
