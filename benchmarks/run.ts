@@ -298,6 +298,7 @@ let native: Record<string, { rust: Stat; c?: Stat; checksumMatch?: boolean }>
 
 		sh("cc", [
 			"-O3",
+			"-ffp-contract=off", // as in scripts/generate-fixtures.ts: no host-dependent FMA contraction
 			"-std=c11",
 			"-I" + join(cLib, "src/h3lib/include"),
 			"-o",
