@@ -167,9 +167,11 @@ bit-identical to C on every committed case. Elsewhere, coordinates differ from t
 few units in the last place (at most about 1e-14 relative on Apple Silicon). That is far inside the
 documented bounds (`docs/api-decisions.md`).
 
-Indexes are computed from those coordinates, so a point that lies within about 1e-14 radians of a
-cell edge can be assigned to a different cell by a different libm. No committed fixture hits such
-a point, and they are rare. Cross-machine identical integer output is promised only by the
+Indexes are computed from those coordinates, so a point that lies extremely close to a cell edge
+can be assigned to a different cell by a different libm. Measured on linux x86-64 (glibc against
+the `libm` crate, `yarn stress:boundary`), that band is under 1e-15 radians, about 6 nanometres on
+the ground: no flips at 1e-15 rad from an edge at any resolution. For a uniformly random point the
+estimated chance of a flip is about 3.5e-13 at resolution 9 and 1.4e-10 at resolution 15. Cross-machine identical integer output is promised only by the
 WebAssembly build and by the `libm` feature at a pinned crate version. If you store derived data
 and need reruns on another machine to match exactly, enable the feature (Cargo features are
 additive: if any crate in your build enables it, it is on for all). The polygon order of
@@ -186,6 +188,7 @@ yarn compile && yarn test --run
 cargo test -p sister-h3 --locked                  # bit-exact on linux x86-64 glibc
 cargo test -p sister-h3 --features libm --locked  # portable libm, within documented bounds
 yarn check:libm-wasm        # native with the libm feature equals the WASM build bit for bit
+yarn stress:boundary        # cell flips near edges, platform libm vs the libm crate
 yarn test:runtimes          # Node, Worker bundle, wrangler dev, Vite and webpack in Chromium
 yarn test:package           # packed tarball and native crate in clean consumers
 yarn benchmark              # see benchmarks/

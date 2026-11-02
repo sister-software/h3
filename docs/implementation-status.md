@@ -93,8 +93,10 @@ matching outputs. An authoritative run on an idle machine has not been possible.
     musl, and Windows.
   - Native with the feature equals WASM bit for bit.
   - `cellsToLinkedMultiPolygon` polygon order is declared unspecified.
-  - Open: measure the cross-libm cell-flip rate near edges (a boundary-stress test). Fable
-    estimated it at about 1e-9 per point at res 9 and 1e-7 at res 15; that is not yet measured.
+  - Cross-libm cell flips near edges, measured with `yarn stress:boundary` (glibc vs `libm`):
+    none beyond 1e-15 rad (about 6 nm) from an edge; an estimated 3.5e-13 per random point at
+    res 9 and 1.4e-10 at res 15. Fable's pre-measurement estimate (1e-9 and 1e-7) was about four
+    orders of magnitude too high. Apple libm not yet measured.
 
 - The clean-checkout gate passed in CI on PR #1 (run 41391165306, ubuntu-24.04, 4 min 55 s),
   including `cargo package` without `--allow-dirty`, runtime tests in Chromium and Firefox, and
