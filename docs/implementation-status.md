@@ -82,15 +82,16 @@ matching outputs. An authoritative run on an idle machine has not been possible.
 
 ## Deviations from the guide, and open items
 
-- `cargo package` was run with `--allow-dirty` because the tree is deliberately uncommitted; CI
-  runs it without the flag. The clean-copy gate after committing lockfiles has not been run.
+- The clean-checkout gate passed in CI on PR #1 (run 41391165306, ubuntu-24.04, 4 min 55 s),
+  including `cargo package` without `--allow-dirty`, runtime tests in Chromium and Firefox, and
+  `check:wasm-artifact`.
 - The guide's CMake command needed `-DBUILD_FILTERS=ON` at the pinned revision (docs/build.md).
 - Initialization is implicit (first-use synchronous instantiation) instead of the guide's required
   awaited `init`; see `docs/api-decisions.md`, "Initialization".
 - The private WASM ABI uses reused Rust-owned output buffers and fixed result slots instead of
   returning `Vec`s for most results, based on measured boundary costs (docs/api-decisions.md).
-- `wasm/h3.wasm` reproducibility is established across target directories on this host only;
-  cross-host byte identity is unverified.
+- `wasm/h3.wasm`, its glue, and the embedded module are byte-identical between the development host
+  and a GitHub-hosted runner (the build manifest records host paths as placeholders).
 - License: MIT (operator decision, 2026-11-02), with the H3-derived portions shipped alongside
   `LICENSE-APACHE-2.0`, `NOTICE`, and `THIRD_PARTY_NOTICES.md` per Apache-2.0 section 4.
 - Exact ties in `cellsToMultiPolygon` polygon areas are ordered by Rust's stable sort; C's `qsort`
@@ -102,5 +103,5 @@ matching outputs. An authoritative run on an idle machine has not been possible.
 
 ## Next action
 
-Push the `rust-port` branch so CI can run the clean-copy
-gate (including `cargo package` without `--allow-dirty`).
+Merge PR #1, complete the npm first-publish and trusted-publishing setup, and run the WebKit and
+benchmark checks on a Mac (`scratchpad/2026/11/02/mac-verification-issue.md`).
