@@ -2,7 +2,7 @@
 	"fixtureSchemaVersion": 1,
 	"seed": 1364674611,
 	"generationCommand": "H3_C_SOURCE=<checkout> yarn generate:fixtures",
-	"generatorSha256": "3b219e4924acee9acf97fefe89794a70bcdba64a614a69390f68e63ccfe09e0d",
+	"generatorSha256": "f6805f2dc50c58a9b5e70f2e96226d0adc36c79fde2216c82c89d2abb8365af7",
 	"references": {
 		"h3c": {
 			"repository": "https://github.com/uber/h3",
@@ -19,12 +19,12 @@
 		}
 	},
 	"platform": {
-		"os": "linux x64",
-		"cc": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
-		"cmake": "cmake version 3.28.3",
-		"node": "v26.2.0"
+		"os": "darwin arm64",
+		"cc": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+		"cmake": "cmake version 4.4.4",
+		"node": "v24.22.1"
 	},
-	"ctestRun": true,
+	"ctestRun": false,
 	"files": {
 		"areNeighborCells.jsonl": {
 			"cases": 525,
@@ -32,15 +32,15 @@
 		},
 		"cellAreaKm2.jsonl": {
 			"cases": 397,
-			"sha256": "dc854c32fd7dccaef195c350a049fc6af335bc7af629d6f23e471119820a990a"
+			"sha256": "40f7dd0fcc661d271ff9972ebcc836869a2e490ad2fedb1330a84a9793a07ffa"
 		},
 		"cellAreaM2.jsonl": {
 			"cases": 397,
-			"sha256": "22a817356dd37866db0f4c527ad163bc30bfd71860f40c4f1134fda9248308f6"
+			"sha256": "99d0c57252a9a72fbf540f218833f43940091439ebe14651844f42d271082d27"
 		},
 		"cellAreaRads2.jsonl": {
 			"cases": 397,
-			"sha256": "473b2bb36831a112f2f8d87e1f1e2e0fc5426d8466b493d0f6cca0c05d8e602d"
+			"sha256": "0ddaae51d6c2ef4e76bece0fa484703794218f4d56925c54be30a4a537a3b972"
 		},
 		"cellsToDirectedEdge.jsonl": {
 			"cases": 525,
@@ -48,11 +48,11 @@
 		},
 		"cellsToLinkedMultiPolygon.jsonl": {
 			"cases": 16,
-			"sha256": "90ac2067042f46bf7b2e4e30407057d222bee605383cedb84fc2eb5f51e95a54"
+			"sha256": "36fda55ffa525ed290171a3293429590459e16775c35739b4762848c92b2aa5f"
 		},
 		"cellToBoundary.jsonl": {
 			"cases": 778,
-			"sha256": "7ada43afd61ebb347cd8ad6f035c105168f86b6e84982bed76eda5bd097b8c5c"
+			"sha256": "f4a3594305bfe61549d272d80ed8f1bbdef4ad7e1e0959885546599b34f96bf9"
 		},
 		"cellToCenterChild.jsonl": {
 			"cases": 1890,
@@ -72,7 +72,7 @@
 		},
 		"cellToLatLng.jsonl": {
 			"cases": 778,
-			"sha256": "e0a5a45295a6c97ddce1ef4e04db56069ba60e76db05be6827ac573b2650e25b"
+			"sha256": "ff6f65d7e054ec7ce593c60f702220f08f66834356b34c2c32c12a21b45d493e"
 		},
 		"cellToLocalIj.jsonl": {
 			"cases": 640,
@@ -108,7 +108,7 @@
 		},
 		"directedEdgeToBoundary.jsonl": {
 			"cases": 600,
-			"sha256": "31db0915981028a97979b7b7a111ed50b08899e6cdbba58eda90b722eacff166"
+			"sha256": "68adb7632fb86afe917d51f170e6d323cf36133b13dcd954feffd9121224d7c2"
 		},
 		"directedEdgeToCells.jsonl": {
 			"cases": 600,
@@ -116,15 +116,15 @@
 		},
 		"edgeLengthKm.jsonl": {
 			"cases": 600,
-			"sha256": "39ee4fc5ef3dedd88a1f540644fdc46d04e01fc3d759ac1eead2ac7b1296bc8a"
+			"sha256": "5b170d8484cc5c7ba19651034381ab5b9c19eae1eda6336ec5de2bd67c373e33"
 		},
 		"edgeLengthM.jsonl": {
 			"cases": 600,
-			"sha256": "5ab5487eb5a61f36796837f5ea0d8420222d243e7b1e20845d9b08ade34e52c1"
+			"sha256": "52197ad6ca6b53d85f25616195f40ac6374a8708b19465265ca5d41bb5caf65c"
 		},
 		"edgeLengthRads.jsonl": {
 			"cases": 600,
-			"sha256": "ebca64a81f430552cf26c53807b24928e05829bb75f87853aa085c7e9c5bbce5"
+			"sha256": "05ddbd055c96ed2fe30b37509671d40aee916b875a81651fb177bcb7a33aa738"
 		},
 		"getBaseCellNumber.jsonl": {
 			"cases": 778,
@@ -180,15 +180,15 @@
 		},
 		"greatCircleDistanceKm.jsonl": {
 			"cases": 205,
-			"sha256": "2abe887cab9cbbd27b4fbd1e44a8e529b84f0102c6fd3d05924a3d6085ed7c82"
+			"sha256": "275df9d49a18b3b8102be837827fa974c76900dd04c75dcffaedc599be3ef084"
 		},
 		"greatCircleDistanceM.jsonl": {
 			"cases": 205,
-			"sha256": "39e9b44bdfb1ffdeabd5463e2251702243dc3ebe147a70cdc9cbfd052ecff3d1"
+			"sha256": "07003333dd9b60039c993e356bb5c5ce770173642ec323ba244cb929eb9f6bd7"
 		},
 		"greatCircleDistanceRads.jsonl": {
 			"cases": 205,
-			"sha256": "507f077f04953fddd27e460a999bb7c1673cd73ff95c59b023095c98a93f7b9c"
+			"sha256": "be09b2bbf3029bb2c0503ecf4f8bd5ced007aba4a17cbead2025cf606ae92359"
 		},
 		"gridDisk.jsonl": {
 			"cases": 756,
@@ -256,7 +256,7 @@
 		},
 		"latLngToCell.jsonl": {
 			"cases": 2128,
-			"sha256": "24cdfb1a9f553067518efba35f89e00a9bb1112f2b613ea039f13229d88f4f54"
+			"sha256": "9d7f0ecbf3dd942758e3beb60e83983287d29ad4c329a8d9ab37534a53091fd2"
 		},
 		"localIjToCell.jsonl": {
 			"cases": 766,
@@ -272,11 +272,11 @@
 		},
 		"maxPolygonToCellsSize.jsonl": {
 			"cases": 31,
-			"sha256": "a85d00b72ee35265c6a25560336501a8e0d922dade93b056b08dc6a0d1ce8cf5"
+			"sha256": "4891d36de70cca3abafe6f208188acb8c473490effe06eed64a74d2e3b406286"
 		},
 		"maxPolygonToCellsSizeExperimental.jsonl": {
 			"cases": 112,
-			"sha256": "bf1f1f9bdaa91a7caac51809f6886bbae830d6778d3cd8cc66e054a04866bac8"
+			"sha256": "94c6e1e973a094cee085a1a98a5e9d95b63faedb001a52defc0e563d3d85f856"
 		},
 		"originToDirectedEdges.jsonl": {
 			"cases": 199,
@@ -284,11 +284,11 @@
 		},
 		"polygonToCells.jsonl": {
 			"cases": 31,
-			"sha256": "db38f48d1cb289af6a7ce3e93e5f866c09941c9220642bbe2e47f41af4f87f29"
+			"sha256": "1b46e9ba55693902ea2fe2bef66c722ef625e1faecec0a86a68b95ce70722124"
 		},
 		"polygonToCellsExperimental.jsonl": {
 			"cases": 112,
-			"sha256": "ffa9a4fb9d07b2a7836e180f78dd63ef86a77ca19c4279c6f3c397f3f4b62f5e"
+			"sha256": "a6daad910bf66479ec7c309cf4d538b31ed32645f86ddcbcbffeeb519bf2b518"
 		},
 		"radsToDegs.jsonl": {
 			"cases": 12,
@@ -308,7 +308,7 @@
 		},
 		"vertexToLatLng.jsonl": {
 			"cases": 505,
-			"sha256": "cfd99bc07e50810f18b347b3e95aa58b0dbd820629c7970fb8569d6fcd687bff"
+			"sha256": "46d61457be820684fcf941a3481047f2995c3c79f9cbcdf9592c45ae74384d74"
 		}
 	}
 }
