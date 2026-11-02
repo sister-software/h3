@@ -67,6 +67,7 @@ permissions:
 # Must match test.yml and scripts/build-wasm.ts (the build refuses any other version).
 env:
   WASM_BINDGEN_VERSION: "0.2.130"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 # Serialize releases. Never cancel an in-flight run — a prepare may be mid-push and a publish
 # mid-tarball; killing either leaves a partial state a human has to unwind.

@@ -45,7 +45,7 @@ fixture evidence is missing, or if root exports differ from the manifest.
   init (restrictions reproduced); Vite (no init, no WASM request) and webpack (`init({ bytes })`,
   one request) builds in Chromium 156 and Firefox 157. Each runtime matched C on all 34,805 cases.
 - Package (`yarn test:package`, 12 checks): 63-file tarball; README example, export map, and the
-  fixture probe under Node 22.18.0, 24.22.1 (`.nvmrc`), and 26.2.0; TypeScript consumer with
+  fixture probe under Node 24.22.1 (`.nvmrc`), and 26.2.0; TypeScript consumer with
   `skipLibCheck: false`; external consumer of the packaged crate plus its 41 tests.
 - Benchmarks and memory: `benchmarks/RESULTS.md` (load ≈ 4 on 16 cores, indicative). Faster than
   h3-js on all six priority functions (ratios 0.30–0.90); native Rust within 0.71–1.11× of C with

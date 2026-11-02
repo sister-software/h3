@@ -29,8 +29,9 @@ concurrency:
 
 env:
   WASM_BINDGEN_VERSION: "0.2.130"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   # Node versions that test:package runs the packed tarball under, besides .nvmrc.
-  H3_NODE_FLOOR: "22.18.0"
+  H3_NODE_FLOOR: "24.22.1"
 
 jobs:
   test:
