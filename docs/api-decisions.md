@@ -253,10 +253,26 @@ Native observations against the same bounds, as the worst difference divided by 
 - **C built on macOS arm64** (Apple libm, `-ffp-contract=off`) against the Linux fixtures:
   coordinates up to 74 ULP, areas 0.07, lengths 0.006.
 
-Cell assignment depends on these coordinates. A point within about 1e-14 rad of a cell edge can
-change cells between math libraries. No fixture hits such a point, so integer outputs are exact
-on the fixtures but are not promised to be identical across libms in general (README,
-"Reproducibility across machines").
+Cell assignment depends on these coordinates, so a point close enough to a cell edge can change
+cells between math libraries. No fixture hits such a point, so integer outputs are exact on the
+fixtures but are not promised to be identical across libms in general (README, "Reproducibility
+across machines").
+
+`yarn stress:boundary` measures the band (`crates/h3-core/examples/boundary_stress.rs`). For 2,000
+random edge crossings per resolution it bisects to the edge and compares `latLngToCell` from the
+platform build and the `libm` build at offsets from 1e-16 to 1e-8 rad on both sides. Linux x86-64
+(glibc vs `libm` 0.2.16), 2026-11-02:
+
+| Offset from edge   | res 0 | res 3 | res 6 | res 9 | res 12 | res 15 |
+| ------------------ | ----- | ----- | ----- | ----- | ------ | ------ |
+| 1.0e-16 rad        | 1.8%  | 2.1%  | 2.0%  | 2.5%  | 2.2%   | 2.3%   |
+| 3.2e-16 rad        | 0.57% | 0.27% | 0.37% | 0.20% | 0.20%  | 0.45%  |
+| 5.6e-16 rad        | 0.15% | 0     | 0.03% | 0     | 0      | 0.03%  |
+| 1.0e-15 rad and up | 0     | 0     | 0     | 0     | 0      | 0      |
+
+The band is the same width in radians at every resolution, so the chance that a uniformly random
+point flips scales with perimeter/area: an estimated 6e-17 at res 0, 3.5e-13 at res 9 and 1.4e-10
+at res 15. None of the 12,000 random control points flipped.
 
 ## Differences from h3-js 4.5.0
 
