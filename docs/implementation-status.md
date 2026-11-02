@@ -5,16 +5,16 @@ work. Merged to `main` (PR #1); released as described under Releases.
 
 ## Phases
 
-| Phase | Scope                                           | Native Rust vs C                                     | WASM / JavaScript                                       |
-| ----- | ----------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------- |
-| A     | Index bits, validation, base cells, enumeration | verified, exact                                      | verified                                                |
-| B     | Encoding, decoding, boundaries, faces           | verified, bit-identical coordinates                  | verified (coordinates within 1e-12°, observed 6.4e-14°) |
-| C     | Hierarchy, child positions, compaction          | verified, exact (C buffer order)                     | verified                                                |
-| D     | Disks, rings, local IJ, distance, paths         | verified, exact (C buffer order incl. safe fallback) | verified                                                |
-| E     | Directed edges, vertexes                        | verified, exact                                      | verified                                                |
-| F     | Distances, areas, lengths, averages, counts     | verified, bit-identical                              | verified (radian-unit bounds; see api-decisions.md)     |
-| G     | Polygon fill (all four modes), outlines         | verified, exact order and coordinates                | verified (`polygonToCells` as a set)                    |
-| H     | Packaging, docs, runtimes, limits, benchmarks   | crate packages and tests outside the workspace       | all runtime, package, and benchmark checks run          |
+| Phase | Scope                                           | Native Rust vs C                                              | WASM / JavaScript                                       |
+| ----- | ----------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------- |
+| A     | Index bits, validation, base cells, enumeration | verified, exact                                               | verified                                                |
+| B     | Encoding, decoding, boundaries, faces           | verified; coordinates bit-identical on the reference platform | verified (coordinates within 1e-12°, observed 6.4e-14°) |
+| C     | Hierarchy, child positions, compaction          | verified, exact (C buffer order)                              | verified                                                |
+| D     | Disks, rings, local IJ, distance, paths         | verified, exact (C buffer order incl. safe fallback)          | verified                                                |
+| E     | Directed edges, vertexes                        | verified, exact                                               | verified                                                |
+| F     | Distances, areas, lengths, averages, counts     | verified; bit-identical on the reference platform             | verified (radian-unit bounds; see api-decisions.md)     |
+| G     | Polygon fill (all four modes), outlines         | verified, exact order and coordinates                         | verified (`polygonToCells` as a set)                    |
+| H     | Packaging, docs, runtimes, limits, benchmarks   | crate packages and tests outside the workspace                | all runtime, package, and benchmark checks run          |
 
 Order note: Phases B and C were implemented natively before the Phase A WASM slice ran in
 runtimes; the slice was then proven in Node, workerd, and Chromium before further adapter work.
@@ -63,9 +63,11 @@ fixture evidence is missing, or if root exports differ from the manifest.
 | `yarn check:fixtures`                                            | 0    | 37,539 cases, 71 files, CTest run recorded                |
 | `cargo fmt --all --check`                                        | 0    |                                                           |
 | `cargo clippy --workspace --all-targets --locked -- -D warnings` | 0    | 0 warnings                                                |
-| `cargo test --workspace --locked`                                | 0    | 41 passed, 0 failed                                       |
+| `H3_EXPECT_EXACT=1 cargo test -p sister-h3 --locked`             | 0    | 42 passed, bit-exact                                      |
+| `H3_EXPECT_EXACT=0 cargo test -p sister-h3 --features libm`      | 0    | 42 passed, within bounds (worst 0.56 of a bound)          |
+| `yarn check:libm-wasm`                                           | 0    | 15,956 values bit-identical, native `libm` vs WASM        |
 | `cargo package -p sister-h3 --locked --allow-dirty`              | 0    | 1.0 MiB compressed; CI runs it without `--allow-dirty`    |
-| `yarn build:wasm`                                                | 0    | `wasm/h3.wasm` 175,239 bytes, sha256 `3b465701…fc2b27`    |
+| `yarn build:wasm`                                                | 0    | `wasm/h3.wasm` 173,701 bytes, sha256 `617f8789…4278a9`    |
 | `yarn check:wasm-artifact`                                       | 0    | committed artifacts match a fresh build                   |
 | `yarn compile`                                                   | 0    |                                                           |
 | `yarn check-types`                                               | 0    |                                                           |
@@ -82,6 +84,17 @@ the noisiest run so far (this package was still ahead on all six, ratios 0.26–
 matching outputs. An authoritative run on an idle machine has not been possible.
 
 ## Deviations from the guide, and open items
+
+- Math libraries (operator decision 2026-11-02, after consulting Fable): native builds use the
+  platform libm by default; the `libm` feature routes the six transcendental functions through the
+  `libm` crate, and the WASM adapter enables it.
+  - Native parity is bit-exact only on linux x86-64 glibc with the default features. Everywhere
+    else it holds within the JS bounds; the `native` CI job covers macOS arm64, Linux arm64,
+    musl, and Windows.
+  - Native with the feature equals WASM bit for bit.
+  - `cellsToLinkedMultiPolygon` polygon order is declared unspecified.
+  - Open: measure the cross-libm cell-flip rate near edges (a boundary-stress test). Fable
+    estimated it at about 1e-9 per point at res 9 and 1e-7 at res 15; that is not yet measured.
 
 - The clean-checkout gate passed in CI on PR #1 (run 41391165306, ubuntu-24.04, 4 min 55 s),
   including `cargo package` without `--allow-dirty`, runtime tests in Chromium and Firefox, and

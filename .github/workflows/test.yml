@@ -85,11 +85,23 @@ jobs:
       - name: Rust format
         run: cargo fmt --all --check
 
+      # The workspace build enables sister-h3's `libm` feature through the WASM adapter (feature
+      # unification), so the default math path is linted and tested on its own.
       - name: Rust lint
-        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+        run: |
+          cargo clippy --workspace --all-targets --locked -- -D warnings
+          cargo clippy -p sister-h3 --all-targets --locked -- -D warnings
 
-      - name: Rust tests
-        run: cargo test --workspace --locked
+      # Never `cargo test --workspace` here: it would test sister-h3 with the `libm` feature only.
+      # H3_EXPECT_EXACT makes the suite fail if it is not comparing in the expected mode.
+      - name: Rust tests (reference platform, bit-exact against the fixtures)
+        run: H3_EXPECT_EXACT=1 cargo test -p sister-h3 --locked
+
+      - name: Rust tests (libm feature, within documented bounds)
+        run: H3_EXPECT_EXACT=0 cargo test -p sister-h3 --features libm --locked
+
+      - name: Rust tests (WASM adapter)
+        run: cargo test -p sister-h3-wasm --locked
 
       - name: Package the native crate
         run: cargo package -p sister-h3 --locked
@@ -98,6 +110,10 @@ jobs:
       # build manifest without overwriting them.
       - name: Committed WASM artifact matches a fresh build
         run: yarn check:wasm-artifact
+
+      # Native with the `libm` feature must reproduce the WASM build bit for bit.
+      - name: Native libm feature matches WASM exactly
+        run: yarn check:libm-wasm
 
       - name: Lint
         run: yarn lint
@@ -134,3 +150,39 @@ jobs:
 
       - name: Runtime tests (Node, Worker bundle, wrangler dev, Vite and webpack in Chromium and Firefox)
         run: yarn test:runtimes
+
+  # The native crate on platforms whose libm differs from the fixtures' (glibc on x86-64): parity
+  # within documented bounds with the platform libm, and with the `libm` feature. Not a required
+  # check; the `test` job above is.
+  native:
+    name: native (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: macOS arm64, os: macos-latest, target: "" }
+          - { name: Linux arm64 glibc, os: ubuntu-24.04-arm, target: "" }
+          - { name: Linux x86-64 musl, os: ubuntu-24.04, target: x86_64-unknown-linux-musl }
+          - { name: Windows x86-64 MSVC, os: windows-latest, target: "" }
+    env:
+      H3_EXPECT_EXACT: "0"
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Rust from rust-toolchain.toml
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          if [ -n "${{ matrix.target }}" ]; then rustup target add "${{ matrix.target }}"; fi
+
+      - name: Rust tests (platform libm)
+        run: cargo test -p sister-h3 --locked ${{ matrix.target && format('--target {0}', matrix.target) || '' }}
+
+      - name: Rust tests (libm feature)
+        run: cargo test -p sister-h3 --features libm --locked ${{ matrix.target && format('--target {0}', matrix.target) || '' }}

@@ -4,7 +4,8 @@
  * - Public JavaScript API versus h3-js 4.5.0 under Node: the six priority functions with fixed seeded inputs, warmup,
  *   interleaved samples, and output checksums.
  * - Boundary costs: index string conversion alone, the raw WASM call alone, first initialization (fresh processes).
- * - Native Rust versus C (`crates/h3-core/examples/bench.rs`, `benchmarks/c/bench.c`) when the C reference is built.
+ * - Native Rust versus C (`crates/h3-core/examples/bench.rs`, `benchmarks/c/bench.c`) when the C reference is built, with
+ *   Rust measured twice: default (platform libm) and with the `libm` feature (portable libm, as in WASM).
  * - Memory: JS heap, array buffers, and WASM memory in fresh Node processes before import, after import, after init, and
  *   after each workload, plus repeated-call plateau; and the same stages in local workerd through the inspector.
  *
@@ -275,7 +276,7 @@ console.log(
 // ---------------------------------------------------------------------------------------------
 // Native Rust versus C.
 
-let native: Record<string, { rust: Stat; c?: Stat; checksumMatch?: boolean }>
+let native: Record<string, { rust: Stat; rustLibm: Stat; c?: Stat; checksumMatch?: boolean }>
 
 {
 	sh("cargo", ["build", "--release", "-p", "sister-h3", "--example", "bench", "--locked", "-j", jobs])
@@ -290,6 +291,23 @@ let native: Record<string, { rust: Stat; c?: Stat; checksumMatch?: boolean }>
 		)
 
 	const rust = parse(sh(join(root, "target/release/examples/bench"), [String(SAMPLES)]))
+
+	// The same binary with the `libm` feature. Same output path, so build and run it before the next build.
+	sh("cargo", [
+		"build",
+		"--release",
+		"-p",
+		"sister-h3",
+		"--example",
+		"bench",
+		"--features",
+		"libm",
+		"--locked",
+		"-j",
+		jobs,
+	])
+
+	const rustLibm = parse(sh(join(root, "target/release/examples/bench"), [String(SAMPLES)]))
 	const cLib = join(root, "target/reference/h3-c")
 	let c: Record<string, { nsPerOp: number[]; checksum: string }> | undefined
 
@@ -317,6 +335,7 @@ let native: Record<string, { rust: Stat; c?: Stat; checksumMatch?: boolean }>
 			op,
 			{
 				rust: stat(r.nsPerOp),
+				rustLibm: stat(rustLibm[op]!.nsPerOp),
 				c: c?.[op] ? stat(c[op].nsPerOp) : undefined,
 				checksumMatch: c?.[op] ? c[op].checksum === r.checksum : undefined,
 			},
@@ -570,11 +589,13 @@ const lines = [
 	"",
 	"## Native Rust versus C",
 	"",
-	"| Function | Rust ns/op (median, IQR) | C ns/op (median, IQR) | Ratio | Same output |",
-	"| --- | --- | --- | --- | --- |",
+	"Rust is measured with the default platform libm and with the `libm` feature (the portable libm the WebAssembly build uses). Same output compares the default build with C; integer-only functions are unaffected by the feature.",
+	"",
+	"| Function | Rust ns/op (median, IQR) | Rust `libm` ns/op | C ns/op (median, IQR) | Ratio | `libm` ratio | Same output |",
+	"| --- | --- | --- | --- | --- | --- | --- |",
 	...Object.entries(native).map(
 		([k, v]) =>
-			`| ${k} | ${f(v.rust.median)} (${iqr(v.rust)}) | ${v.c ? `${f(v.c.median)} (${iqr(v.c)})` : "not run"} | ${v.c ? (v.rust.median / v.c.median).toFixed(2) : ""} | ${v.checksumMatch === undefined ? "" : v.checksumMatch ? "yes" : "no"} |`
+			`| ${k} | ${f(v.rust.median)} (${iqr(v.rust)}) | ${f(v.rustLibm.median)} (${iqr(v.rustLibm)}) | ${v.c ? `${f(v.c.median)} (${iqr(v.c)})` : "not run"} | ${v.c ? (v.rust.median / v.c.median).toFixed(2) : ""} | ${v.c ? (v.rustLibm.median / v.c.median).toFixed(2) : ""} | ${v.checksumMatch === undefined ? "" : v.checksumMatch ? "yes" : "no"} |`
 	),
 	"",
 	"## Memory",

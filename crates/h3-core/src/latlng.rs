@@ -5,6 +5,7 @@
 use crate::LatLng;
 use crate::constants::*;
 use crate::errors::{H3Error, H3Result};
+use crate::math::Trig;
 
 /// C `_posAngleRads`: normalizes radians to `[0, 2π)`.
 #[inline]
@@ -71,10 +72,10 @@ pub(crate) fn normalize_lng(lng: f64, n: LngNormalization) -> f64 {
 
 /// C `greatCircleDistanceRads` (haversine).
 pub fn great_circle_distance_rads(a: &LatLng, b: &LatLng) -> f64 {
-    let sin_lat = ((b.lat - a.lat) * 0.5).sin();
-    let sin_lng = ((b.lng - a.lng) * 0.5).sin();
-    let aa = sin_lat * sin_lat + a.lat.cos() * b.lat.cos() * sin_lng * sin_lng;
-    2.0 * aa.sqrt().atan2((1.0 - aa).sqrt())
+    let sin_lat = ((b.lat - a.lat) * 0.5).h3_sin();
+    let sin_lng = ((b.lng - a.lng) * 0.5).h3_sin();
+    let aa = sin_lat * sin_lat + a.lat.h3_cos() * b.lat.h3_cos() * sin_lng * sin_lng;
+    2.0 * aa.sqrt().h3_atan2((1.0 - aa).sqrt())
 }
 
 /// C `greatCircleDistanceKm`.

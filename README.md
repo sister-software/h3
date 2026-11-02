@@ -5,12 +5,13 @@ geospatial index, usable as a native Rust crate (`sister-h3`) and as an npm pack
 (`@sister.software/h3`) for Node, browsers, and Cloudflare Workers through WebAssembly.
 
 - The algorithms are translated from the H3 C library (pinned at `v4.5.0-67-g24946ad1`) and are
-  tested against it: native Rust is bit-identical to C on every committed fixture case, and the
-  compiled WebAssembly matches C exactly for every index and within documented bounds for floats.
+  tested against it: every index matches C exactly, and floats match bit for bit on the reference
+  platform and within documented bounds elsewhere. See
+  [reproducibility across machines](#reproducibility-across-machines).
 - The JavaScript API keeps the familiar h3-js 4.x function names, argument order and result shapes,
   with predictable JavaScript errors. See [migrating from h3-js](#migrating-from-h3-js).
-- Importing the package allocates nothing. A single explicit `init` call instantiates a small
-  (~175 KB) WebAssembly module whose memory starts small and grows on demand.
+- Importing the package allocates nothing. The first H3 call instantiates a small (~174 KB)
+  WebAssembly module whose memory starts small and grows on demand; no setup call is needed.
 
 ## Installation
 
@@ -148,6 +149,33 @@ assert_eq!(raw::cell_to_parent(cell.get(), 9).unwrap_err().code(), 12);
 `sister_h3::raw` mirrors the C API over raw `u64` indexes in radians; `CellIndex`,
 `DirectedEdgeIndex`, and `VertexIndex` validate on construction. See `crates/h3-core/README.md`.
 
+## Reproducibility across machines
+
+H3 computes cells with trigonometry, and math libraries (glibc, Apple's, Bionic, musl, Windows)
+are not guaranteed to agree in the last bit of `sin`, `cos`, or `atan2`. Which results are
+identical where:
+
+| Build                               | Results                                                                                |
+| ----------------------------------- | -------------------------------------------------------------------------------------- |
+| npm package (WebAssembly), any host | identical on every OS, CPU, browser, and runtime (one portable libm inside the binary) |
+| `sister-h3`, default features       | the platform's libm: matches H3 C built on the same machine                            |
+| `sister-h3`, `features = ["libm"]`  | identical on every platform, and identical to the npm package's WebAssembly            |
+
+Native builds use the platform libm by default because that is what a locally built H3 C uses.
+On linux x86-64 with glibc, where the reference fixtures are generated, native results are
+bit-identical to C on every committed case. Elsewhere, coordinates differ from those fixtures by a
+few units in the last place (at most about 1e-14 relative on Apple Silicon). That is far inside the
+documented bounds (`docs/api-decisions.md`).
+
+Indexes are computed from those coordinates, so a point that lies within about 1e-14 radians of a
+cell edge can be assigned to a different cell by a different libm. No committed fixture hits such
+a point, and they are rare. Cross-machine identical integer output is promised only by the
+WebAssembly build and by the `libm` feature at a pinned crate version. If you store derived data
+and need reruns on another machine to match exactly, enable the feature (Cargo features are
+additive: if any crate in your build enables it, it is on for all). The polygon order of
+`cellsToMultiPolygon` / `cells_to_linked_multi_polygon` is unspecified and can change with the
+libm, though the polygons themselves do not.
+
 ## Development
 
 ```sh
@@ -155,7 +183,9 @@ yarn install --immutable
 yarn build:wasm             # requires wasm-bindgen-cli 0.2.130 (see docs/build.md)
 yarn check:wasm-artifact    # committed binary equals a fresh build
 yarn compile && yarn test --run
-cargo test --workspace --locked
+cargo test -p sister-h3 --locked                  # bit-exact on linux x86-64 glibc
+cargo test -p sister-h3 --features libm --locked  # portable libm, within documented bounds
+yarn check:libm-wasm        # native with the libm feature equals the WASM build bit for bit
 yarn test:runtimes          # Node, Worker bundle, wrangler dev, Vite and webpack in Chromium
 yarn test:package           # packed tarball and native crate in clean consumers
 yarn benchmark              # see benchmarks/

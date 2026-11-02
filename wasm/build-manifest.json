@@ -1,5 +1,5 @@
 {
-	"sourceTreeSha256": "05f4fdd61542cfa87f1ceb63efacca46ebc8a4d37cb5f369f1bec0f082d7a701",
+	"sourceTreeSha256": "e81c343166998544c3b877eb690d327d8f771db896dbeda46f7a7506c7c6d303",
 	"rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
 	"target": "wasm32-unknown-unknown",
 	"profile": "release (Cargo.toml [profile.release])",
@@ -9,6 +9,7 @@
 		"-Cdebuginfo=0"
 	],
 	"wasmBindgen": "0.2.130",
+	"libm": "0.2.16",
 	"wasmBindgenArgs": [
 		"--target",
 		"web",
@@ -18,12 +19,12 @@
 	],
 	"optimizer": "none",
 	"lockfiles": {
-		"Cargo.lock": "f9738baac66e6816b84191c7ca97ad3853ff156d51113b8f20af85375001a507"
+		"Cargo.lock": "68040869b76c9789820944de525742bf7f7917f75414b5e09c2015e210418172"
 	},
 	"outputs": {
 		"wasm/h3.wasm": {
-			"sha256": "0521e54eedcb7e01e0f96935cb6f28edc361954472b207d8a306e98f456704ba",
-			"bytes": 175239
+			"sha256": "617f87899a162b249dadc83855ec098e400e9f4c7923f470ad7d5c4c8e4278a9",
+			"bytes": 173701
 		},
 		"lib/generated/h3.js": {
 			"sha256": "b9f567394e12069067a557523b55f8ee9ce4295e17d5555fd0bfad7348d7783e",
@@ -34,8 +35,8 @@
 			"bytes": 11638
 		},
 		"lib/generated/h3-embedded.js": {
-			"sha256": "c13e9c2b5cd98a180950702592a2c8dc0a3e10f2319d3ce690bbf610a86adab0",
-			"bytes": 234012
+			"sha256": "b1b36e64dc5aaf834157abac8f94ee39d44f42a62862abeea285e6040534cf8a",
+			"bytes": 231964
 		},
 		"lib/generated/h3-embedded.d.ts": {
 			"sha256": "393fae9e40dcec131a8ac1c076dd766a6033e59860b55f13a7239a6900fafb6a",

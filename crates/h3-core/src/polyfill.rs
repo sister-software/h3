@@ -15,6 +15,7 @@ use crate::errors::{H3Error, H3Result};
 use crate::hierarchy::{ChildIter, cell_to_center_child, cell_to_children_size};
 use crate::index::*;
 use crate::latlng::get_hexagon_area_avg_km2;
+use crate::math::Trig;
 use crate::polygon::*;
 use crate::traversal::grid_disk1_buffer;
 use crate::{LatLng, coords::INVALID_DIGIT};
@@ -232,7 +233,7 @@ pub(crate) fn cell_to_bbox(cell: u64, cover_children: bool) -> H3Result<BBox> {
         RES0_BBOXES[bc as usize]
     } else {
         let center = cell_to_lat_lng(cell)?;
-        let lng_ratio = 1.0 / center.lat.cos();
+        let lng_ratio = 1.0 / center.lat.h3_cos();
         let e = MAX_EDGE_LENGTH_RADS[res as usize];
         BBox {
             north: center.lat + e,
@@ -481,8 +482,9 @@ pub fn max_polygon_to_cells_size_experimental(polygon: &GeoPolygon, res: i32, fl
     }
     it.mode = 3;
     let b = it.bboxes[0];
-    let area =
-        b.height_rads() * b.width_rads() / b.north.abs().min(b.south.abs()).cos() * EARTH_RADIUS_KM * EARTH_RADIUS_KM;
+    let area = b.height_rads() * b.width_rads() / b.north.abs().min(b.south.abs()).h3_cos()
+        * EARTH_RADIUS_KM
+        * EARTH_RADIUS_KM;
     while it.res > 0 && area / get_hexagon_area_avg_km2(it.res - 1).unwrap_or(0.0) > MAX_SIZE_CELL_THRESHOLD {
         it.res -= 1;
     }

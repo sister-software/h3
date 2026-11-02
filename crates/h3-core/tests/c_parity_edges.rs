@@ -1,6 +1,8 @@
 //! Native Rust versus pinned H3 C fixtures: Phase E (directed edges, vertexes) and Phase F
-//! (measurements). Floating-point results are compared exactly: native builds use the same
-//! platform libm as the C reference.
+//! (measurements). Results computed through libm (coordinates, lengths, areas, distances) are
+//! bit-exact on the reference platform and within the documented bounds elsewhere
+//! (`common::EXACT`); unit conversions and the average tables involve no libm and are exact
+//! everywhere.
 
 mod common;
 use common::*;
@@ -23,16 +25,19 @@ fn bool_op(op: &str, f: impl Fn(u64) -> bool) {
 }
 
 fn float_op(op: &str, op_fn: impl Fn(u64) -> H3Result<f64>) {
+    let mut worst = 0.0;
     for r in load(op) {
         let (e, v) = err(op_fn(idx(&r.args["index"])));
         assert_eq!(e, r.error, "{op} line {} {:?}", r.line, r.args);
         if let Some(v) = v {
-            assert_eq!(v.to_bits(), f(&r.result["value"]).to_bits(), "{op} line {}: {v:e}", r.line);
+            check_float(&mut worst, v, f(&r.result["value"]), Kind::for_op(op), &format!("{op} line {}", r.line));
         }
     }
+    report(op, worst);
 }
 
 fn boundary_op(op: &str, op_fn: impl Fn(u64) -> H3Result<sister_h3::CellBoundary>) {
+    let mut worst = 0.0;
     for r in load(op) {
         let (e, v) = err(op_fn(idx(&r.args["index"])));
         assert_eq!(e, r.error, "{op} line {} {:?}", r.line, r.args);
@@ -40,15 +45,13 @@ fn boundary_op(op: &str, op_fn: impl Fn(u64) -> H3Result<sister_h3::CellBoundary
             let want = r.result["verticesRadians"].as_array().unwrap();
             assert_eq!(v.len(), want.len(), "{op} line {}", r.line);
             for (g, w) in v.iter().zip(want) {
-                assert_eq!(
-                    (g.lat.to_bits(), g.lng.to_bits()),
-                    (f(&w[0]).to_bits(), f(&w[1]).to_bits()),
-                    "{op} line {}",
-                    r.line
-                );
+                let ctx = format!("{op} line {}", r.line);
+                check_float(&mut worst, g.lat, f(&w[0]), Kind::Coord, &ctx);
+                check_float(&mut worst, g.lng, f(&w[1]), Kind::Coord, &ctx);
             }
         }
     }
+    report(op, worst);
 }
 
 fn pair_op<T: PartialEq + std::fmt::Debug>(
@@ -115,14 +118,17 @@ fn vertexes() {
         }
     }
     bool_op("isValidVertex", raw::is_valid_vertex);
+    let mut worst = 0.0;
     for r in load("vertexToLatLng") {
         let (e, v) = err(raw::vertex_to_lat_lng(idx(&r.args["index"])));
         assert_eq!(e, r.error, "line {}", r.line);
         if let Some(v) = v {
-            assert_eq!(v.lat.to_bits(), f(&r.result["latRadians"]).to_bits(), "line {}", r.line);
-            assert_eq!(v.lng.to_bits(), f(&r.result["lngRadians"]).to_bits(), "line {}", r.line);
+            let ctx = format!("vertexToLatLng line {}", r.line);
+            check_float(&mut worst, v.lat, f(&r.result["latRadians"]), Kind::Coord, &ctx);
+            check_float(&mut worst, v.lng, f(&r.result["lngRadians"]), Kind::Coord, &ctx);
         }
     }
+    report("vertexToLatLng", worst);
     bool_op("isValidIndex", raw::is_valid_index);
 }
 
@@ -140,13 +146,14 @@ fn distances_and_tables() {
         ("greatCircleDistanceKm", raw::great_circle_distance_km),
         ("greatCircleDistanceM", raw::great_circle_distance_m),
     ] {
+        let mut worst = 0.0;
         for r in load(op) {
             let a = LatLng::from_radians(f(&r.args["aLatRadians"]), f(&r.args["aLngRadians"]));
             let b = LatLng::from_radians(f(&r.args["bLatRadians"]), f(&r.args["bLngRadians"]));
             let got = fun(&a, &b);
-            let want = f(&r.result["value"]);
-            assert!(got.to_bits() == want.to_bits() || (got.is_nan() && want.is_nan()), "{op} line {}", r.line);
+            check_float(&mut worst, got, f(&r.result["value"]), Kind::for_op(op), &format!("{op} line {}", r.line));
         }
+        report(op, worst);
     }
     for (op, fun) in [
         ("getHexagonAreaAvgKm2", raw::get_hexagon_area_avg_km2 as fn(i32) -> H3Result<f64>),

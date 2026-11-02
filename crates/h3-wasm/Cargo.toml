@@ -11,5 +11,6 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-sister-h3.workspace = true
+# The WebAssembly build always uses the portable libm, so native builds with the same feature reproduce it.
+sister-h3 = { workspace = true, features = ["libm"] }
 wasm-bindgen.workspace = true

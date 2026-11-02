@@ -7,6 +7,7 @@ use crate::constants::*;
 use crate::coords::{CoordIjk, FaceIjk, Vec2d, Vec3d, ijk, v2d_intersect};
 use crate::index::is_resolution_class_iii;
 use crate::latlng::pos_angle_rads;
+use crate::math::Trig;
 use crate::tables::{
     ADJACENT_FACE_DIR, FACE_AXES_AZ_RADS_CII, FACE_CENTER_POINT, FACE_NEIGHBORS, MAX_DIM_BY_CII_RES,
     UNIT_SCALE_BY_CII_RES,
@@ -43,7 +44,7 @@ fn vec3_azimuth_rads(p1: Vec3d, p2: Vec3d) -> f64 {
     let (north, east) = vec3_tangent_basis(p1);
     let mut proj = Vec3d::lin_comb(1.0, p2, -p2.dot(p1), p1);
     proj.normalize();
-    proj.dot(east).atan2(proj.dot(north))
+    proj.dot(east).h3_atan2(proj.dot(north))
 }
 
 /// C `_vec3ToClosestFace`: returns (face, squared distance to face center).
@@ -63,7 +64,7 @@ fn vec3_to_closest_face(v: &Vec3d) -> (i32, f64) {
 /// C `_vec3ToHex2d`.
 fn vec3_to_hex2d(p: &Vec3d, res: i32) -> (i32, Vec2d) {
     let (face, sqd) = vec3_to_closest_face(p);
-    let mut r = (1.0 - sqd * 0.5).acos();
+    let mut r = (1.0 - sqd * 0.5).h3_acos();
     if r < EPSILON {
         return (face, Vec2d { x: 0.0, y: 0.0 });
     }
@@ -73,12 +74,12 @@ fn vec3_to_hex2d(p: &Vec3d, res: i32) -> (i32, Vec2d) {
     if is_resolution_class_iii(res) {
         theta = pos_angle_rads(theta - M_AP7_ROT_RADS);
     }
-    r = r.tan();
+    r = r.h3_tan();
     r *= INV_RES0_U_GNOMONIC;
     for _ in 0..res {
         r *= M_SQRT7;
     }
-    (face, Vec2d { x: r * theta.cos(), y: r * theta.sin() })
+    (face, Vec2d { x: r * theta.h3_cos(), y: r * theta.h3_sin() })
 }
 
 /// C `_hex2dToVec3`.
@@ -88,7 +89,7 @@ pub(crate) fn hex2d_to_vec3(v: &Vec2d, face: i32, res: i32, substrate: bool) -> 
     if r < EPSILON {
         return FACE_CENTER_POINT[f];
     }
-    let mut theta = v.y.atan2(v.x);
+    let mut theta = v.y.h3_atan2(v.x);
     for _ in 0..res {
         r *= M_RSQRT7;
     }
@@ -99,14 +100,14 @@ pub(crate) fn hex2d_to_vec3(v: &Vec2d, face: i32, res: i32, substrate: bool) -> 
         }
     }
     r *= RES0_U_GNOMONIC;
-    r = r.atan();
+    r = r.h3_atan();
     if !substrate && is_resolution_class_iii(res) {
         theta = pos_angle_rads(theta + M_AP7_ROT_RADS);
     }
     theta = pos_angle_rads(FACE_AXES_AZ_RADS_CII[f][0] - theta);
     let (north, east) = vec3_tangent_basis(FACE_CENTER_POINT[f]);
-    let dir = Vec3d::lin_comb(theta.cos(), north, theta.sin(), east);
-    let mut out = Vec3d::lin_comb(r.cos(), FACE_CENTER_POINT[f], r.sin(), dir);
+    let dir = Vec3d::lin_comb(theta.h3_cos(), north, theta.h3_sin(), east);
+    let mut out = Vec3d::lin_comb(r.h3_cos(), FACE_CENTER_POINT[f], r.h3_sin(), dir);
     out.normalize();
     out
 }

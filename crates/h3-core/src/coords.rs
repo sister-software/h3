@@ -10,6 +10,7 @@
 //! in the few places that can overflow, and guards the meaningful cases explicitly.
 
 use crate::constants::{M_ONESEVENTH, M_RSIN60, M_SQRT3_2};
+use crate::math::Trig;
 
 /// An H3 digit / direction (0–7).
 pub(crate) type Direction = u8;
@@ -429,14 +430,14 @@ impl Vec3d {
     /// C `latLngToVec3`.
     #[inline]
     pub fn from_lat_lng(lat: f64, lng: f64) -> Vec3d {
-        let r = lat.cos();
-        Vec3d { x: lng.cos() * r, y: lng.sin() * r, z: lat.sin() }
+        let r = lat.h3_cos();
+        Vec3d { x: lng.h3_cos() * r, y: lng.h3_sin() * r, z: lat.h3_sin() }
     }
 
     /// C `vec3ToLatLng`: returns (lat, lng) in radians.
     #[inline]
     pub fn to_lat_lng(self) -> (f64, f64) {
-        (self.z.atan2((self.x * self.x + self.y * self.y).sqrt()), self.y.atan2(self.x))
+        (self.z.h3_atan2((self.x * self.x + self.y * self.y).sqrt()), self.y.h3_atan2(self.x))
     }
 
     /// C `vec3LinComb`.
