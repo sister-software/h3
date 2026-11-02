@@ -9,7 +9,8 @@
  *
  *    yarn test:package
  *
- * Required Node versions: 22.18.0 (the `engines` floor) and the `.nvmrc` version. They are looked up in
+ * Node versions: the floor of every range in `package.json` `engines` (one per supported LTS line) and the `.nvmrc`
+ * version, plus the running Node when `engines` admits it. They are looked up in
  * `target/tools/node-v<version>-linux-x64/bin/node`, then in `~/.nvm/versions/node`. A missing version is reported as
  * NOT RUN and fails the command.
  *
@@ -169,7 +170,34 @@ function nodeBinary(version: string): string | undefined {
 
 const nvmrc = readFileSync(join(root, ".nvmrc"), "utf8").trim().replace(/^v/, "")
 
-for (const version of new Set(["22.18.0", nvmrc, process.version.slice(1)])) {
+// `engines.node` is a disjunction of `^x.y.z` (that LTS line from its latest security release) and `>=x.y.z` (the
+// newest LTS line onward). Only those two forms are accepted, so the policy cannot drift into something untested.
+const enginesRange = String(JSON.parse(readFileSync(join(root, "package.json"), "utf8")).engines.node)
+
+const ranges = enginesRange.split("||").map((part) => {
+	const match = /^\s*(\^|>=)(\d+)\.(\d+)\.(\d+)\s*$/.exec(part)
+
+	if (!match) throw new Error(`engines.node "${enginesRange}": unsupported range "${part.trim()}"`)
+
+	return { op: match[1]!, floor: [Number(match[2]), Number(match[3]), Number(match[4])] as const }
+})
+
+const parse = (v: string) => v.split(".").map(Number) as [number, number, number]
+const cmp = (a: readonly number[], b: readonly number[]) => a[0]! - b[0]! || a[1]! - b[1]! || a[2]! - b[2]!
+
+const admitted = (v: string) =>
+	ranges.some(({ op, floor }) => cmp(parse(v), floor) >= 0 && (op === ">=" || parse(v)[0] === floor[0]))
+
+if (!admitted(nvmrc)) throw new Error(`.nvmrc ${nvmrc} is outside engines.node "${enginesRange}"`)
+
+const floors = ranges.map(({ floor }) => floor.join("."))
+const running = process.version.slice(1)
+
+if (!admitted(running)) {
+	console.log(`test:package: running Node ${running} is outside engines.node "${enginesRange}"; not tested`)
+}
+
+for (const version of new Set([...floors, nvmrc, ...(admitted(running) ? [running] : [])])) {
 	const node = version === process.version.slice(1) ? process.execPath : nodeBinary(version)
 
 	if (!node) {
