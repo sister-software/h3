@@ -1,0 +1,118 @@
+# Publish the `sister-h3` crate to crates.io.
+#
+# DISPATCHED BY publish.yml after it tags and publishes npm, against the tag (`--ref v<version>`), so the crate builds
+# from exactly the release commit. Dispatch it by hand with the same ref to retry: a version already on crates.io is
+# skipped, so a re-run is always safe. A dispatch from a branch is refused unless `dry_run` is set.
+#
+# AUTH: crates.io Trusted Publishing (OIDC) through `rust-lang/crates-io-auth-action`, matched by this file's name
+# (`publish-cargo.yml`) and the `cargo` environment. crates.io only lets a crate that already exists trust a workflow,
+# so the very first publish needs a `CARGO_REGISTRY_TOKEN` secret in the `cargo` environment; once the crate exists,
+# configure the trusted publisher and delete the secret. The token, when present, wins.
+#
+# Only `sister-h3` is published. `sister-h3-wasm` (the WebAssembly adapter behind the npm package) is `publish = false`.
+name: Cargo Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run — package and verify the crate, publish nothing"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-cargo
+  cancel-in-progress: false
+
+jobs:
+  # Outside the `cargo` environment, which only release tags may enter, so a dry run from a branch checks everything.
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      published: ${{ steps.version.outputs.published }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Rust from rust-toolchain.toml
+        run: rustup show active-toolchain || rustup toolchain install
+
+      - name: Read and check the version
+        id: version
+        run: |
+          set -euo pipefail
+          VERSION="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "sister-h3") | .version')"
+          NPM_VERSION="$(node -p "require('./package.json').version")"
+          echo "crate ${VERSION}, npm ${NPM_VERSION}, ref ${GITHUB_REF}"
+          if [ "${VERSION}" != "${NPM_VERSION}" ]; then
+            echo "::error::Cargo.toml says ${VERSION} but package.json says ${NPM_VERSION}"; exit 1
+          fi
+          if [ "${GITHUB_REF}" != "refs/tags/v${VERSION}" ] && [ "${{ inputs.dry_run }}" != "true" ]; then
+            echo "::error::publish from the release tag (dispatch with --ref v${VERSION}), not ${GITHUB_REF}"; exit 1
+          fi
+          if curl -sf -A "sister-h3-release (github.com/sister-software/h3)" \
+            "https://crates.io/api/v1/crates/sister-h3/${VERSION}" >/dev/null; then
+            echo "published=true" >> "${GITHUB_OUTPUT}"
+            echo "::notice::sister-h3 ${VERSION} is already on crates.io (recovery re-run) — nothing to publish"
+          else
+            echo "published=false" >> "${GITHUB_OUTPUT}"
+          fi
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+
+      # The parity suites read the committed fixtures, which the packaged crate also ships (`include` covers tests/).
+      - name: Test
+        run: cargo test -p sister-h3 --locked
+
+      - name: Package and verify
+        run: cargo publish -p sister-h3 --locked --dry-run
+
+  publish:
+    needs: verify
+    if: ${{ needs.verify.outputs.published != 'true' && !inputs.dry_run }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: cargo
+    permissions:
+      contents: read
+      id-token: write # crates.io Trusted Publishing (OIDC)
+    env:
+      HAS_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN != '' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Rust from rust-toolchain.toml
+        run: rustup show active-toolchain || rustup toolchain install
+
+      - name: Authenticate with crates.io
+        id: auth
+        if: ${{ env.HAS_REGISTRY_TOKEN != 'true' }}
+        uses: rust-lang/crates-io-auth-action@v1
+
+      - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || steps.auth.outputs.token }}
+        run: cargo publish -p sister-h3 --locked
+
+      - name: Verify the published version
+        env:
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          for attempt in $(seq 1 20); do
+            if curl -sf -A "sister-h3-release (github.com/sister-software/h3)" \
+              "https://crates.io/api/v1/crates/sister-h3/${VERSION}" >/dev/null; then
+              echo "sister-h3 ${VERSION} is live"; exit 0
+            fi
+            echo "attempt ${attempt}: not visible yet"
+            sleep 15
+          done
+          echo "::error::sister-h3 ${VERSION} is not visible on crates.io after 5 minutes"
+          exit 1

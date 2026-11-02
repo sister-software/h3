@@ -1,0 +1,15 @@
+{
+	"extends": "@sister.software/tsconfig",
+	"compilerOptions": {
+		"composite": false,
+		"incremental": false,
+		"declaration": false,
+		"declarationMap": false,
+		"noEmit": true,
+		"emitDeclarationOnly": false,
+		"types": ["node"],
+		"lib": ["ESNext", "DOM"]
+	},
+	"include": ["scripts/**/*.ts", "test/**/*.ts", "benchmarks/**/*.ts", "lib/**/*.test.ts", "*.config.ts"],
+	"exclude": ["./out/**/*", "./target/**/*", "./crates/**/*"]
+}

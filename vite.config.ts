@@ -1,0 +1,23 @@
+/**
+ * @license MIT
+ * @author Teffen Ellis, et al.
+ * @copyright Sister Software
+ */
+
+/// <reference types="vitest/config" />
+
+import { defineConfig } from "vite"
+
+export default defineConfig({
+	test: {
+		exclude: [
+			"**/node_modules/**",
+			"**/dist/**",
+			"**/out/**",
+			"**/examples/**",
+			"**/cypress/**",
+			"**/.{idea,git,cache,output,temp}/**",
+			"**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*",
+		],
+	},
+})

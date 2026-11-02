@@ -1,0 +1,314 @@
+{
+	"fixtureSchemaVersion": 1,
+	"seed": 1364674611,
+	"generationCommand": "H3_C_SOURCE=<checkout> yarn generate:fixtures",
+	"generatorSha256": "3b219e4924acee9acf97fefe89794a70bcdba64a614a69390f68e63ccfe09e0d",
+	"references": {
+		"h3c": {
+			"repository": "https://github.com/uber/h3",
+			"version": "4.5.0",
+			"revision": "24946ad1c5e9016a6eab96d4f9ee4d0c993720e5",
+			"describe": "v4.5.0-67-g24946ad1",
+			"license": "Apache-2.0",
+			"note": "The pinned revision is after the v4.5.0 tag; its VERSION file still reads 4.5.0."
+		},
+		"h3-js": {
+			"version": "4.5.0",
+			"role": "migration comparison only (devDependency); bundles C v4.5.0",
+			"license": "Apache-2.0"
+		}
+	},
+	"platform": {
+		"os": "linux x64",
+		"cc": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+		"cmake": "cmake version 3.28.3",
+		"node": "v26.2.0"
+	},
+	"ctestRun": true,
+	"files": {
+		"areNeighborCells.jsonl": {
+			"cases": 525,
+			"sha256": "1e1bf504511c79d52f81875676452bcf05cb8354e0fcae46a99f462032ded4d6"
+		},
+		"cellAreaKm2.jsonl": {
+			"cases": 397,
+			"sha256": "dc854c32fd7dccaef195c350a049fc6af335bc7af629d6f23e471119820a990a"
+		},
+		"cellAreaM2.jsonl": {
+			"cases": 397,
+			"sha256": "22a817356dd37866db0f4c527ad163bc30bfd71860f40c4f1134fda9248308f6"
+		},
+		"cellAreaRads2.jsonl": {
+			"cases": 397,
+			"sha256": "473b2bb36831a112f2f8d87e1f1e2e0fc5426d8466b493d0f6cca0c05d8e602d"
+		},
+		"cellsToDirectedEdge.jsonl": {
+			"cases": 525,
+			"sha256": "76c88244709b84ddaddecd778ec2aec3720f2a1215c2a628fccf5e922ca870b9"
+		},
+		"cellsToLinkedMultiPolygon.jsonl": {
+			"cases": 16,
+			"sha256": "90ac2067042f46bf7b2e4e30407057d222bee605383cedb84fc2eb5f51e95a54"
+		},
+		"cellToBoundary.jsonl": {
+			"cases": 778,
+			"sha256": "7ada43afd61ebb347cd8ad6f035c105168f86b6e84982bed76eda5bd097b8c5c"
+		},
+		"cellToCenterChild.jsonl": {
+			"cases": 1890,
+			"sha256": "7ef66bb32fc2eba109cda678487ae5c8cff8eff221c33bf35e38cc07b180fedc"
+		},
+		"cellToChildPos.jsonl": {
+			"cases": 1890,
+			"sha256": "dc525845b946a310badd1780d846cbb929fb5f07119bc69faa4e14dec5cfef90"
+		},
+		"cellToChildren.jsonl": {
+			"cases": 435,
+			"sha256": "ee9fa367488a17ad8b49cb4329dedd6f17f0bb4e69a9e3078f3d42d0bacc4b2d"
+		},
+		"cellToChildrenSize.jsonl": {
+			"cases": 1890,
+			"sha256": "563a9e854b589d1dc337977f995eaacdaf24fb62e8b41892070d1d7d3264ec20"
+		},
+		"cellToLatLng.jsonl": {
+			"cases": 778,
+			"sha256": "e0a5a45295a6c97ddce1ef4e04db56069ba60e76db05be6827ac573b2650e25b"
+		},
+		"cellToLocalIj.jsonl": {
+			"cases": 640,
+			"sha256": "38cfbc821ac073902ad0d08f135f11a209ab8a8e5a02e7da89e1a59876a55dfc"
+		},
+		"cellToParent.jsonl": {
+			"cases": 1890,
+			"sha256": "f2a1ae5a39115100efe5ed536b15a09325cbb8870b33eb3a4302abf3bb2b22da"
+		},
+		"cellToVertex.jsonl": {
+			"cases": 750,
+			"sha256": "a6771564ae644eb30ad9f89a4dce121b87191d4fa429287fc59b9925fd383f01"
+		},
+		"cellToVertexes.jsonl": {
+			"cases": 265,
+			"sha256": "aa6ec2392396dbccd1b2cad964fda36f568eeb437a963677c5aae9dc22b25302"
+		},
+		"childPosToCell.jsonl": {
+			"cases": 1240,
+			"sha256": "ef716eee86e5ae560c66329fe2cbfcdc8ad04748786209f716adb4e8300b2198"
+		},
+		"compactCells.jsonl": {
+			"cases": 26,
+			"sha256": "c27115a1fc3b3a2f1336beaf0ef375fdeab0af9c84859d9e70ed0c943cce2cae"
+		},
+		"constructCell.jsonl": {
+			"cases": 54,
+			"sha256": "4b4f640cf37fb4210f5374a0aaa96b38aecaee3ec17dbef58e67a95bc6ca8604"
+		},
+		"degsToRads.jsonl": {
+			"cases": 12,
+			"sha256": "7062b306bfc1aeaed2ca6afedf59d8541f61c88713c1f776f6a9feee42eca298"
+		},
+		"directedEdgeToBoundary.jsonl": {
+			"cases": 600,
+			"sha256": "31db0915981028a97979b7b7a111ed50b08899e6cdbba58eda90b722eacff166"
+		},
+		"directedEdgeToCells.jsonl": {
+			"cases": 600,
+			"sha256": "d1ec4ea2a91ee5bafc97492e57ff9a47ec30363bc2c611f1989ca4a577cbc1f4"
+		},
+		"edgeLengthKm.jsonl": {
+			"cases": 600,
+			"sha256": "39ee4fc5ef3dedd88a1f540644fdc46d04e01fc3d759ac1eead2ac7b1296bc8a"
+		},
+		"edgeLengthM.jsonl": {
+			"cases": 600,
+			"sha256": "5ab5487eb5a61f36796837f5ea0d8420222d243e7b1e20845d9b08ade34e52c1"
+		},
+		"edgeLengthRads.jsonl": {
+			"cases": 600,
+			"sha256": "ebca64a81f430552cf26c53807b24928e05829bb75f87853aa085c7e9c5bbce5"
+		},
+		"getBaseCellNumber.jsonl": {
+			"cases": 778,
+			"sha256": "d6fdbcfa8af8f6b057c4504b8e22d82db4fff1efb58db8bb8d550f968ab44e20"
+		},
+		"getDirectedEdgeDestination.jsonl": {
+			"cases": 600,
+			"sha256": "3dea99ee5a29ed7ef57cf2a3a0bf0615fdb3dec6877fcff9405c55ab149f8675"
+		},
+		"getDirectedEdgeOrigin.jsonl": {
+			"cases": 600,
+			"sha256": "5a2e3f3fbd4c1d79b1977ab933c436d358fddfbc35c83ef26e68b050c274b10a"
+		},
+		"getHexagonAreaAvgKm2.jsonl": {
+			"cases": 18,
+			"sha256": "4f68f5d3d63382665018dec232a91c0f7c6c109b57b7b026e59ea95595bbb6ab"
+		},
+		"getHexagonAreaAvgM2.jsonl": {
+			"cases": 18,
+			"sha256": "00f3d5cc3f3be225f15a44b1d7e0162601179918aa01fc89af74a1a8d7bfa1f7"
+		},
+		"getHexagonEdgeLengthAvgKm.jsonl": {
+			"cases": 18,
+			"sha256": "483eb2e10cf7ba311b12c45a72a6314705ca3c358e56955e68aedb36b67637a3"
+		},
+		"getHexagonEdgeLengthAvgM.jsonl": {
+			"cases": 18,
+			"sha256": "935d264c5bfec77732bf3ee4b355850c301cc29a72dcfde419368585a4126b80"
+		},
+		"getIcosahedronFaces.jsonl": {
+			"cases": 778,
+			"sha256": "23742f0e4b462a414c528cc40e030875358c6da2fb19360356008c18b0c71d06"
+		},
+		"getIndexDigit.jsonl": {
+			"cases": 875,
+			"sha256": "f8605ba1268531eea4751f4b80c4e028c09d121a8af39ceefcc8566d43def1ee"
+		},
+		"getNumCells.jsonl": {
+			"cases": 18,
+			"sha256": "bae727e01b0375b78f3f89d13fe2bec60e7bd3118cebce5642c105f06a38650b"
+		},
+		"getPentagons.jsonl": {
+			"cases": 18,
+			"sha256": "3a7db5da30416d99b8ffc9fd3ee1edcdf96ffde763599023e27b49cf796dcef7"
+		},
+		"getRes0Cells.jsonl": {
+			"cases": 1,
+			"sha256": "352c714d00bc2449ba531790a63d141adb0dfb80e283609b6087d37d9962285e"
+		},
+		"getResolution.jsonl": {
+			"cases": 778,
+			"sha256": "4d6b85b6c71c84ec0559a3c4dd59d0f3227d6591b514d101f71cb3c488ca7a03"
+		},
+		"greatCircleDistanceKm.jsonl": {
+			"cases": 205,
+			"sha256": "2abe887cab9cbbd27b4fbd1e44a8e529b84f0102c6fd3d05924a3d6085ed7c82"
+		},
+		"greatCircleDistanceM.jsonl": {
+			"cases": 205,
+			"sha256": "39e9b44bdfb1ffdeabd5463e2251702243dc3ebe147a70cdc9cbfd052ecff3d1"
+		},
+		"greatCircleDistanceRads.jsonl": {
+			"cases": 205,
+			"sha256": "507f077f04953fddd27e460a999bb7c1673cd73ff95c59b023095c98a93f7b9c"
+		},
+		"gridDisk.jsonl": {
+			"cases": 756,
+			"sha256": "26108acd398cf9630000d3d92c213ed789e7e56b767da30122b97296e6c9852a"
+		},
+		"gridDiskDistances.jsonl": {
+			"cases": 748,
+			"sha256": "b2fdcd0c8f91c15f0270f2f4e18725eef785dba5bf19d15ed840c038fb5b400a"
+		},
+		"gridDiskDistancesSafe.jsonl": {
+			"cases": 748,
+			"sha256": "718e99ce3c6c03360e75d06d36707828bc545bff1407d25fbd0833ff6f6a7eb9"
+		},
+		"gridDiskDistancesUnsafe.jsonl": {
+			"cases": 748,
+			"sha256": "c77f072f63c8145a0ad02077576241be1a77a751b5a26b338105c7062d845ee3"
+		},
+		"gridDiskUnsafe.jsonl": {
+			"cases": 748,
+			"sha256": "6059758dbac914f9fb535e7872e6e81e7a68906283edc0a87d2fe822899cd448"
+		},
+		"gridDistance.jsonl": {
+			"cases": 320,
+			"sha256": "5a71243a479ed5248fd1b1ffc4c88440c71e446f0cb1c0288287d3e67b44c94b"
+		},
+		"gridPathCells.jsonl": {
+			"cases": 320,
+			"sha256": "edd4306b30dce742742b0619ff3ad4ef317f11e0d23d173fd1aae6b30c235e84"
+		},
+		"gridPathCellsSize.jsonl": {
+			"cases": 320,
+			"sha256": "743440e4e5eb2115981be843bfd7fcd0d18a19fd588ea6ee9b52879cff881d55"
+		},
+		"gridRing.jsonl": {
+			"cases": 752,
+			"sha256": "ba5144435c0dd311ce616d8d0b7051b1ec7a415702a49311c163c1754dfaf39d"
+		},
+		"gridRingUnsafe.jsonl": {
+			"cases": 748,
+			"sha256": "0bb574b6255d2e0012075da511e15e47add45ff7bc0612fdbe7da208bd61f584"
+		},
+		"isPentagon.jsonl": {
+			"cases": 778,
+			"sha256": "29bfd8d013dadc2becaa15b41ffeee3eb91d14b04c259c5707c19d36781f9500"
+		},
+		"isResClassIII.jsonl": {
+			"cases": 778,
+			"sha256": "fa7d4c0285bb5bc5e41084504c7044169aa9b172947495c0c0cf8000440e6628"
+		},
+		"isValidCell.jsonl": {
+			"cases": 778,
+			"sha256": "3c27f1fa2d30639115d72408696f83b517c9550cd267fcefad42aa47f4b2401e"
+		},
+		"isValidDirectedEdge.jsonl": {
+			"cases": 600,
+			"sha256": "667054dcc8b359dee273a6f3249fd6f3ab6e4e6b6a5209e8b0100a0f8e3c351a"
+		},
+		"isValidIndex.jsonl": {
+			"cases": 432,
+			"sha256": "f44bd84bc62c2c9540e217fc2df99f1b244ed5cb6cf861a70d3a44fe9b9cf842"
+		},
+		"isValidVertex.jsonl": {
+			"cases": 505,
+			"sha256": "89805c409fccbf654de0c60d3838c967d2b0cfd2f6cb9a24f2a5c90c0a1c2ad5"
+		},
+		"latLngToCell.jsonl": {
+			"cases": 2128,
+			"sha256": "24cdfb1a9f553067518efba35f89e00a9bb1112f2b613ea039f13229d88f4f54"
+		},
+		"localIjToCell.jsonl": {
+			"cases": 766,
+			"sha256": "e71602891bf022dc8d1ef2b349042d2373c16c18ac8d2f325f7b0fdf4b1b1a16"
+		},
+		"maxGridDiskSize.jsonl": {
+			"cases": 9,
+			"sha256": "a6847254c129a591ce0866d7a8cd65c4520a6940476de9b37517ff360d1e3d37"
+		},
+		"maxGridRingSize.jsonl": {
+			"cases": 9,
+			"sha256": "54bc6644b5ca35e5f19265b60c7369adabdf64b0ea5ad38a2fd11ca73d652aa8"
+		},
+		"maxPolygonToCellsSize.jsonl": {
+			"cases": 31,
+			"sha256": "a85d00b72ee35265c6a25560336501a8e0d922dade93b056b08dc6a0d1ce8cf5"
+		},
+		"maxPolygonToCellsSizeExperimental.jsonl": {
+			"cases": 112,
+			"sha256": "bf1f1f9bdaa91a7caac51809f6886bbae830d6778d3cd8cc66e054a04866bac8"
+		},
+		"originToDirectedEdges.jsonl": {
+			"cases": 199,
+			"sha256": "e62cbe60683ded002c12f54049d2ef04c4ae7b8c0810a60e0abef918a124087d"
+		},
+		"polygonToCells.jsonl": {
+			"cases": 31,
+			"sha256": "db38f48d1cb289af6a7ce3e93e5f866c09941c9220642bbe2e47f41af4f87f29"
+		},
+		"polygonToCellsExperimental.jsonl": {
+			"cases": 112,
+			"sha256": "ffa9a4fb9d07b2a7836e180f78dd63ef86a77ca19c4279c6f3c397f3f4b62f5e"
+		},
+		"radsToDegs.jsonl": {
+			"cases": 12,
+			"sha256": "219b99b311365915a32b690cb8bb10f5abc2055e14cb05761127096a4f0c9caa"
+		},
+		"reverseDirectedEdge.jsonl": {
+			"cases": 600,
+			"sha256": "36e016dcf39cdb5f2e532ac909e8b96f0d6558fabacb4a5614c67cec5fbb7190"
+		},
+		"uncompactCells.jsonl": {
+			"cases": 9,
+			"sha256": "9bddbea8a6957f207b2655854fd9bdda85dec50d59af2793e32d370df5b7d775"
+		},
+		"uncompactCellsSize.jsonl": {
+			"cases": 9,
+			"sha256": "d587326efe0f5d3b0ee9693483fd213fec0549bf58064fdc025dfe3593cb8f13"
+		},
+		"vertexToLatLng.jsonl": {
+			"cases": 505,
+			"sha256": "cfd99bc07e50810f18b347b3e95aa58b0dbd820629c7970fb8569d6fcd687bff"
+		}
+	}
+}

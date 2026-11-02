@@ -1,77 +1,130 @@
-name: test
+# The CI gate: fixtures, Rust, the committed WASM artifact, lint, TypeScript, the test suites, and
+# the runtime and package tests, on every PR and on every push to main.
+#
+# THE JOB IS NAMED `test` ON PURPOSE. The ruleset on `main` requires a status check with exactly
+# that context before a PR can merge, and publish.yml's prepare phase auto-merges the release PR
+# on that same check. Rename it and both break silently — the ruleset would wait forever for a
+# check that never reports.
+#
+# `workflow_dispatch` is here because PRs opened with GITHUB_TOKEN never trigger `on: pull_request`
+# (GitHub's anti-recursion rule); publish.yml dispatches this workflow against the release branch
+# explicitly so the required check lands on the branch head.
+#
+# The C reference is never built here: tests consume the committed fixtures. Regenerating them
+# (`yarn generate:fixtures`) needs an explicit H3 C checkout at the pinned revision.
+name: Test
 
 on:
-  push:
-    branches: [master]
   pull_request:
-    branches: [master]
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  WASM_BINDGEN_VERSION: "0.2.130"
+  # Node versions that test:package runs the packed tarball under, besides .nvmrc.
+  H3_NODE_FLOOR: "22.18.0"
+
 jobs:
-  
-  # Run quick tests for all Node versions
-  version-tests:
-    name: Test Node ${{ matrix.node_version }}
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node_version: [18, 20, 22, 23]
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
+      - name: Set up Node
+        uses: actions/setup-node@v7
         with:
-          node-version: '${{ matrix.node_version }}'
+          node-version-file: .nvmrc
 
-      - name: Install
-        run: |
-          yarn
+      - name: Enable Corepack (yarn 4)
+        run: corepack enable
 
-      - name: Tests
-        run: |
-          yarn test-fast
-  
-  # Run the full CI suite for the dev Node version. Tests are expected to pass for all 
-  # Node versions, but the build only needs to work for the development version, which 
-  # should match the Volta config in package.json
-  build-tests:
-    name: Build Test Node ${{ matrix.node_version }}
-    runs-on: ubuntu-latest
+      - name: Install dependencies
+        run: yarn install --immutable
 
-    strategy:
-      matrix:
-        node_version: [22]
+      # rustup reads rust-toolchain.toml (1.99.1 + wasm32-unknown-unknown, rustfmt, clippy).
+      - name: Set up Rust from rust-toolchain.toml
+        run: rustup show active-toolchain || rustup toolchain install
 
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
+      - name: Cache Cargo
+        uses: actions/cache@v4
         with:
-          node-version: '${{ matrix.node_version }}'
+          path: |
+            ~/.cargo/bin/wasm-bindgen
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: cargo-${{ runner.os }}-${{ hashFiles('rust-toolchain.toml', 'Cargo.lock') }}-wbg${{ env.WASM_BINDGEN_VERSION }}
 
-      - name: Install
+      - name: Install wasm-bindgen-cli
         run: |
-          yarn
+          if [ "$(wasm-bindgen --version 2>/dev/null)" != "wasm-bindgen ${WASM_BINDGEN_VERSION}" ]; then
+            cargo install wasm-bindgen-cli --version "${WASM_BINDGEN_VERSION}" --locked --force
+          fi
 
-      - name: Build
-        run: |
-          yarn docker-boot
-          yarn build-emscripten
+      - name: Check fixtures
+        run: yarn check:fixtures
 
-      - name: Tests
+      # One version across npm and crates.io; publish.yml bumps them together.
+      - name: Versions in lockstep
         run: |
-          yarn lint
-          yarn test-fast
-          yarn check-prettier
-          yarn check-docs
-          yarn check-tsd
-          yarn cover
-      
-      - uses: coverallsapp/github-action@master
-        with:
-          path-to-lcov: ./coverage/lcov.info
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          CARGO_VERSION="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "sister-h3") | .version')"
+          NPM_VERSION="$(node -p "require('./package.json').version")"
+          test "${CARGO_VERSION}" = "${NPM_VERSION}" || { echo "::error::Cargo.toml ${CARGO_VERSION} != package.json ${NPM_VERSION}"; exit 1; }
+
+      - name: Rust format
+        run: cargo fmt --all --check
+
+      - name: Rust lint
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Rust tests
+        run: cargo test --workspace --locked
+
+      - name: Package the native crate
+        run: cargo package -p sister-h3 --locked
+
+      # Builds into a temporary directory and compares with the committed wasm/h3.wasm, glue, and
+      # build manifest without overwriting them.
+      - name: Committed WASM artifact matches a fresh build
+        run: yarn check:wasm-artifact
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Compile
+        run: yarn compile
+
+      - name: Type check
+        run: yarn check-types
+
+      # `--run` is required. Bare vitest watches and never exits.
+      - name: Test
+        run: yarn test --run
+
+      - name: Install Node ${{ env.H3_NODE_FLOOR }} for package tests
+        run: |
+          mkdir -p target/tools && cd target/tools
+          v="${H3_NODE_FLOOR}"
+          curl -fsSL -o "node-v${v}.tar.xz" "https://nodejs.org/dist/v${v}/node-v${v}-linux-x64.tar.xz"
+          curl -fsSL "https://nodejs.org/dist/v${v}/SHASUMS256.txt" | grep " node-v${v}-linux-x64.tar.xz$" | sed "s/node-v${v}-linux-x64.tar.xz/node-v${v}.tar.xz/" | sha256sum -c -
+          tar -xJf "node-v${v}.tar.xz"
+
+      - name: Package tests (npm tarball and native crate in clean consumers)
+        run: yarn test:package
+
+      - name: Install Chromium and Firefox for runtime tests
+        run: yarn playwright-core install --with-deps chromium firefox
+
+      - name: Runtime tests (Node, Worker bundle, wrangler dev, Vite and webpack in Chromium and Firefox)
+        run: yarn test:runtimes

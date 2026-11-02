@@ -1,0 +1,131 @@
+{
+	"[css]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[javascriptreact]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[markdown]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[shellscript]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"[yaml]": {
+		"editor.autoIndent": "advanced",
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2
+	},
+
+	"editor.insertSpaces": false,
+	"editor.tabSize": 2,
+
+	"eslint.useFlatConfig": true,
+	"explorer.fileNesting.enabled": true,
+	"explorer.fileNesting.patterns": {
+		"*.cjs": "*.d.cts",
+		".node-version": ".nvmrc",
+		"package.json": "package-lock.json, yarn.lock, .yarnrc, .yarnrc.yml, .yarn, .nvmrc, .node-version",
+		"tsconfig.json": "tsconfig.*.json, jsconfig.json"
+	},
+	"files.exclude": {
+		".editorconfig": true,
+		".eslintignore": true,
+		".eslintrc.cjs": true,
+		".node-version": true,
+		".yarnrc": true,
+		"scratch": true,
+		"out": true,
+		"paths.mjs": true,
+		"yarn.lock": true
+	},
+	"js/ts.implicitProjectConfig.checkJs": true,
+	"search.exclude": {
+		"**/dist": true,
+		"**/out": true,
+		// "**/*.test.ts": true,
+		"**/dictionaries/**/*.txt": true,
+		"**/scratch": true,
+		".docusaurus": true,
+		"./functions": true,
+		".editorconfig": false,
+		".eslintignore": false,
+		".eslintrc.cjs": false,
+		".node-version": false,
+		".yarn": true,
+		"yarn.lock": true
+	},
+	"js/ts.format.semicolons": "remove",
+	"js/ts.preferences.quoteStyle": "double",
+	"js/ts.preferences.importModuleSpecifier": "project-relative",
+	"js/ts.preferences.importModuleSpecifierEnding": "js",
+	"js/ts.preferences.includePackageJsonAutoImports": "on",
+	"js/ts.implicitProjectConfig.module": "ESNext",
+	"js/ts.implicitProjectConfig.target": "ESNext",
+
+	//#region Exclude Patterns
+	"js/ts.preferences.autoImportFileExcludePatterns": [
+		// --- Test Files ---
+		"**/*.{test,spec}.{ts,tsx}",
+		"**/setupTests.{ts,tsx}",
+		"**/setupProxy.{ts,tsx}",
+
+		// --- Entrypoints ---
+		"**/serviceWorker.{ts,tsx,js,mjs}",
+		"**/service-worker.{ts,tsx,js,mjs}",
+
+		// --- TypeScript Syntax Overlaps ---
+		// BAD: import { type } from 'node:os'
+		"**/@types/node/os.d.ts",
+		"os",
+		"node:os",
+		// BAD: import { exp } from 'node:constants'
+		"**/@types/node/constants.d.ts",
+		"constants",
+		"node:constants",
+		// BAD: import { Console } from 'node:console'
+		"node:console",
+		"console",
+		"**/@types/node/console.d.ts",
+		// BAD: import { request } from 'node:http'
+		"node:http",
+		"http",
+		"**/@types/node/https.d.ts",
+		// BAD: import { request } from 'node:https'
+		"node:https",
+		"https",
+		"**/@types/node/https.d.ts",
+		// BAD: import { satisfies } from 'semver'
+		"**/semver/**",
+		// --- React Overlaps ---
+		// BAD: import { createContext } from 'vm'
+		"**/@types/node/vm.d.ts",
+		"vm",
+		"node:vm",
+		// -- Monorepo Relative Imports --
+		"**/../{core,spatial,tiger,fcc,mailwoman,sdk,sync,app,schema}/**",
+		// -- Compiled output --
+		"**/../out/**",
+		// -- Re-exported --
+		"**/../index.{ts,tsx,js,mjs}"
+	],
+
+	"github.copilot.enable": {
+		"*": true,
+		"csv": false,
+		"scminput": false,
+		"**/dictionaries/**/*.txt": true
+	}
+}
