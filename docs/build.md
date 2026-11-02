@@ -158,7 +158,7 @@ Chromium and Firefox). It never builds C. It never runs `cargo test --workspace`
 unification would enable `libm` for the core crate's tests through the WASM adapter.
 
 The `native` job runs the core crate's parity suites with the platform libm and with `--features
-libm` on macOS arm64 (macOS 26 and 15), Linux arm64 glibc, Linux x86-64 musl, and Windows x86-64 MSVC, within the
+libm` on macOS arm64 (macos-26), Linux arm64 glibc, Linux x86-64 musl, and Windows x86-64 MSVC, within the
 documented bounds. Only `test` is a required check.
 
 ## Releases
