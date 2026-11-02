@@ -22,6 +22,12 @@ import { fileURLToPath } from "node:url"
 import { cases, FIXTURE_SCHEMA_VERSION, SEED } from "./fixtures/cases.ts"
 
 export const PINNED_C_REVISION = "24946ad1c5e9016a6eab96d4f9ee4d0c993720e5"
+
+/**
+ * Every C compile for the reference uses this, so fixtures and benchmarks do not depend on the host's default
+ * floating-point contraction (see the CMake invocation below).
+ */
+export const C_FP_FLAG = "-ffp-contract=off"
 export const PINNED_C_VERSION = "4.5.0"
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
@@ -73,6 +79,9 @@ run("cmake", [
 	"-B",
 	cBuild,
 	"-DCMAKE_BUILD_TYPE=Release",
+	// No floating-point contraction: clang on arm64 (Apple Silicon) otherwise fuses a*b+c into FMA by default,
+	// which changes last bits (cellToLatLng output differed from Linux x86-64). Rust never contracts.
+	`-DCMAKE_C_FLAGS=${C_FP_FLAG}`,
 	"-DBUILD_TESTING=ON",
 	"-DBUILD_BENCHMARKS=OFF",
 	"-DBUILD_FUZZERS=OFF",
@@ -99,6 +108,7 @@ const runner = join(target, "runner")
 
 run("cc", [
 	"-O2",
+	C_FP_FLAG,
 	"-std=c11",
 	"-I" + include,
 	"-o",
@@ -124,6 +134,7 @@ const genBin = join(tablesDir, "gen_tables")
 
 run("cc", [
 	"-O0",
+	C_FP_FLAG,
 	"-std=c11",
 	"-I" + join(source, "src/h3lib/include"),
 	"-I" + include,
@@ -232,7 +243,7 @@ const provenance = {
 			license: "Apache-2.0",
 		},
 	},
-	platform: { os: `${process.platform} ${process.arch}`, cc, cmake, node: process.version },
+	platform: { os: `${process.platform} ${process.arch}`, cc, cmake, cFlags: C_FP_FLAG, node: process.version },
 	ctestRun: process.env.H3_SKIP_CTEST !== "1",
 	files,
 }
