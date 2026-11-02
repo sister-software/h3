@@ -1,0 +1,138 @@
+# Build and verification
+
+## Toolchain (pinned)
+
+| Tool               | Version                                   | Pinned by                                      |
+| ------------------ | ----------------------------------------- | ---------------------------------------------- |
+| Rust               | 1.99.1, target `wasm32-unknown-unknown`   | `rust-toolchain.toml`                          |
+| wasm-bindgen       | 0.2.130 (crate `=0.2.130`, CLI `0.2.130`) | `Cargo.toml`, `scripts/build-wasm.ts`          |
+| wasm-opt           | not used                                  | the correctness build is unoptimized by design |
+| Node               | `.nvmrc` (24.22.1); floor 22.18.0         | `.nvmrc`, `package.json` `engines`             |
+| Yarn               | 4.18.1                                    | `packageManager`                               |
+| esbuild            | 0.28.2                                    | `package.json` (exact)                         |
+| webpack            | 5.111.1                                   | `package.json` (exact)                         |
+| wrangler / workerd | 4.156.0 / 1.20261023.1                    | `package.json` (exact) / `yarn.lock`           |
+| playwright-core    | 1.64.1 (Chromium revision 1248)           | `package.json` (exact)                         |
+
+Install the wasm-bindgen CLI once:
+
+```sh
+cargo install wasm-bindgen-cli --version 0.2.130 --locked
+```
+
+`yarn build:wasm` checks both the Rust and wasm-bindgen versions and fails with these instructions
+instead of installing anything.
+
+## Building
+
+```sh
+yarn build:wasm            # wasm/h3.wasm, lib/generated/h3.{js,d.ts}, wasm/build-manifest.json
+yarn check:wasm-artifact   # fresh build in a temporary directory, compared byte-for-byte
+yarn compile               # TypeScript to out/
+```
+
+The WASM build is `cargo build --locked --release -p sister-h3-wasm --target wasm32-unknown-unknown`
+with `--remap-path-prefix` for the checkout and Cargo home (so embedded panic locations do not
+depend on the host path) and `-Cdebuginfo=0`, followed by `wasm-bindgen --target web
+--omit-default-module-path`. `wasm/build-manifest.json` records the source-tree hash, rustc,
+target, flags, wasm-bindgen version, lockfile hash, and each output's SHA-256 and size.
+
+The committed artifacts are `wasm/h3.wasm`, `lib/generated/h3.js`, `lib/generated/h3.d.ts`, and
+`wasm/build-manifest.json`. The generated glue is private; only `lib/runtime/state.ts` imports it.
+TypeScript carries it to `out/lib/generated/` with `allowJs`, so source and packed import paths
+are identical.
+
+Release build environment: Linux x86-64 (Ubuntu 24.04, kernel 6.8). Reproducibility has been
+confirmed across target directories on this host; cross-host byte identity is not yet established
+(see `docs/implementation-status.md`).
+
+## C reference fixtures
+
+Normal builds and tests consume committed fixtures (`crates/h3-core/tests/fixtures/*.jsonl`) and
+never need C. Regenerating them requires an explicit H3 C checkout at the pinned revision:
+
+```sh
+H3_C_SOURCE=/path/to/h3 yarn generate:fixtures
+```
+
+The script verifies `git rev-parse HEAD` equals `24946ad1c5e9016a6eab96d4f9ee4d0c993720e5` and
+`VERSION` is `4.5.0`, then builds C out of tree in `target/reference/h3-c`, runs CTest, compiles the
+test-only runner (`test/reference/runner.c`) and the table generator (`scripts/tables/gen_tables.c`),
+regenerates `crates/h3-core/src/tables/generated.rs`, and writes fixtures plus
+`test/fixtures/provenance.json`.
+
+CMake configuration differs from the original guide in one flag: **`-DBUILD_FILTERS=ON`** is required
+at the pinned revision because `CMakeTests.cmake` registers CLI tests that reference the `h3_bin`
+filter target; with `BUILD_FILTERS=OFF` CMake's generate step fails (`No target "h3_bin"`).
+
+Reference environment used for the committed fixtures:
+
+| Item     | Version                                                     |
+| -------- | ----------------------------------------------------------- |
+| CMake    | 3.28.3                                                      |
+| C        | gcc 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04.1), `-O3 -DNDEBUG` |
+| Platform | Linux 6.8.0 x86-64                                          |
+| CTest    | 325/325 passed                                              |
+
+Prerequisites for fixture generation only: git, CMake ≥ 3.20, a C11 compiler, and libm.
+
+## Runtime verification
+
+`yarn test:runtimes` packs the tarball, installs it into fresh consumers under `target/runtime/`,
+and runs the C-fixture probe in Node (bytes and module initialization, with WebAssembly call
+instrumentation around import), an esbuild bundle under `--conditions=workerd,worker,browser`,
+local `wrangler dev`, and Vite and webpack production builds in headless Chromium. Prerequisites:
+the Playwright Chromium revision 1248 (`npx playwright-core install chromium` with
+playwright-core 1.64.1) and the workerd binary installed by `wrangler` from npm.
+
+### Observed workerd restrictions (wrangler 4.156.0, workerd 1.20261023.1)
+
+Reproduced by the `/restrictions` route of the runtime Worker probe on 2026-11-02:
+
+| Probe                                       | Result                                                                             |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `WebAssembly.compile(bytes)`                | `CompileError: WebAssembly.compile(): Wasm code generation disallowed by embedder` |
+| `new Function("return 1")`                  | `EvalError: Code generation from strings disallowed for this context`              |
+| indirect `eval("1")`                        | `EvalError: Code generation from strings disallowed for this context`              |
+| `typeof globalThis.process`                 | defined (`"object"`)                                                               |
+| `import.meta.url` in the bundled Worker     | `undefined`                                                                        |
+| `init({ bytes })`                           | rejects with `H3InitializationError` (cause: the `CompileError` above)             |
+| `init({ module })` with an imported `.wasm` | works                                                                              |
+
+## Package verification
+
+`yarn test:package` packs the npm tarball, checks its file list (only `out/`, `wasm/h3.wasm`, the
+README, license and notices), installs it into a fresh consumer, and runs the README example, the
+export-map checks, and the C fixture probe under Node 22.18.0 (the `engines` floor), the `.nvmrc`
+version, and the running Node. It also typechecks a TypeScript consumer against the shipped
+declarations with `skipLibCheck: false`, and builds and tests the unpacked `cargo package` output
+of `sister-h3` from a directory outside the repository.
+
+Node binaries for the version matrix are looked up in `target/tools/node-v<version>-linux-x64/`
+and then `~/.nvm/versions/node/`. Locally they were downloaded from nodejs.org into `target/tools`
+with SHA-256 verification against `SHASUMS256.txt`; CI does the same for 22.18.0.
+
+`cargo package` requires a committed tree; on an uncommitted working tree run it with
+`--allow-dirty` (as `yarn test:package` does). CI runs it without that flag.
+
+## Fixture checks
+
+`yarn check:fixtures` validates every committed record against the schema and compares file
+hashes and case counts with `test/fixtures/provenance.json` (which must equal the copy packaged
+with the native crate), and requires the provenance to record a CTest run. It needs no C.
+
+## Benchmarks
+
+`yarn benchmark` writes `benchmarks/RESULTS.md` and `benchmarks/results/latest.json`. The native
+comparison builds `crates/h3-core/examples/bench.rs` (not packaged) and, when
+`target/reference/h3-c` exists (after `yarn generate:fixtures`), `benchmarks/c/bench.c` against the
+pinned C library. `H3_BENCH_SAMPLES` sets the sample count (default 15).
+
+## CI
+
+`.github/workflows/test.yml` (job `test`) runs, in order: fixture checks, `cargo fmt --check`,
+`cargo clippy -D warnings`, `cargo test`, `cargo package`, `yarn check:wasm-artifact` (installs
+`wasm-bindgen-cli` 0.2.130 with `--locked`), `yarn lint`, `yarn compile`, `yarn check-types`,
+`yarn test --run`, `yarn test:package`, and `yarn test:runtimes` (after installing Playwright's
+Chromium). It never builds C. `publish.yml` was audited: its stale `out/web.js` assertion now checks
+the WASM glue and `wasm/h3.wasm` instead; the release flow itself is unchanged and was not run.

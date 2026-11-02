@@ -1,0 +1,31 @@
+[package]
+name = "sister-h3"
+description = "An independent Rust implementation of the H3 hexagonal hierarchical geospatial index, ported from the H3 C library."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme = "README.md"
+keywords = ["h3", "geospatial", "hexagon", "geo", "index"]
+categories = ["science::geo", "algorithms"]
+include = [
+    "src/**/*",
+    "tests/**/*",
+    "README.md",
+    "LICENSE",
+    "LICENSE-APACHE-2.0",
+    "NOTICE",
+    "THIRD_PARTY_NOTICES.md",
+]
+
+[lib]
+name = "sister_h3"
+crate-type = ["rlib"]
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+serde_json = { version = "1.0.154", features = ["float_roundtrip"] }

@@ -1,0 +1,9 @@
+{"schemaVersion":1,"operation":"maxGridRingSize","args":{"k":-1},"error":2,"result":null}
+{"schemaVersion":1,"operation":"maxGridRingSize","args":{"k":0},"error":0,"result":{"value":1}}
+{"schemaVersion":1,"operation":"maxGridRingSize","args":{"k":1},"error":0,"result":{"value":6}}
+{"schemaVersion":1,"operation":"maxGridRingSize","args":{"k":2},"error":0,"result":{"value":12}}
+{"schemaVersion":1,"operation":"maxGridRingSize","args":{"k":5},"error":0,"result":{"value":30}}
+{"schemaVersion":1,"operation":"maxGridRingSize","args":{"k":100},"error":0,"result":{"value":600}}
+{"schemaVersion":1,"operation":"maxGridRingSize","args":{"k":13780509},"error":0,"result":{"value":82683054}}
+{"schemaVersion":1,"operation":"maxGridRingSize","args":{"k":13780510},"error":0,"result":{"value":82683060}}
+{"schemaVersion":1,"operation":"maxGridRingSize","args":{"k":2147483647},"error":0,"result":{"value":12884901882}}

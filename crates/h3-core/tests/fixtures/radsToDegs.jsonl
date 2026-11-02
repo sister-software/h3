@@ -1,0 +1,12 @@
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":0},"error":0,"result":{"value":0}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":1},"error":0,"result":{"value":57.29577951308232}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":-1},"error":0,"result":{"value":-57.29577951308232}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":90},"error":0,"result":{"value":5156.620156177409}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":180},"error":0,"result":{"value":10313.240312354817}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":-180},"error":0,"result":{"value":-10313.240312354817}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":360},"error":0,"result":{"value":20626.480624709635}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":1e-300},"error":0,"result":{"value":5.729577951308232e-299}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":1e+300},"error":0,"result":{"value":5.729577951308233e+301}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":57.29577951308232},"error":0,"result":{"value":3282.806350011744}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":"nan"},"error":0,"result":{"value":"nan"}}
+{"schemaVersion":1,"operation":"radsToDegs","args":{"value":"inf"},"error":0,"result":{"value":"inf"}}

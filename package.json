@@ -1,0 +1,96 @@
+{
+	"name": "@sister.software/h3",
+	"version": "0.1.0",
+	"description": "H3 hexagonal hierarchical geospatial indexing, implemented in Rust and compiled to WebAssembly",
+	"keywords": [
+		"geo",
+		"geocoding",
+		"geohashing",
+		"geospatial",
+		"h3",
+		"spatial",
+		"spatial-indexing"
+	],
+	"homepage": "https://github.com/sister-software/h3",
+	"bugs": {
+		"url": "https://github.com/sister-software/h3/issues"
+	},
+	"license": "MIT",
+	"contributors": [
+		{
+			"name": "Teffen Ellis",
+			"email": "teffen@sister.software"
+		}
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/sister-software/h3.git"
+	},
+	"files": [
+		"/out/**/*",
+		"/wasm/h3.wasm",
+		"/LICENSE",
+		"/LICENSE-APACHE-2.0",
+		"/NOTICE",
+		"/THIRD_PARTY_NOTICES.md",
+		"/README.md"
+	],
+	"type": "module",
+	"sideEffects": false,
+	"types": "./out/index.d.ts",
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"types": "./out/index.d.ts",
+			"default": "./out/index.js"
+		},
+		"./h3.wasm": "./wasm/h3.wasm"
+	},
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
+	},
+	"scripts": {
+		"build:wasm": "node scripts/build-wasm.ts",
+		"check:wasm-artifact": "node scripts/build-wasm.ts --check",
+		"check:fixtures": "node scripts/check-fixtures.ts",
+		"generate:fixtures": "node scripts/generate-fixtures.ts",
+		"check-types": "tsc --build . && tsc -p tsconfig.tools.json",
+		"clean": "tsc -b --clean",
+		"compile": "NODE_OPTIONS=\"--max-old-space-size=3000\" tsc -b",
+		"test": "yarn compile && vitest",
+		"test:runtimes": "node test/runtime/run.ts",
+		"test:package": "node test/package/run.ts",
+		"benchmark": "node benchmarks/run.ts",
+		"lint": "run-s lint:oxlint lint:oxfmt",
+		"lint:oxlint": "oxlint",
+		"lint:oxfmt": "oxfmt --check .",
+		"lint:fix": "run-s fix:oxlint format",
+		"fix:oxlint": "oxlint --fix",
+		"format": "oxfmt ."
+	},
+	"devDependencies": {
+		"@sister.software/oxfmt-config": "^14.7.0",
+		"@sister.software/oxlint-config": "^14.7.0",
+		"@sister.software/tsconfig": "^14.7.0",
+		"@types/node": "^26.6.5",
+		"colorette": "^2.0.20",
+		"esbuild": "0.28.2",
+		"h3-js": "4.5.0",
+		"npm-run-all": "^4.1.5",
+		"oxfmt": "0.74.0",
+		"oxlint": "1.89.0",
+		"oxlint-tsgolint": "^7.0.2005",
+		"path-ts": "^2.5.0",
+		"playwright-core": "1.64.1",
+		"typescript": "^7.0.2",
+		"vite": "^8.3.5",
+		"vitest": "^5.0.5",
+		"webpack": "5.111.1",
+		"wrangler": "4.156.0"
+	},
+	"engines": {
+		"node": ">= 22.18.0"
+	},
+	"packageManager": "yarn@4.18.1"
+}

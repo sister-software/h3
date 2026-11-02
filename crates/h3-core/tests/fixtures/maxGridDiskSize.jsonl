@@ -1,0 +1,9 @@
+{"schemaVersion":1,"operation":"maxGridDiskSize","args":{"k":-1},"error":2,"result":null}
+{"schemaVersion":1,"operation":"maxGridDiskSize","args":{"k":0},"error":0,"result":{"value":1}}
+{"schemaVersion":1,"operation":"maxGridDiskSize","args":{"k":1},"error":0,"result":{"value":7}}
+{"schemaVersion":1,"operation":"maxGridDiskSize","args":{"k":2},"error":0,"result":{"value":19}}
+{"schemaVersion":1,"operation":"maxGridDiskSize","args":{"k":5},"error":0,"result":{"value":91}}
+{"schemaVersion":1,"operation":"maxGridDiskSize","args":{"k":100},"error":0,"result":{"value":30301}}
+{"schemaVersion":1,"operation":"maxGridDiskSize","args":{"k":13780509},"error":0,"result":{"value":569707326238771}}
+{"schemaVersion":1,"operation":"maxGridDiskSize","args":{"k":13780510},"error":0,"result":{"value":569707381193162}}
+{"schemaVersion":1,"operation":"maxGridDiskSize","args":{"k":2147483647},"error":0,"result":{"value":569707381193162}}

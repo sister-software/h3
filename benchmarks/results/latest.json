@@ -1,0 +1,361 @@
+{
+	"environment": {
+		"date": "2026-11-02T03:35:32.825Z",
+		"node": "v26.2.0",
+		"cpu": "AMD Ryzen 9 8945HS w/ Radeon 780M Graphics",
+		"cores": 16,
+		"memoryGiB": 29,
+		"loadAverageBefore": [24.64, 16.64, 9.28],
+		"rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+		"wasmBytes": 175239,
+		"h3js": "4.5.0",
+		"loadAverageAfter": [18.88, 15.94, 9.24]
+	},
+	"samples": 15,
+	"js": {
+		"latLngToCell": {
+			"ours": {
+				"median": 742.1414000000141,
+				"p25": 699.278849999996,
+				"p75": 821.7900999999983,
+				"samples": 15
+			},
+			"h3js": {
+				"median": 1363.5843999999906,
+				"p25": 1248.596299999997,
+				"p75": 1492.631300000005,
+				"samples": 15
+			},
+			"checksumMatch": true,
+			"oursOpsPerSec": 1347452.1162678448,
+			"h3jsOpsPerSec": 733361.2792871544
+		},
+		"cellToParent": {
+			"ours": {
+				"median": 471.29780000000216,
+				"p25": 368.7413500000048,
+				"p75": 518.1497499999978,
+				"samples": 15
+			},
+			"h3js": {
+				"median": 627.7156999999988,
+				"p25": 542.817249999996,
+				"p75": 716.6147499999965,
+				"samples": 15
+			},
+			"checksumMatch": true,
+			"oursOpsPerSec": 2121800.6958657466,
+			"h3jsOpsPerSec": 1593077.8854185133
+		},
+		"cellToLatLng": {
+			"ours": {
+				"median": 437.25519999998136,
+				"p25": 411.75214999999525,
+				"p75": 556.9526499999938,
+				"samples": 15
+			},
+			"h3js": {
+				"median": 564.736199999993,
+				"p25": 474.17809999999463,
+				"p75": 741.3188500000047,
+				"samples": 15
+			},
+			"checksumMatch": true,
+			"oursOpsPerSec": 2286993.956847266,
+			"h3jsOpsPerSec": 1770738.2668226552
+		},
+		"gridDisk": {
+			"ours": {
+				"median": 1218.2439999999133,
+				"p25": 1128.050999999914,
+				"p75": 2998.326499999962,
+				"samples": 15
+			},
+			"h3js": {
+				"median": 3741.625000000113,
+				"p25": 2889.2684999999574,
+				"p75": 4527.93250000002,
+				"samples": 15
+			},
+			"checksumMatch": true,
+			"oursOpsPerSec": 820853.6220987512,
+			"h3jsOpsPerSec": 267263.55527343595
+		},
+		"compactCells": {
+			"ours": {
+				"median": 1634612.000000061,
+				"p25": 1131180.9999999697,
+				"p75": 1713188.0000000591,
+				"samples": 15
+			},
+			"h3js": {
+				"median": 2085283.0000001176,
+				"p25": 2031066.5000000654,
+				"p75": 2193795.000000023,
+				"samples": 15
+			},
+			"checksumMatch": true,
+			"oursOpsPerSec": 611.7659725977558,
+			"h3jsOpsPerSec": 479.55121678925286
+		},
+		"polygonToCells": {
+			"ours": {
+				"median": 833785.9999999182,
+				"p25": 734656.5000000282,
+				"p75": 909994.0000000971,
+				"samples": 15
+			},
+			"h3js": {
+				"median": 2774969.9999999395,
+				"p25": 2728413.0000002733,
+				"p75": 3250722.99999988,
+				"samples": 15
+			},
+			"checksumMatch": true,
+			"oursOpsPerSec": 1199.348513887374,
+			"h3jsOpsPerSec": 360.3642561901649
+		}
+	},
+	"boundary": {
+		"stringToBigInt": {
+			"median": 113.97870000000694,
+			"p25": 71.4198000000124,
+			"p75": 126.40495000000556,
+			"samples": 15
+		},
+		"bigIntToString": {
+			"median": 34.151799999972354,
+			"p25": 30.97179999999753,
+			"p75": 47.04980000001342,
+			"samples": 15
+		},
+		"rawWasmCellToParent": {
+			"median": 17.06490000001395,
+			"p25": 12.850449999996272,
+			"p75": 30.748400000015863,
+			"samples": 15
+		},
+		"publicCellToParent": {
+			"median": 167.2461999999996,
+			"p25": 161.54605000001538,
+			"p75": 424.65320000001157,
+			"samples": 15
+		},
+		"rawWasmLatLngToCell": {
+			"median": 665.9842000000026,
+			"p25": 637.5701999999819,
+			"p75": 671.4599000000135,
+			"samples": 15
+		},
+		"publicLatLngToCell": {
+			"median": 678.2181000000037,
+			"p25": 633.1368999999995,
+			"p75": 715.7911999999897,
+			"samples": 15
+		}
+	},
+	"init": {
+		"importMs": {
+			"median": 10.197996999999997,
+			"p25": 9.847483,
+			"p75": 11.068060999999997,
+			"samples": 9
+		},
+		"initMs": {
+			"median": 26.804797,
+			"p25": 25.647336000000003,
+			"p75": 27.574643999999992,
+			"samples": 9
+		},
+		"firstCallMs": {
+			"median": 0.46360500000000116,
+			"p25": 0.41947300000000354,
+			"p75": 0.5456980000000016,
+			"samples": 9
+		}
+	},
+	"native": {
+		"latLngToCell": {
+			"rust": {
+				"median": 421.91,
+				"p25": 418.475,
+				"p75": 450.52,
+				"samples": 15
+			},
+			"c": {
+				"median": 362.54,
+				"p25": 361.92499999999995,
+				"p75": 364.38,
+				"samples": 15
+			},
+			"checksumMatch": true
+		},
+		"cellToParent": {
+			"rust": {
+				"median": 2.6,
+				"p25": 2.565,
+				"p75": 2.6500000000000004,
+				"samples": 15
+			},
+			"c": {
+				"median": 2.47,
+				"p25": 2.46,
+				"p75": 2.47,
+				"samples": 15
+			},
+			"checksumMatch": true
+		},
+		"cellToLatLng": {
+			"rust": {
+				"median": 191.73,
+				"p25": 190.14499999999998,
+				"p75": 199.555,
+				"samples": 15
+			},
+			"c": {
+				"median": 188.7,
+				"p25": 187.01,
+				"p75": 192.625,
+				"samples": 15
+			},
+			"checksumMatch": true
+		},
+		"gridDisk": {
+			"rust": {
+				"median": 177.85,
+				"p25": 174.115,
+				"p75": 184.265,
+				"samples": 15
+			},
+			"c": {
+				"median": 225.62,
+				"p25": 220.15,
+				"p75": 239.81,
+				"samples": 15
+			},
+			"checksumMatch": true
+		},
+		"compactCells": {
+			"rust": {
+				"median": 19977,
+				"p25": 19937,
+				"p75": 20233,
+				"samples": 15
+			},
+			"c": {
+				"median": 18114,
+				"p25": 18093.5,
+				"p75": 18209,
+				"samples": 15
+			},
+			"checksumMatch": true
+		},
+		"polygonToCells": {
+			"rust": {
+				"median": 585122,
+				"p25": 569178,
+				"p75": 592971.5,
+				"samples": 15
+			},
+			"c": {
+				"median": 520161,
+				"p25": 514730.5,
+				"p75": 526823.5,
+				"samples": 15
+			},
+			"checksumMatch": true
+		}
+	},
+	"memory": {
+		"node": {
+			"beforeImport": {
+				"heapUsedBytes": 4178440,
+				"arrayBuffersBytes": 22783,
+				"externalBytes": 1844186,
+				"wasmMemoryBytes": 0
+			},
+			"afterImport": {
+				"heapUsedBytes": 4581304,
+				"arrayBuffersBytes": 22783,
+				"externalBytes": 1844226,
+				"wasmMemoryBytes": 0
+			},
+			"afterInit": {
+				"heapUsedBytes": 7144040,
+				"arrayBuffersBytes": 207126,
+				"externalBytes": 3854633,
+				"wasmMemoryBytes": 1114112
+			},
+			"afterScalar": {
+				"heapUsedBytes": 7175208,
+				"arrayBuffersBytes": 207126,
+				"externalBytes": 3854633,
+				"wasmMemoryBytes": 1114112
+			},
+			"afterDisk100": {
+				"heapUsedBytes": 7183008,
+				"arrayBuffersBytes": 207126,
+				"externalBytes": 3854633,
+				"wasmMemoryBytes": 1376256
+			},
+			"afterCompact": {
+				"heapUsedBytes": 7869232,
+				"arrayBuffersBytes": 207126,
+				"externalBytes": 3854633,
+				"wasmMemoryBytes": 1966080
+			},
+			"afterPolygon": {
+				"heapUsedBytes": 7883168,
+				"arrayBuffersBytes": 207126,
+				"externalBytes": 3854633,
+				"wasmMemoryBytes": 2228224
+			},
+			"repeatedWorkloadWasmBytes": [2228224, 2228224, 2228224, 2228224, 2228224],
+			"compactCellsInput": 16807
+		},
+		"worker": {
+			"baseline": {
+				"wasmMemoryBytes": 0,
+				"jsHeapUsedBytes": 887784,
+				"jsHeapTotalBytes": 1572864,
+				"backingStorageBytes": 226692
+			},
+			"import": {
+				"wasmMemoryBytes": 0,
+				"jsHeapUsedBytes": 607716,
+				"jsHeapTotalBytes": 1572864,
+				"backingStorageBytes": 226692
+			},
+			"init": {
+				"wasmMemoryBytes": 1114112,
+				"jsHeapUsedBytes": 683608,
+				"jsHeapTotalBytes": 1310720,
+				"backingStorageBytes": 226692
+			},
+			"scalar": {
+				"wasmMemoryBytes": 1114112,
+				"jsHeapUsedBytes": 710464,
+				"jsHeapTotalBytes": 1572864,
+				"backingStorageBytes": 226692
+			},
+			"disk": {
+				"wasmMemoryBytes": 1376256,
+				"jsHeapUsedBytes": 715136,
+				"jsHeapTotalBytes": 1310720,
+				"backingStorageBytes": 226692
+			},
+			"compact": {
+				"wasmMemoryBytes": 1966080,
+				"jsHeapUsedBytes": 727416,
+				"jsHeapTotalBytes": 1572864,
+				"backingStorageBytes": 226692
+			},
+			"polygon": {
+				"wasmMemoryBytes": 2228224,
+				"jsHeapUsedBytes": 729000,
+				"jsHeapTotalBytes": 1572864,
+				"backingStorageBytes": 226692
+			}
+		}
+	}
+}

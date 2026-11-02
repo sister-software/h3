@@ -1,0 +1,9 @@
+{"schemaVersion":1,"operation":"uncompactCellsSize","args":{"indexes":[],"res":5},"error":0,"result":{"value":0}}
+{"schemaVersion":1,"operation":"uncompactCellsSize","args":{"indexes":["83ed8dfffffffff"],"res":5},"error":0,"result":{"value":49}}
+{"schemaVersion":1,"operation":"uncompactCellsSize","args":{"indexes":["83b98cfffffffff","823007fffffffff"],"res":4},"error":0,"result":{"value":48}}
+{"schemaVersion":1,"operation":"uncompactCellsSize","args":{"indexes":["83738afffffffff","0","840375bffffffff"],"res":5},"error":0,"result":{"value":56}}
+{"schemaVersion":1,"operation":"uncompactCellsSize","args":{"indexes":["85b6e277fffffff"],"res":4},"error":12,"result":null}
+{"schemaVersion":1,"operation":"uncompactCellsSize","args":{"indexes":["85e80c27fffffff"],"res":5},"error":0,"result":{"value":1}}
+{"schemaVersion":1,"operation":"uncompactCellsSize","args":{"indexes":["852858dbfffffff"],"res":16},"error":12,"result":null}
+{"schemaVersion":1,"operation":"uncompactCellsSize","args":{"indexes":["85ed63c3fffffff"],"res":-1},"error":12,"result":null}
+{"schemaVersion":1,"operation":"uncompactCellsSize","args":{"indexes":["8009fffffffffff"],"res":3},"error":0,"result":{"value":286}}

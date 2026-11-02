@@ -1,0 +1,30 @@
+[workspace]
+resolver = "3"
+members = ["crates/h3-core", "crates/h3-wasm"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99.1"
+license = "MIT"
+repository = "https://github.com/sister-software/h3"
+authors = ["Teffen Ellis <teffen@sister.software>"]
+
+[workspace.dependencies]
+sister-h3 = { path = "crates/h3-core", version = "0.1.0" }
+wasm-bindgen = { version = "=0.2.130", default-features = false, features = ["std"] }
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+excessive_precision = "allow"
+too_many_arguments = "allow"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+debug = false
+strip = "debuginfo"

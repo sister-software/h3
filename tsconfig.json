@@ -1,0 +1,21 @@
+{
+	"extends": "@sister.software/tsconfig",
+	"compilerOptions": {
+		"forceConsistentCasingInFileNames": true,
+		"emitDeclarationOnly": false,
+		"rewriteRelativeImportExtensions": true,
+		"stripInternal": true,
+		"types": [],
+		"lib": ["ESNext", "DOM"]
+	},
+	"include": ["index.ts", "lib/**/*.ts", "lib/**/*.js"],
+	"exclude": [
+		"./out/**/*",
+		"./target/**/*",
+		"./crates/**/*",
+		"./test/**/*",
+		"./scripts/**/*",
+		"./benchmarks/**/*",
+		"**/*.test.ts"
+	]
+}

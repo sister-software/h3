@@ -1,0 +1,62 @@
+node_modules
+
+# ignore any openaddresses test cases
+test/oa
+
+# OS X
+.DS_Store
+._*
+
+## Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+## Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+## Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+
+# Yarn (without zero-installs)
+# https://yarnpkg.com/getting-started/qa
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+## Rust/WASM build artifacts
+/target/
+# The published binary and its private glue are committed and checked by `yarn check:wasm-artifact`.
+wasm/*.wasm
+!wasm/h3.wasm
+
+## Build asset directories
+dist
+out
+/build
+schema/generated
+
+# Agents
+.claude/settings.local.json
+.pi/
+docs/superpowers
+
+
+## Example data downloads
+examples/data/
+
+# Source is TypeScript only; Node strips types natively on the supported floor.
+*.js
+*.mjs
+!lib/generated/h3.js
