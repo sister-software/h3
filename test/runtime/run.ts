@@ -13,6 +13,8 @@
  * @copyright Sister Software
  */
 
+/// <reference types="node" />
+
 import { execFileSync, spawn } from "node:child_process"
 import {
 	copyFileSync,
@@ -478,6 +480,10 @@ try {
 		["Chromium", pw.chromium],
 		["Firefox", pw.firefox],
 	]
+
+	if (process.platform === "darwin") {
+		engines.push(["WebKit", pw.webkit])
+	}
 } catch (error) {
 	record("browser", "not run", `playwright-core unavailable: ${String(error)}`)
 }
