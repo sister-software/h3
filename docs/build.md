@@ -130,9 +130,32 @@ pinned C library. `H3_BENCH_SAMPLES` sets the sample count (default 15).
 
 ## CI
 
-`.github/workflows/test.yml` (job `test`) runs, in order: fixture checks, `cargo fmt --check`,
-`cargo clippy -D warnings`, `cargo test`, `cargo package`, `yarn check:wasm-artifact` (installs
-`wasm-bindgen-cli` 0.2.130 with `--locked`), `yarn lint`, `yarn compile`, `yarn check-types`,
-`yarn test --run`, `yarn test:package`, and `yarn test:runtimes` (after installing Playwright's
-Chromium). It never builds C. `publish.yml` was audited: its stale `out/web.js` assertion now checks
-the WASM glue and `wasm/h3.wasm` instead; the release flow itself is unchanged and was not run.
+`.github/workflows/test.yml` (job `test`) runs, in order: fixture checks, a check that
+`package.json` and the `sister-h3` crate share a version, `cargo fmt --check`, `cargo clippy -D
+warnings`, `cargo test`, `cargo package`, `yarn check:wasm-artifact` (installs `wasm-bindgen-cli`
+0.2.130 with `--locked`), `yarn lint`, `yarn compile`, `yarn check-types`, `yarn test --run`,
+`yarn test:package`, and `yarn test:runtimes` (after installing Playwright's Chromium and Firefox).
+It never builds C.
+
+## Releases
+
+One version ships to both registries, following the same two-phase flow as spliterator:
+
+1. Dispatch `publish.yml` with `mode=prepare` and a version (`patch`, `minor`, an exact semver such
+   as `0.2.0-rc.1`). It bumps `package.json`, the Cargo workspace version, and the `sister-h3`
+   workspace dependency, then runs `cargo update --workspace`. It rebuilds the WASM artifacts
+   (`wasm/h3.wasm`, `wasm/build-manifest.json`, `lib/generated/h3-embedded.js`), commits them on
+   `release/v<version>`, and opens an auto-merging PR. The rebuild is required, not cosmetic: the
+   crate version feeds rustc's symbol hashes, so the binary changes with every version. The PR's
+   `test` run proves the rebuilt artifacts reproduce on a clean runner.
+2. After the merge, dispatch `publish.yml` with `mode=publish`. It tags `v<version>`, creates the
+   GitHub release, and publishes to npm with provenance through trusted publishing (OIDC).
+   Prereleases go under the `next` dist-tag, everything else under `latest`. It then dispatches
+   `publish-cargo.yml` against the tag.
+3. `publish-cargo.yml` tests and packages `sister-h3` at the tag, then publishes it to crates.io in
+   the `cargo` environment (`v*` tags only). It uses crates.io trusted publishing, or a
+   `CARGO_REGISTRY_TOKEN` environment secret for the very first publish, because crates.io lets
+   only an existing crate trust a workflow. `sister-h3-wasm` is never published.
+
+Every step is idempotent: a tag, release, or version that already exists is skipped, so
+re-dispatching is the recovery path.

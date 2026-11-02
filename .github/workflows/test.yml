@@ -75,6 +75,13 @@ jobs:
       - name: Check fixtures
         run: yarn check:fixtures
 
+      # One version across npm and crates.io; publish.yml bumps them together.
+      - name: Versions in lockstep
+        run: |
+          CARGO_VERSION="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "sister-h3") | .version')"
+          NPM_VERSION="$(node -p "require('./package.json').version")"
+          test "${CARGO_VERSION}" = "${NPM_VERSION}" || { echo "::error::Cargo.toml ${CARGO_VERSION} != package.json ${NPM_VERSION}"; exit 1; }
+
       - name: Rust format
         run: cargo fmt --all --check
 

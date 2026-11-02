@@ -32,6 +32,11 @@
 # configured path names a real file, so a mismatch surfaces as a bare E404 on publish rather than
 # as a configuration error. If a publish 404s and the package exists, check that path first, then
 # check whether the trusted publisher is bound to a GitHub environment this job does not declare.
+#
+# ONE VERSION, TWO REGISTRIES. package.json is the source of truth. `prepare` bumps the Cargo workspace version (and the
+# `sister-h3` workspace dependency) in the same release commit, so `@sister.software/h3` on npm and `sister-h3` on
+# crates.io always share a version. The same commit carries the WASM artifacts rebuilt at that version. `publish` tags and publishes npm, then dispatches publish-cargo.yml against the tag.
+# That workflow is idempotent and can be re-dispatched by hand with the tag as its ref.
 name: NPM Publish
 
 on:
@@ -58,6 +63,10 @@ on:
 
 permissions:
   contents: read
+
+# Must match test.yml and scripts/build-wasm.ts (the build refuses any other version).
+env:
+  WASM_BINDGEN_VERSION: "0.2.130"
 
 # Serialize releases. Never cancel an in-flight run — a prepare may be mid-push and a publish
 # mid-tarball; killing either leaves a partial state a human has to unwind.
@@ -88,6 +97,13 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      # The pinned toolchain rewrites Cargo.lock and rebuilds the WASM artifacts below.
+      - name: Set up Rust from rust-toolchain.toml
+        run: rustup show active-toolchain || rustup toolchain install
+
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli --version "${WASM_BINDGEN_VERSION}" --locked
+
       # `npm version` without git side effects: only package.json changes. The commit and branch
       # are made below, under the allowlist, so an unexpected dirty file is a failure here rather
       # than a silent passenger in the release commit.
@@ -105,6 +121,20 @@ jobs:
           if npm view "@sister.software/h3@${VERSION}" version >/dev/null 2>&1; then
             echo "::error::@sister.software/h3@${VERSION} is already on npm — pick a different version"; exit 1
           fi
+          if curl -sf -A "sister-h3-release (github.com/sister-software/h3)" \
+            "https://crates.io/api/v1/crates/sister-h3/${VERSION}" >/dev/null; then
+            echo "::error::sister-h3 ${VERSION} is already on crates.io — pick a different version"; exit 1
+          fi
+          # The first `version =` in Cargo.toml is `[workspace.package]`'s, which every crate inherits; the
+          # `sister-h3` workspace dependency carries the same version for the WASM adapter.
+          sed -i -E "0,/^version = \".*\"/s//version = \"${VERSION}\"/" Cargo.toml
+          sed -i -E "s/^(sister-h3 = \{ path = \"crates\/h3-core\", version = )\"[^\"]*\"/\\1\"${VERSION}\"/" Cargo.toml
+          grep -q "^sister-h3 = .*version = \"${VERSION}\"" Cargo.toml || { echo "::error::sister-h3 workspace dependency not bumped"; exit 1; }
+          cargo update --workspace
+          # The crate version feeds rustc's symbol hashes, which survive into the binary, so the committed WASM
+          # artifacts change with every version. Rebuild them into the release commit; the release PR's `test` run
+          # (check:wasm-artifact on a clean runner) then proves they reproduce before anything merges.
+          node scripts/build-wasm.ts
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
 
       - name: "Dry run: show the bump and stop"
@@ -127,12 +157,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "${BRANCH}"
-          # Only the manifest may change in a release commit. Anything else dirty is a fault to
+          # Only the manifests and the rebuilt WASM artifacts may change in a release commit. Anything else dirty is a fault to
           # surface, never to ship.
-          git add package.json
-          UNEXPECTED="$(git status --porcelain --untracked-files=no | grep -v '^M  package.json$' || true)"
+          # (lib/generated/h3.js and h3.d.ts are listed in case a version ever reaches the glue; today they do not change.)
+          git add package.json Cargo.toml Cargo.lock wasm/h3.wasm wasm/build-manifest.json lib/generated/h3-embedded.js lib/generated/h3.js lib/generated/h3.d.ts
+          UNEXPECTED="$(git status --porcelain --untracked-files=no | grep -vE '^M  (package\.json|Cargo\.(toml|lock)|wasm/(h3\.wasm|build-manifest\.json)|lib/generated/h3(-embedded)?\.(js|d\.ts))$' || true)"
           if [ -n "${UNEXPECTED}" ]; then
-            echo "::error::changed files outside package.json — refusing to commit them silently:"
+            echo "::error::changed files outside the manifests and WASM artifacts — refusing to commit them silently:"
             echo "${UNEXPECTED}"
             exit 1
           fi
@@ -171,6 +202,7 @@ jobs:
     permissions:
       contents: write # push the version tag + create the GitHub release
       id-token: write # npm Trusted Publishing (OIDC)
+      actions: write # dispatch publish-cargo.yml against the tag
 
     steps:
       - name: Checkout
@@ -187,6 +219,9 @@ jobs:
 
       - name: Enable Corepack (yarn 4)
         run: corepack enable
+
+      - name: Set up Rust from rust-toolchain.toml
+        run: rustup show active-toolchain || rustup toolchain install
 
       - name: Install dependencies
         run: yarn install --immutable
@@ -215,7 +250,11 @@ jobs:
         id: version
         run: |
           VERSION="$(node -p "require('./package.json').version")"
-          echo "version=${VERSION}"
+          CARGO_VERSION="$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name == "sister-h3") | .version')"
+          echo "version=${VERSION} (Cargo: ${CARGO_VERSION})"
+          if [ "${CARGO_VERSION}" != "${VERSION}" ]; then
+            echo "::error::package.json says ${VERSION} but Cargo.toml says ${CARGO_VERSION}; the release commit must bump both"; exit 1
+          fi
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
 
       - name: Pack and inspect the tarball
@@ -296,3 +335,18 @@ jobs:
           done
           echo "::error::npm still reports '${PUBLISHED}' after 10 minutes; expected ${EXPECTED}"
           exit 1
+
+      # The tag exists now, so the crate builds from exactly the commit npm shipped. Dispatching with the workflow token
+      # is the one cross-workflow trigger GitHub allows from it.
+      - name: Dispatch the crate publish
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh workflow run publish-cargo.yml --ref "v${VERSION}"
+          {
+            echo "## Dispatched"
+            echo ""
+            echo "- publish-cargo.yml at v${VERSION}. Re-dispatch it with that ref to retry."
+          } >> "${GITHUB_STEP_SUMMARY}"
