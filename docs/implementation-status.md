@@ -1,7 +1,7 @@
 # Implementation status
 
 Updated 2026-11-02 (second revision: implicit initialization). This file separates implemented and verified work from proposed or pending
-work. Pushed on `rust-port` (draft PR #1, CI green); nothing has been published.
+work. Merged to `main` (PR #1); released as described under Releases.
 
 ## Phases
 
@@ -101,7 +101,18 @@ matching outputs. An authoritative run on an idle machine has not been possible.
   application `init`, consumer migration, and the layer-database cell-column comparison. The
   original geocoder memory problem is not resolved by this library alone.
 
+## Releases
+
+- `0.1.0` (npm `latest`): published by hand from `adefdbc` on 2026-11-02 to claim the release;
+  no provenance. Not on crates.io.
+- `0.1.0-rc.1` (npm `next`, crates.io `sister-h3`): the first release through `publish.yml` and
+  `publish-cargo.yml` from tag `v0.1.0-rc.1`, with npm trusted publishing and a signed provenance
+  statement. The crate went up with the one-time `CARGO_REGISTRY_TOKEN`. npm took longer than the
+  workflow's 10-minute poll to list the version, so that run failed its verification step after a
+  successful publish (fixed in #4: the crate dispatch no longer waits on the poll).
+
 ## Next action
 
-Merge PR #1, complete the npm first-publish and trusted-publishing setup, and run the WebKit and
-benchmark checks on a Mac (`scratchpad/2026/11/02/mac-verification-issue.md`).
+Configure the crates.io trusted publisher for `sister-h3` (`publish-cargo.yml`, environment
+`cargo`) and delete the `CARGO_REGISTRY_TOKEN` environment secret. Run the WebKit and benchmark
+checks on a Mac (issue #2). The next release version must be above `0.1.0`.
