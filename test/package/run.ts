@@ -78,6 +78,8 @@ attempt("tarball contents", () => {
 		"out/index.d.ts",
 		"out/lib/generated/h3.js",
 		"out/lib/generated/h3.d.ts",
+		"out/lib/generated/h3-embedded.js",
+		"out/workerd.js",
 		"out/lib/runtime/state.js",
 	]
 
@@ -125,12 +127,8 @@ writeFileSync(join(consumer, "cases.json"), JSON.stringify(records))
 // The README Node example, verbatim, plus the probe.
 writeFileSync(
 	join(consumer, "readme.mjs"),
-	`// Node: import.meta.resolve locates the exported package asset.
-import { readFile } from "node:fs/promises"
-import { init, latLngToCell } from "@sister.software/h3"
+	`import { latLngToCell } from "@sister.software/h3"
 
-const bytes = await readFile(new URL(import.meta.resolve("@sister.software/h3/h3.wasm")))
-await init({ bytes })
 console.log(latLngToCell(37.3615593, -122.0553238, 7)) // "87283472bffffff"
 `
 )
@@ -221,8 +219,9 @@ const cells: H3Index[] = polygonToCellsExperimental([[0, 0], [1, 0], [1, 1]], 5,
 function code(e: H3Error): number { return e.code }
 // @ts-expect-error resolution must be a number
 latLngToCell(0, 0, "7")
-// @ts-expect-error init requires a source
-await init({})
+await init()
+// @ts-expect-error init takes at most one source
+await init({ bytes, module: {} as WebAssembly.Module })
 export { boundary, rings, cells, code }
 `
 	)

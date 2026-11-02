@@ -36,12 +36,18 @@
 		"/README.md"
 	],
 	"type": "module",
-	"sideEffects": false,
+	"sideEffects": [
+		"./out/index.js",
+		"./out/workerd.js",
+		"./index.ts",
+		"./workerd.ts"
+	],
 	"types": "./out/index.d.ts",
 	"exports": {
 		"./package.json": "./package.json",
 		".": {
 			"types": "./out/index.d.ts",
+			"workerd": "./out/workerd.js",
 			"default": "./out/index.js"
 		},
 		"./h3.wasm": "./wasm/h3.wasm"

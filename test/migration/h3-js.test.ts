@@ -232,7 +232,11 @@ describe("documented differences, by example", () => {
 		expect(h3.degsToRads(1e-300)).not.toBe(h3js.degsToRads(1e-300))
 	})
 
-	test("calls before init throw H3InitializationError (see test/js/init.test.ts); h3-js needs no init", () => {
+	test("neither package needs setup: the first call works", async () => {
+		const { vi } = await import("vitest")
+		vi.resetModules()
+		const fresh = await import("../../index.ts")
+		expect(fresh.latLngToCell(37.3615593, -122.0553238, 7)).toBe(CELL)
 		expect(h3js.latLngToCell(37.3615593, -122.0553238, 7)).toBe(CELL)
 	})
 

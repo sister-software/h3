@@ -20,51 +20,35 @@ npm install @sister.software/h3
 
 ## Initialization
 
-Call `init` once during startup. Afterwards every function is synchronous. Until `init` resolves,
-every function except `UNITS`, `POLYGON_TO_CELLS_FLAGS`, `h3IndexToSplitLong`,
-`splitLongToH3Index`, `degsToRads`, and `radsToDegs` throws an error named
-`H3InitializationError`. Pass exactly one of `bytes` (the contents of
-`@sister.software/h3/h3.wasm`) or `module` (a compiled `WebAssembly.Module`).
+None is needed. Import and call, as with h3-js:
 
 ```ts
-// Node: import.meta.resolve locates the exported package asset.
-import { readFile } from "node:fs/promises"
+import { latLngToCell } from "@sister.software/h3"
 
-import { init, latLngToCell } from "@sister.software/h3"
-
-const bytes = await readFile(new URL(import.meta.resolve("@sister.software/h3/h3.wasm")))
-await init({ bytes })
 latLngToCell(37.3615593, -122.0553238, 7) // "87283472bffffff"
 ```
 
-```ts
-import { init } from "@sister.software/h3"
-// Vite browser consumer: the ?url declaration comes from vite/client.
-import wasmUrl from "@sister.software/h3/h3.wasm?url"
+Importing does no WebAssembly work. The first H3 call compiles and instantiates the package's binary
+synchronously (about 2 ms in Node), and every call is synchronous. In Node and browsers the binary
+is embedded in the package's JavaScript; under the `workerd` export condition (Cloudflare Workers
+bundled by wrangler) the package imports its own `h3.wasm`, which wrangler compiles at deploy time.
 
-const response = await fetch(wasmUrl)
-if (!response.ok) throw new Error(`Unable to load H3 WASM: ${response.status}`)
-await init({ bytes: await response.arrayBuffer() })
-```
-
-```ts
-import { init } from "@sister.software/h3"
-// webpack 5: emit the binary as an asset module (module.rules: { test: /\.wasm$/, type: "asset/resource" }).
-import wasmUrl from "@sister.software/h3/h3.wasm"
-
-await init({ bytes: await (await fetch(wasmUrl)).arrayBuffer() })
-```
+`init` is optional. Use it to preload during startup, to set [resource limits](#resource-limits)
+(which must happen before the first H3 call), or to supply the binary yourself, for example from a
+separately served asset:
 
 ```ts
 import { init } from "@sister.software/h3"
-// Cloudflare Worker bundled by wrangler: wrangler compiles the imported .wasm module.
-import wasmModule from "@sister.software/h3/h3.wasm"
 
-await init({ module: wasmModule })
+await init({ limits: { maxResultItems: 5_000_000 } }) // the package's own binary
+await init({ bytes: await (await fetch(wasmUrl)).arrayBuffer() }) // your own copy of h3.wasm
+await init({ module: compiledModule }) // a compiled WebAssembly.Module
 ```
 
-Workers refuse to compile WebAssembly from bytes, so they must use `module`. Calling `init` again
-with the same source resolves immediately; a different source or different limits rejects.
+`init` resolves immediately if H3 is already running with the same limits, and rejects with
+`H3InitializationError` if the limits differ. Environments that forbid synchronous WebAssembly
+compilation (none of the tested ones do: Node, Chromium 156, Firefox 157, workerd) need an awaited
+`init({ module })` or `init({ bytes })` before the first call; the first-call error says so.
 
 ## Usage
 
@@ -116,7 +100,7 @@ cellsToMultiPolygon(hexagons, true)
 | Wrong argument type                                                                                                                         | `TypeError`                                                                       |
 | Out-of-range or fractional resolution, negative ring size, malformed index, non-finite coordinate, unknown unit or flag, non-boolean switch | `RangeError`                                                                      |
 | The H3 algorithm rejects a value (invalid cell bits, pentagon distortion, not neighbors, ...)                                               | `Error` with `name: "H3Error"` and the numeric C `code`                           |
-| Call before `init`                                                                                                                          | `Error` with `name: "H3InitializationError"`                                      |
+| First-use instantiation is not allowed by the environment (see Initialization)                                                              | `Error` with `name: "H3InitializationError"`                                      |
 | Request over a resource limit                                                                                                               | `RangeError` with `name: "H3ResourceLimitError"`, `limit`, `requested`, `maximum` |
 
 `isValidCell`, `isValidIndex`, `isValidDirectedEdge`, and `isValidVertex` never throw after
@@ -139,7 +123,7 @@ cell at a fine resolution, should raise them in `init`.
 
 ### Migrating from h3-js
 
-Change the import and `await init(...)` once at startup. Results are the same strings and shapes.
+Change the import. Results are the same strings and shapes, and there is no setup step.
 The intentional differences, each covered by `test/migration/h3-js.test.ts`, are listed in
 [`docs/api-decisions.md`](docs/api-decisions.md#differences-from-h3-js-450); the most visible are
 `RangeError`s for out-of-range arguments (instead of an `Error` with code 4) and `name: "H3Error"`

@@ -58,14 +58,14 @@ nothing else; it is deliberately stricter than C `sscanf("%" PRIx64)`.
 
 ### Errors
 
-| Situation                                                           | Thrown                                                                            |
-| ------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Wrong or missing top-level argument type                            | `TypeError`                                                                       |
-| Well-typed argument out of the binding's accepted range (see below) | `RangeError`                                                                      |
-| Syntactically valid 64-bit value that C rejects                     | `Error` with `name: "H3Error"` and numeric `code` (the C code)                    |
-| Any non-pure call before `init` resolves                            | `Error` with `name: "H3InitializationError"`                                      |
-| Request over a resolved resource limit                              | `RangeError` with `name: "H3ResourceLimitError"`, `limit`, `requested`, `maximum` |
-| Unexpected WASM trap; every later call                              | `Error` with `name: "H3RuntimeError"`, `cause` = the trap                         |
+| Situation                                                                               | Thrown                                                                            |
+| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Wrong or missing top-level argument type                                                | `TypeError`                                                                       |
+| Well-typed argument out of the binding's accepted range (see below)                     | `RangeError`                                                                      |
+| Syntactically valid 64-bit value that C rejects                                         | `Error` with `name: "H3Error"` and numeric `code` (the C code)                    |
+| Synchronous first-use instantiation fails; any call while an explicit `init` is pending | `Error` with `name: "H3InitializationError"` (`cause` attached)                   |
+| Request over a resolved resource limit                                                  | `RangeError` with `name: "H3ResourceLimitError"`, `limit`, `requested`, `maximum` |
+| Unexpected WASM trap; every later call                                                  | `Error` with `name: "H3RuntimeError"`, `cause` = the trap                         |
 
 `RangeError` cases: fractional or out-of-range resolutions (`0..15`, integers only), negative or
 fractional `ringSize`, malformed index strings and tuples, invalid split words, unknown units and
@@ -95,39 +95,54 @@ the C `describeH3Error` text.
 
 ```ts
 type InitOptions =
+	| { module?: never; bytes?: never; limits?: ResourceLimits }
 	| { module: WebAssembly.Module; bytes?: never; limits?: ResourceLimits }
-	| { bytes: BufferSource; module?: never; limits?: ResourceLimits }
+	| { bytes: ArrayBuffer | ArrayBufferView; module?: never; limits?: ResourceLimits }
 
-function init(options: InitOptions): Promise<void>
+function init(options?: InitOptions): Promise<void>
 ```
 
-Importing the package compiles, instantiates, fetches and allocates nothing beyond ordinary module
-objects. There is no top-level `await`, no default asset URL, and no `globalThis.process` detection.
+**Changed 2026-11-02 (operator decision):** initialization is implicit. The original guide required
+an awaited `init` before any call, on the premise that WebAssembly loading is asynchronous in
+browsers and Workers. Measured on the pinned runtimes, synchronous compile and instantiate of the
+175 KB binary is allowed in Node, on the Chromium 156 and Firefox 157 main threads, and in workerd
+for a bundler-compiled module (WebKit/Safari is unverified: its Playwright build cannot run on the
+development host). A required async step was a foot gun for an otherwise synchronous library.
 
-State machine: `uninitialized → initializing → ready`, and `ready → poisoned` after an unexpected
-trap.
+- Importing the package compiles, instantiates, fetches, and allocates nothing beyond ordinary
+  module objects (the embedded binary is a string constant). There is no top-level `await`, no
+  default asset URL, and no `globalThis.process` detection.
+- The first H3 call instantiates synchronously from the entry's registered binary: the embedded
+  copy (`lib/generated/h3-embedded.js`, base64) for the default entry, or the package's own
+  `h3.wasm` imported by the `workerd` entry (`exports["."].workerd`), which wrangler compiles. The
+  Worker bundle therefore does not contain the embedded copy.
+- If that fails (for example under a policy that forbids synchronous compilation), the call throws
+  `H3InitializationError` with the cause and the advice to await `init({ module })` or
+  `init({ bytes })`; the state stays `uninitialized`, so a later call or `init` can retry.
 
-1. Before `ready`, every export except `UNITS`, `POLYGON_TO_CELLS_FLAGS`, `h3IndexToSplitLong`,
-   `splitLongToH3Index`, `degsToRads`, `radsToDegs` (and `init`) throws `H3InitializationError`
-   synchronously.
-2. Concurrent `init` calls with the same source (`===` on `module` or `bytes`) and equal resolved
-   limits share one promise and one instance.
-3. `init` after success with the same source and limits resolves without reinstantiating; a
-   different source or limits rejects with `H3InitializationError` and leaves the live instance.
-4. A failed attempt rejects every waiter with the original cause (as `cause`), clears state to
-   `uninitialized`, and allows a retry. A different source while pending rejects without
+`init` is optional. With no source it initializes from the package's binary (synchronously, behind
+a resolved promise). State machine: `uninitialized → initializing → ready`, and `ready → poisoned`
+after an unexpected trap.
+
+1. Limits must be set before the first H3 call; they are frozen when the instance starts.
+2. If H3 is already ready from the package's binary (first use or a source-less `init`), `init`
+   with the same limits resolves, whatever source it names; different limits reject with
+   `H3InitializationError`.
+3. After an explicit `module` or `bytes` source, `init` with the same source and limits resolves;
+   a different source or different limits reject and leave the live instance.
+4. Concurrent `init` calls with the same source (`===`) and equal limits share one promise and one
+   instance. A call to an H3 function while an explicit `init` is pending throws
+   `H3InitializationError` (it does not start a second instance).
+5. A failed explicit attempt rejects every waiter with the original cause, clears the state to
+   `uninitialized`, and allows a retry; a different source while pending rejects without
    cancelling the pending attempt.
-5. After resolution all computation is synchronous; there is no lazy initialization and no
-   fallback backend.
+6. All computation is synchronous; there is no fallback backend.
 
-`bytes` are copied synchronously before the first asynchronous gap. `bytes` initialization compiles
-with `WebAssembly.compile` (not expected to work under workerd); `module` initialization accepts a
-bundler-supplied compiled module (required for Cloudflare Workers).
+`bytes` are copied synchronously before the first asynchronous gap and compiled with
+`WebAssembly.compile` (refused under workerd); `module` accepts a bundler-supplied compiled module.
 
-Cost to existing h3-js callers: imports change from `"h3-js"` to `"@sister.software/h3"`, and each
-application must `await init(...)` once at startup before any H3 call. Calls during module
-evaluation (top-level constants computed with H3) must move after initialization. This is not a
-literal import-only replacement.
+Cost to existing h3-js callers: change the import from `"h3-js"` to `"@sister.software/h3"`.
+Nothing else is required.
 
 ### Resource limits
 
@@ -225,7 +240,6 @@ example test. Counts are from the fixture run on 2026-11-02.
 
 | Category              | Input (example)                                                           | h3-js 4.5.0                                    | This package                          | C                        | Migration action                       | Cases   |
 | --------------------- | ------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------- | ------------------------ | -------------------------------------- | ------- |
-| initialization        | any non-pure call before `init`                                           | works (eager 32 MiB asm.js heap)               | `H3InitializationError`               | n/a                      | `await init(...)` at startup           | n/a     |
 | error-name            | `cellToParent(cell, 9)` on a res-7 cell                                   | `Error`, `code: 12`, message with `(code: 12)` | `H3Error`, `code: 12`, C description  | `E_RES_MISMATCH` (12)    | test `error.code`, not `error.name`    | 3656    |
 | range-error           | `cellToParent(cell, 16)`, `gridDisk(cell, -1)`, `latLngToCell(NaN, 0, 5)` | `Error` with C code 4/2/3                      | `RangeError`                          | 4 / 2 / 3                | catch `RangeError` or validate         | 2872    |
 | range-error           | `latLngToCell(lat, lng, 7.5)`                                             | truncated to 7                                 | `RangeError`                          | n/a                      | pass an integer                        | (incl.) |

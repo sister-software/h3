@@ -139,36 +139,44 @@ for (const key of ["Module", "Instance", "Memory"]) {
 }
 const h3 = await import("@sister.software/h3")
 const afterImport = { ...counts }
-let beforeInit
-try { h3.isValidCell("8001fffffffffff"); beforeInit = "did not throw" } catch (e) { beforeInit = e.name }
 const pure = { split: h3.h3IndexToSplitLong("87283472bffffff"), join: h3.splitLongToH3Index(0x2bffffff, 0x8728347) }
 const bytes = await readFile(new URL(import.meta.resolve("@sister.software/h3/h3.wasm")))
 const cases = JSON.parse(await readFile(new URL("./cases.json", import.meta.url), "utf8"))
 `
 
 	writeFileSync(
+		join(dir, "lazy.mjs"),
+		common +
+			`// No init: the first call instantiates the embedded binary synchronously.
+const first = h3.latLngToCell(37.3615593, -122.0553238, 7)
+console.log(JSON.stringify({ afterImport, first, instances: counts.Instance, pure, outcomes: runFixtureCases(h3, cases) }))`
+	)
+
+	writeFileSync(
 		join(dir, "bytes.mjs"),
 		common +
 			`await h3.init({ bytes })
-console.log(JSON.stringify({ afterImport, beforeInit, pure, outcomes: runFixtureCases(h3, cases) }))`
+console.log(JSON.stringify({ afterImport, instances: counts.Instance, outcomes: runFixtureCases(h3, cases) }))`
 	)
 
 	writeFileSync(
 		join(dir, "module.mjs"),
 		common +
 			`await h3.init({ module: new WebAssembly.Module(bytes) })
-console.log(JSON.stringify({ afterImport, beforeInit, outcomes: runFixtureCases(h3, cases) }))`
+console.log(JSON.stringify({ afterImport, instances: counts.Instance, outcomes: runFixtureCases(h3, cases) }))`
 	)
 
-	for (const variant of ["bytes", "module"]) {
+	for (const variant of ["lazy", "bytes", "module"]) {
 		const out = JSON.parse(sh("node", [join(dir, `${variant}.mjs`)], dir))
-		judge(`node ${process.version} init({ ${variant} })`, out)
+		const label = variant === "lazy" ? "no init (first-use instantiation)" : `init({ ${variant} })`
+		judge(`node ${process.version} ${label}`, out)
 		const importClean = Object.values(out.afterImport as Record<string, number>).every((n) => n === 0)
+		const lazyOk = variant !== "lazy" || out.first === "87283472bffffff"
 
 		record(
-			`node import allocates no WASM (${variant})`,
-			importClean && out.beforeInit === "H3InitializationError" ? "pass" : "fail",
-			`WebAssembly calls during import ${JSON.stringify(out.afterImport)}; call before init threw ${out.beforeInit}`
+			`node import does no WASM work; one instance (${variant})`,
+			importClean && out.instances === 1 && lazyOk ? "pass" : "fail",
+			`WebAssembly calls during import ${JSON.stringify(out.afterImport)}; instances ${out.instances}${variant === "lazy" ? `; first call ${out.first}` : ""}`
 		)
 	}
 }
@@ -202,10 +210,9 @@ export default {
 	async fetch(request) {
 		const url = new URL(request.url)
 		if (url.pathname === "/restrictions") return Response.json(await restrictions())
-		let beforeInit
-		try { h3.isValidCell("8001fffffffffff"); beforeInit = "did not throw" } catch (e) { beforeInit = e.name }
-		await h3.init({ module: wasmModule })
-		return Response.json({ beforeInit, outcomes: runFixtureCases(h3, cases) })
+		// No init: the workerd export condition supplies the bundled module for first use.
+		const first = h3.latLngToCell(37.3615593, -122.0553238, 7)
+		return Response.json({ first, outcomes: runFixtureCases(h3, cases) })
 	},
 }
 `
@@ -250,6 +257,8 @@ rules = [{ type = "Data", globs = ["**/*.bin"], fallthrough = false }]
 			h3js: /h3-js/.test(text),
 			h3o: /\bh3o\b/.test(text),
 			importMetaUrl: (text.match(/import\.meta\.url/g) ?? []).length,
+			// The workerd condition must select the entry that imports the compiled module, not the embedded copy.
+			embeddedBinary: text.includes("embeddedWasmBytes"),
 		}
 
 		const clean =
@@ -258,12 +267,13 @@ rules = [{ type = "Data", globs = ["**/*.bin"], fallthrough = false }]
 			!findings.eval &&
 			!findings.newFunction &&
 			!findings.h3js &&
-			!findings.h3o
+			!findings.h3o &&
+			!findings.embeddedBinary
 
 		record(
 			"esbuild bundle (--conditions=workerd,worker,browser)",
 			clean ? "pass" : "fail",
-			`node builtins ${findings.nodeBuiltins.length}, require ${findings.require}, eval ${findings.eval}, new Function ${findings.newFunction}, h3-js ${findings.h3js}, h3o ${findings.h3o}; import.meta.url occurrences (probe only) ${findings.importMetaUrl}`,
+			`node builtins ${findings.nodeBuiltins.length}, require ${findings.require}, eval ${findings.eval}, new Function ${findings.newFunction}, h3-js ${findings.h3js}, h3o ${findings.h3o}, embedded binary ${findings.embeddedBinary}; import.meta.url occurrences (probe only) ${findings.importMetaUrl}`,
 			findings
 		)
 	} catch (error) {
@@ -320,12 +330,12 @@ rules = [{ type = "Data", globs = ["**/*.bin"], fallthrough = false }]
 			)
 
 			const res = await (await fetch(base + "/")).json()
-			judge(`wrangler dev (workerd ${workerd}) init({ module })`, res)
+			judge(`wrangler dev (workerd ${workerd}) no init (workerd export condition)`, res)
 
 			record(
-				"workerd call before init",
-				res.beforeInit === "H3InitializationError" ? "pass" : "fail",
-				`threw ${res.beforeInit}`
+				"workerd first call without init",
+				res.first === "87283472bffffff" ? "pass" : "fail",
+				`first call returned ${res.first}`
 			)
 		}
 	} finally {
@@ -342,7 +352,8 @@ rules = [{ type = "Data", globs = ["**/*.bin"], fallthrough = false }]
 }
 
 // ---------------------------------------------------------------------------------------------
-// Browsers: Vite and webpack production builds from separate consumers, run in Chromium.
+// Browsers: Vite and webpack production builds from separate consumers, run in Chromium and Firefox.
+// (WebKit is not run: its Playwright build cannot launch on the development host.)
 
 const BROWSER_MAIN = (importLine: string, loadLine: string) => `${importLine}
 import * as h3 from "@sister.software/h3"
@@ -350,10 +361,9 @@ import { runFixtureCases } from "./probe.mjs"
 import cases from "./cases.json"
 
 async function main() {
-	let beforeInit
-	try { h3.isValidCell("8001fffffffffff"); beforeInit = "did not throw" } catch (e) { beforeInit = e.name }
 	${loadLine}
-	window.__result = { beforeInit, outcomes: runFixtureCases(h3, cases) }
+	const first = h3.latLngToCell(37.3615593, -122.0553238, 7)
+	window.__result = { first, outcomes: runFixtureCases(h3, cases) }
 }
 main().catch((e) => { window.__result = { error: String(e && e.stack || e) } })
 `
@@ -363,12 +373,8 @@ installProbe(viteDir)
 
 writeFileSync(
 	join(viteDir, "main.mjs"),
-	BROWSER_MAIN(
-		`import wasmUrl from "@sister.software/h3/h3.wasm?url"`,
-		`const response = await fetch(wasmUrl)
-	if (!response.ok) throw new Error("Unable to load H3 WASM: " + response.status)
-	await h3.init({ bytes: await response.arrayBuffer() })`
-	)
+	// No init: the embedded binary is instantiated synchronously on first use.
+	BROWSER_MAIN("", "")
 )
 
 writeFileSync(
@@ -462,10 +468,15 @@ function serve(dir: string): Promise<{ server: Server; url: string }> {
 	})
 }
 
-let chromium: typeof import("playwright-core").chromium | undefined
+type BrowserType = typeof import("playwright-core").chromium
+let engines: [string, BrowserType][] = []
 
 try {
-	chromium = (await import("playwright-core")).chromium
+	const pw = await import("playwright-core")
+	engines = [
+		["Chromium", pw.chromium],
+		["Firefox", pw.firefox],
+	]
 } catch (error) {
 	record("browser", "not run", `playwright-core unavailable: ${String(error)}`)
 }
@@ -487,50 +498,61 @@ for (const [label, buildFn] of [
 	const assets = readdirSync(dist, { recursive: true }).map(String)
 	const wasmAssets = assets.filter((a) => a.endsWith(".wasm"))
 
+	// The Vite consumer never references h3.wasm (embedded binary); the webpack consumer emits it.
+	const expectedAssets = label === "vite" ? 0 : 1
+
 	record(
 		`${label} production build`,
-		wasmAssets.length === 1 ? "pass" : "fail",
-		`wasm assets emitted: ${wasmAssets.join(", ")}`
+		wasmAssets.length === expectedAssets ? "pass" : "fail",
+		`wasm assets emitted: ${wasmAssets.length ? wasmAssets.join(", ") : "none"}`
 	)
 
-	if (!chromium) continue
-	const { server, url } = await serve(dist)
-	let browser
+	for (const [engineName, engine] of engines) {
+		const { server, url } = await serve(dist)
+		let browser
 
-	try {
-		browser = await chromium.launch({ headless: true })
-		const page = await browser.newPage()
-		const requests: string[] = []
-		page.on("request", (r) => requests.push(new URL(r.url()).pathname))
-		const consoleErrors: string[] = []
-		page.on("pageerror", (e) => consoleErrors.push(String(e)))
-		await page.goto(url)
+		try {
+			browser = await engine.launch({ headless: true })
+			const page = await browser.newPage()
+			const requests: string[] = []
+			page.on("request", (r) => requests.push(new URL(r.url()).pathname))
+			const consoleErrors: string[] = []
+			page.on("pageerror", (e) => consoleErrors.push(String(e)))
+			await page.goto(url)
 
-		await page.waitForFunction(() => (globalThis as unknown as { __result?: unknown }).__result !== undefined, null, {
-			timeout: 60_000,
-		})
+			await page.waitForFunction(() => (globalThis as unknown as { __result?: unknown }).__result !== undefined, null, {
+				timeout: 120_000,
+			})
 
-		const result = await page.evaluate(() => (globalThis as unknown as { __result: Record<string, unknown> }).__result)
-		const wasmRequests = requests.filter((p) => p.endsWith(".wasm"))
+			const result = await page.evaluate(
+				() => (globalThis as unknown as { __result: Record<string, unknown> }).__result
+			)
+			const wasmRequests = requests.filter((p) => p.endsWith(".wasm"))
+			const where = `${label} in ${engineName} ${browser.version()}`
 
-		if (result.error) {
-			record(`${label} in Chromium ${browser.version()}`, "fail", JSON.stringify(result.error))
-		} else {
-			judge(`${label} in Chromium ${browser.version()}`, result as never)
+			if (result.error) {
+				record(where, "fail", JSON.stringify(result.error))
+			} else {
+				judge(where, result as never)
+			}
+
+			// Vite uses first-use instantiation of the embedded binary (no request); webpack preloads the
+			// separate asset with init({ bytes }) (exactly one request).
+			const expectedRequests = label === "vite" ? 0 : 1
+
+			record(
+				`${label} network in ${engineName} (${label === "vite" ? "no init" : "init({ bytes }) from the asset"})`,
+				wasmRequests.length === expectedRequests && result.first === "87283472bffffff" && !consoleErrors.length
+					? "pass"
+					: "fail",
+				`wasm requests ${JSON.stringify(wasmRequests)}; first call ${String(result.first)}; page errors ${consoleErrors.length}`
+			)
+		} catch (error) {
+			record(`${label} in ${engineName}`, "not run", `browser could not run: ${String(error)}`)
+		} finally {
+			await browser?.close()
+			server.close()
 		}
-
-		record(
-			`${label} network`,
-			wasmRequests.length === 1 && result.beforeInit === "H3InitializationError" && !consoleErrors.length
-				? "pass"
-				: "fail",
-			`wasm requests ${JSON.stringify(wasmRequests)}; call before init threw ${String(result.beforeInit)}; page errors ${consoleErrors.length}`
-		)
-	} catch (error) {
-		record(`${label} in Chromium`, "not run", `browser could not run: ${String(error)}`)
-	} finally {
-		await browser?.close()
-		server.close()
 	}
 }
 

@@ -60,3 +60,4 @@ examples/data/
 *.js
 *.mjs
 !lib/generated/h3.js
+!lib/generated/h3-embedded.js

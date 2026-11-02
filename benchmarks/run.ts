@@ -236,26 +236,39 @@ const initScript = join(out, "init.mjs")
 writeFileSync(
 	initScript,
 	`import { readFileSync } from "node:fs"
+const indexUrl = ${JSON.stringify(pathToFileURL(join(root, "out/index.js")).href)}
+const mode = process.argv[2]
 const t0 = performance.now()
-const h3 = await import(${JSON.stringify(pathToFileURL(join(root, "out/index.js")).href)})
+const h3 = await import(indexUrl)
 const t1 = performance.now()
-await h3.init({ bytes: readFileSync(${JSON.stringify(join(root, "wasm/h3.wasm"))}) })
+if (mode === "explicit") await h3.init({ bytes: readFileSync(${JSON.stringify(join(root, "wasm/h3.wasm"))}) })
 const t2 = performance.now()
 h3.latLngToCell(37.3615593, -122.0553238, 7)
 const t3 = performance.now()
-console.log(JSON.stringify({ importMs: t1 - t0, initMs: t2 - t1, firstCallMs: t3 - t2 }))
+h3.latLngToCell(37.3615593, -122.0553238, 7)
+const t4 = performance.now()
+console.log(JSON.stringify({ importMs: t1 - t0, initMs: t2 - t1, firstCallMs: t3 - t2, secondCallMs: t4 - t3 }))
 `
 )
 
-const inits = Array.from({ length: Math.min(SAMPLES, 9) }, () => JSON.parse(sh(process.execPath, [initScript])))
-
+const runs = (mode: string) =>
+	Array.from({ length: Math.min(SAMPLES, 9) }, () => JSON.parse(sh(process.execPath, [initScript, mode])))
+const lazyRuns = runs("lazy")
+const explicitRuns = runs("explicit")
+const inits = lazyRuns
 const initStats = {
-	importMs: stat(inits.map((x) => x.importMs)),
-	initMs: stat(inits.map((x) => x.initMs)),
-	firstCallMs: stat(inits.map((x) => x.firstCallMs)),
+	importMs: stat(lazyRuns.map((x) => x.importMs)),
+	// Default path: the first call compiles and instantiates the embedded binary.
+	firstCallMs: stat(lazyRuns.map((x) => x.firstCallMs)),
+	secondCallMs: stat(lazyRuns.map((x) => x.secondCallMs)),
+	// Optional preload with init({ bytes }) from the separate asset, then the first call.
+	explicitInitMs: stat(explicitRuns.map((x) => x.initMs)),
+	explicitFirstCallMs: stat(explicitRuns.map((x) => x.firstCallMs)),
 }
 
-console.log(`init: import ${initStats.importMs.median.toFixed(2)} ms, init ${initStats.initMs.median.toFixed(2)} ms`)
+console.log(
+	`cold start: import ${initStats.importMs.median.toFixed(2)} ms, first call ${initStats.firstCallMs.median.toFixed(2)} ms (no init); init({ bytes }) ${initStats.explicitInitMs.median.toFixed(2)} ms`
+)
 
 // ---------------------------------------------------------------------------------------------
 // Native Rust versus C.
@@ -361,33 +374,34 @@ async function workerMemory(): Promise<unknown> {
 	const dir = join(out, "worker")
 
 	mkdirSync(dir, { recursive: true })
-	// Bundled from workspace source so the probe can read the internal memory hook.
+	// Bundled from workspace source (the real workerd entry) so the probe can read the internal memory
+	// hook. --ignore-annotations keeps the entry's registration even if sideEffects metadata omitted it.
 	const entry = join(dir, "entry.ts")
 
 	writeFileSync(
 		entry,
-		`export * from ${JSON.stringify(join(root, "index.ts"))}\nexport { wasmMemoryBytes } from ${JSON.stringify(join(root, "lib/runtime/state.ts"))}\n`
+		`export * from ${JSON.stringify(join(root, "workerd.ts"))}\nexport { wasmMemoryBytes } from ${JSON.stringify(join(root, "lib/runtime/state.ts"))}\n`
 	)
-
 	sh(join(root, "node_modules/.bin/esbuild"), [
 		entry,
 		"--bundle",
 		"--format=esm",
 		"--platform=neutral",
+		"--ignore-annotations",
+		"--alias:@sister.software/h3/h3.wasm=./h3.wasm",
+		"--external:./h3.wasm",
 		`--outfile=${join(dir, "h3.mjs")}`,
 	])
-
 	writeFileSync(join(dir, "h3.wasm"), readFileSync(join(root, "wasm/h3.wasm")))
 
 	writeFileSync(
 		join(dir, "worker.mjs"),
-		`import wasmModule from "./h3.wasm"
-let h3
+		`let h3
 export default {
 	async fetch(request) {
 		const step = new URL(request.url).pathname.slice(1)
 		if (step === "import") h3 = await import("./h3.mjs")
-		if (step === "init") await h3.init({ module: wasmModule })
+		if (step === "init") h3.isValidCell("8001fffffffffff") // first use instantiates (no init call)
 		if (step === "scalar") for (let i = 0; i < 100000; i++) h3.latLngToCell(37 + i * 1e-6, -122, 9)
 		if (step === "disk") for (let i = 0; i < 20; i++) h3.gridDisk(h3.latLngToCell(37.36, -122.05, 9), 100)
 		if (step === "compact") h3.compactCells(h3.cellToChildren(h3.cellToParent(h3.latLngToCell(37.36, -122.05, 9), 4), 9))
@@ -547,7 +561,7 @@ const lines = [
 	"| --- | --- |",
 	...Object.entries(boundary).map(([k, v]) => `| ${k} | ${f(v.median)} (${iqr(v)}) |`),
 	"",
-	`Cold start in fresh processes (median of ${inits.length}): import ${initStats.importMs.median.toFixed(2)} ms, \`init\` (compile + instantiate) ${initStats.initMs.median.toFixed(2)} ms, first call ${initStats.firstCallMs.median.toFixed(3)} ms.`,
+	`Cold start in fresh processes (median of ${inits.length}): import ${initStats.importMs.median.toFixed(2)} ms; with no \`init\`, the first call (which compiles and instantiates the embedded binary) ${initStats.firstCallMs.median.toFixed(2)} ms and the second ${(initStats.secondCallMs.median * 1000).toFixed(1)} µs. With the optional \`init({ bytes })\` preload: \`init\` ${initStats.explicitInitMs.median.toFixed(2)} ms, then the first call ${initStats.explicitFirstCallMs.median.toFixed(3)} ms.`,
 	"",
 	"## Native Rust versus C",
 	"",
@@ -593,4 +607,5 @@ writeFileSync(join(root, "benchmarks/RESULTS.md"), lines.join("\n"))
 
 // Committed outputs follow the repository formatting, so `yarn lint` stays clean after a run.
 sh(join(root, "node_modules/.bin/oxfmt"), ["benchmarks/RESULTS.md", "benchmarks/results/latest.json"])
+
 console.log("\nbenchmark: wrote benchmarks/RESULTS.md and benchmarks/results/latest.json")

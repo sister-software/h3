@@ -8,7 +8,7 @@
 		"types": [],
 		"lib": ["ESNext", "DOM"]
 	},
-	"include": ["index.ts", "lib/**/*.ts", "lib/**/*.js"],
+	"include": ["index.ts", "workerd.ts", "lib/**/*.ts", "lib/**/*.js"],
 	"exclude": [
 		"./out/**/*",
 		"./target/**/*",

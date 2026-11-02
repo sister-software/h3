@@ -41,9 +41,10 @@ export interface ResourceLimits {
 }
 
 /**
- * Options for {@link init}: exactly one of `module` or `bytes`.
+ * Options for {@link init}: at most one of `module` or `bytes`, and optional resource limits.
  */
 export type InitOptions =
+	| { module?: never; bytes?: never; limits?: ResourceLimits }
 	| { module: WebAssembly.Module; bytes?: never; limits?: ResourceLimits }
 	| { bytes: ArrayBuffer | ArrayBufferView; module?: never; limits?: ResourceLimits }
 
@@ -131,25 +132,73 @@ function copyBytes(bytes: ArrayBuffer | ArrayBufferView): Uint8Array<ArrayBuffer
 }
 
 /**
- * Initializes the H3 WebAssembly instance. Call once during application startup; every H3 function except the pure
- * exports is synchronous afterwards.
- *
- * Pass `module` with a compiled `WebAssembly.Module` (required in Cloudflare Workers, where a bundler supplies it) or
- * `bytes` with the contents of `@sister.software/h3/h3.wasm`.
+ * The binary the entry module registered for first-use initialization: embedded bytes (default entry) or a
+ * bundler-compiled module (workerd entry). @internal
  */
-export function init(options: InitOptions): Promise<void> {
+let defaultSource: (() => WebAssembly.Module | Uint8Array<ArrayBuffer>) | null = null
+
+/**
+ * Identity of the registered default source, for init source comparisons.
+ */
+const DEFAULT_SOURCE = Object.freeze({ defaultSource: true })
+
+/**
+ * Registers the binary used when no source is passed to {@link init} and on first use. Called once by each entry module.
+ *
+ * @internal
+ */
+export function setDefaultSource(source: () => WebAssembly.Module | Uint8Array<ArrayBuffer>): void {
+	defaultSource = source
+}
+
+/**
+ * Instantiates synchronously and makes the instance live. Throws on failure, leaving the state unchanged.
+ */
+function activate(module: WebAssembly.Module, limits: ResolvedLimits, source: object): Bindings {
+	const exports = glue.initSync({ module }) as { memory?: WebAssembly.Memory }
+	const version = glue.abi_version()
+
+	if (version !== ABI_VERSION) {
+		throw new Error(`WASM ABI version ${version} does not match runtime ABI version ${ABI_VERSION}`)
+	}
+
+	glue.set_limits(limits.maxResultItems, limits.maxResultBytes, limits.maxWorkspaceBytes)
+	memory = exports.memory ?? null
+	state = { kind: "ready", source, limits }
+	live = glue
+
+	return glue
+}
+
+function activateDefault(limits: ResolvedLimits): Bindings {
+	if (!defaultSource) throw new Error("no default WebAssembly binary is registered; pass `module` or `bytes`")
+
+	const src = defaultSource()
+	const module = src instanceof WebAssembly.Module ? src : new WebAssembly.Module(src)
+
+	return activate(module, limits, DEFAULT_SOURCE)
+}
+
+/**
+ * Optionally initializes the H3 WebAssembly instance ahead of first use. Calling it is never required: the first H3
+ * call instantiates the package's binary synchronously.
+ *
+ * Use it to preload during startup, to set resource limits (which must happen before the first H3 call), or to supply
+ * your own `module` (a compiled `WebAssembly.Module`) or `bytes` (the contents of `@sister.software/h3/h3.wasm`). With
+ * no source it initializes from the package's binary. If H3 is already initialized with the same limits it resolves
+ * immediately, whatever the source.
+ */
+export function init(options: InitOptions = {}): Promise<void> {
 	// Validate and capture synchronously, before any asynchronous gap.
 	if (typeof options !== "object" || options === null) {
-		return Promise.reject(new TypeError("init: options must be an object with `module` or `bytes`"))
+		return Promise.reject(new TypeError("init: options must be an object"))
 	}
 
 	const { module, bytes } = options as { module?: unknown; bytes?: unknown }
 	const hasModule = module !== undefined
 	const hasBytes = bytes !== undefined
 
-	if (hasModule === hasBytes) {
-		return Promise.reject(new TypeError("init: pass exactly one of `module` or `bytes`"))
-	}
+	if (hasModule && hasBytes) return Promise.reject(new TypeError("init: pass at most one of `module` or `bytes`"))
 
 	if (hasModule && !(module instanceof WebAssembly.Module)) {
 		return Promise.reject(new TypeError("init: `module` must be a WebAssembly.Module"))
@@ -167,47 +216,52 @@ export function init(options: InitOptions): Promise<void> {
 		return Promise.reject(error)
 	}
 
-	const source = (hasModule ? module : bytes) as object
+	const source = hasModule ? (module as object) : hasBytes ? (bytes as object) : DEFAULT_SOURCE
 
 	switch (state.kind) {
 		case "poisoned":
 			return Promise.reject(runtimeError("H3 WebAssembly instance trapped; create a new runtime", state.cause))
 		case "ready":
-			if (state.source === source && sameLimits(state.limits, limits)) return Promise.resolve()
-			return Promise.reject(initializationError("init: already initialized with a different source or limits"))
+			// The package's binary is already live (possibly from first use): any source is equivalent unless the
+			// limits differ, which can no longer change.
+			if (sameLimits(state.limits, limits) && (state.source === source || state.source === DEFAULT_SOURCE)) {
+				return Promise.resolve()
+			}
+
+			return Promise.reject(
+				initializationError(
+					"init: H3 is already initialized with a different source or limits (limits must be set before the first H3 call)"
+				)
+			)
 		case "initializing":
 			if (state.source === source && sameLimits(state.limits, limits)) return state.promise
+
 			return Promise.reject(initializationError("init: initialization with a different source or limits is pending"))
 		case "uninitialized":
 			break
+	}
+
+	if (!hasModule && !hasBytes) {
+		try {
+			activateDefault(limits)
+
+			return Promise.resolve()
+		} catch (error) {
+			return Promise.reject(initializationError(`init: failed to initialize H3 WebAssembly: ${String(error)}`, error))
+		}
 	}
 
 	const copied = hasBytes ? copyBytes(bytes as ArrayBuffer | ArrayBufferView) : null
 
 	const promise = (async () => {
 		const compiled = copied ? await WebAssembly.compile(copied) : (module as WebAssembly.Module)
-		const exports = (await glue.default({ module_or_path: compiled })) as { memory?: WebAssembly.Memory }
-		memory = exports.memory ?? null
-		const version = glue.abi_version()
 
-		if (version !== ABI_VERSION) {
-			throw new Error(`WASM ABI version ${version} does not match runtime ABI version ${ABI_VERSION}`)
-		}
-
-		glue.set_limits(limits.maxResultItems, limits.maxResultBytes, limits.maxWorkspaceBytes)
-	})().then(
-		() => {
-			state = { kind: "ready", source, limits }
-			live = glue
-
-			return undefined
-		},
-		(error: unknown) => {
-			state = { kind: "uninitialized" }
-			live = null
-			throw initializationError(`init: failed to initialize H3 WebAssembly: ${String(error)}`, error)
-		}
-	)
+		activate(compiled, limits, source)
+	})().catch((error: unknown) => {
+		state = { kind: "uninitialized" }
+		live = null
+		throw initializationError(`init: failed to initialize H3 WebAssembly: ${String(error)}`, error)
+	})
 
 	state = { kind: "initializing", source, limits, promise }
 
@@ -215,8 +269,8 @@ export function init(options: InitOptions): Promise<void> {
 }
 
 /**
- * Returns the live bindings or throws the appropriate state error. Called at the start of every non-pure public
- * function. @internal
+ * Returns the live bindings, instantiating the default binary synchronously on first use. Called at the start of every
+ * non-pure public function. @internal
  */
 export function ready(): Bindings {
 	if (live !== null) return live
@@ -224,11 +278,19 @@ export function ready(): Bindings {
 	if (state.kind === "poisoned")
 		throw runtimeError("H3 WebAssembly instance trapped; create a new runtime", state.cause)
 
-	throw initializationError(
-		state.kind === "initializing"
-			? "H3 is still initializing; await init() before calling H3 functions"
-			: "H3 is not initialized; call and await init() before calling H3 functions"
-	)
+	if (state.kind === "initializing") {
+		throw initializationError("H3 is still initializing from the source passed to init(); await it before calling H3")
+	}
+
+	try {
+		return activateDefault(DEFAULT_LIMITS)
+	} catch (error) {
+		throw initializationError(
+			`H3 could not instantiate its WebAssembly binary synchronously (${String(error)}). ` +
+				"Where synchronous compilation is not allowed, call and await init({ module }) or init({ bytes }) first.",
+			error
+		)
+	}
 }
 
 /**

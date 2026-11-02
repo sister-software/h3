@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated 2026-11-02. This file separates implemented and verified work from proposed or pending
+Updated 2026-11-02 (second revision: implicit initialization). This file separates implemented and verified work from proposed or pending
 work. Nothing has been committed, pushed, or published.
 
 ## Phases
@@ -33,8 +33,14 @@ fixture evidence is missing, or if root exports differ from the manifest.
 - JavaScript: 178 Vitest tests, including C parity over every JavaScript-expressible fixture
   (34,805 cases), the init state machine, resource limits, the argument and error contract, and
   h3-js migration (every difference on the fixtures belongs to a documented category).
-- Runtimes (`yarn test:runtimes`, 14 checks): Node bytes and module init with zero WebAssembly
-  calls at import; esbuild bundle under `workerd,worker,browser` with no Node builtins, `eval`,
+- Initialization (operator decision, 2026-11-02): no `init` is required. The first H3 call
+  instantiates synchronously from the embedded binary (default entry) or the package's own
+  `h3.wasm` (`workerd` export condition); `init` remains optional for preloading, limits, or a custom
+  binary. Measured basis: synchronous compile and instantiate allowed in Node, Chromium 156 and
+  Firefox 157 main threads, and workerd for a bundled module. WebKit/Safari is unverified (its
+  Playwright build cannot launch on this host without system packages).
+- Runtimes (`yarn test:runtimes`, 20 checks): Node with no init, `init({ bytes })`, and
+  `init({ module })`, each with zero WebAssembly calls at import and one instance; esbuild bundle under `workerd,worker,browser` with no Node builtins, `eval`,
   `new Function`, h3-js, or h3o; `wrangler dev` 4.156.0 / workerd 1.20261023.1 restrictions
   reproduced; Vite and webpack production builds in Chromium 156 with one WASM request each. Each
   runtime matched C on all 34,805 cases.
@@ -44,7 +50,9 @@ fixture evidence is missing, or if root exports differ from the manifest.
 - Benchmarks and memory: `benchmarks/RESULTS.md` (load ≈ 4 on 16 cores, indicative). Faster than
   h3-js on all six priority functions (ratios 0.30–0.90); native Rust within 0.71–1.11× of C with
   identical checksums. WASM memory 1.06 MiB after `init`, plateau 2.13 MiB on repeated workloads;
-  workerd backing storage 0.22 MiB (h3-js: a fixed 32 MiB asm.js heap). Cold `init` ≈ 20 ms.
+  workerd backing storage 0.22 MiB (h3-js: a fixed 32 MiB asm.js heap). With no init, the first
+  call (compile + instantiate of the embedded binary) took about 2 ms in Node on a quiet machine
+  (7 ms at load ≈ 36 in the gate run).
 
 ## Acceptance gate (in place, 2026-11-02, `target/gate.sh`)
 
@@ -66,8 +74,8 @@ fixture evidence is missing, or if root exports differ from the manifest.
 | `yarn lint`                                                      | 0    | 0 errors, 0 warnings (also clean after the benchmark run) |
 | `yarn benchmark`                                                 | 0    | see below                                                 |
 
-The committed `benchmarks/RESULTS.md` is from the gate run at load average ≈ 25/17/9 and is the
-noisiest of three runs. The run at load ≈ 4 (03:25 UTC) gave this package / h3-js ratios of 0.55
+The committed `benchmarks/RESULTS.md` is from the latest gate run at load average ≈ 33–37 and is
+the noisiest run so far (this package was still ahead on all six, ratios 0.26–0.90). The run at load ≈ 4 (03:25 UTC) gave this package / h3-js ratios of 0.55
 (`latLngToCell`), 0.90 (`cellToParent`), 0.90 (`cellToLatLng`), 0.41 (`gridDisk`), 0.30
 (`compactCells`), and 0.30 (`polygonToCells`); every run had this package ahead on all six with
 matching outputs. An authoritative run on an idle machine has not been possible.
@@ -77,6 +85,8 @@ matching outputs. An authoritative run on an idle machine has not been possible.
 - `cargo package` was run with `--allow-dirty` because the tree is deliberately uncommitted; CI
   runs it without the flag. The clean-copy gate after committing lockfiles has not been run.
 - The guide's CMake command needed `-DBUILD_FILTERS=ON` at the pinned revision (docs/build.md).
+- Initialization is implicit (first-use synchronous instantiation) instead of the guide's required
+  awaited `init`; see `docs/api-decisions.md`, "Initialization".
 - The private WASM ABI uses reused Rust-owned output buffers and fixed result slots instead of
   returning `Vec`s for most results, based on measured boundary costs (docs/api-decisions.md).
 - `wasm/h3.wasm` reproducibility is established across target directories on this host only;

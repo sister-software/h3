@@ -32,6 +32,14 @@
 		"lib/generated/h3.d.ts": {
 			"sha256": "c4b749fec6a7c2253c884163dacce63c1ea9badce17b4909120ba3786b268c1e",
 			"bytes": 11638
+		},
+		"lib/generated/h3-embedded.js": {
+			"sha256": "58c2f9c484ad5fefa8c269225d0f8cb91a2b957b19d3aec65eafc52220579c13",
+			"bytes": 234012
+		},
+		"lib/generated/h3-embedded.d.ts": {
+			"sha256": "393fae9e40dcec131a8ac1c076dd766a6033e59860b55f13a7239a6900fafb6a",
+			"bytes": 169
 		}
 	}
 }
