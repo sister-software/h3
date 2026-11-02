@@ -173,9 +173,9 @@ against the `libm` crate, that band is about 1e-15 radians, a few nanometres on 
 on linux x86-64 has no flips at 1e-15 rad from an edge, and Apple's libm on macOS arm64 has none
 at 1.8e-15 rad. For a uniformly random point the estimated chance of a flip is below 1e-12 at
 resolution 9 and below 3e-10 at resolution 15. Cross-machine identical integer output is
-promised only by the WebAssembly build and by the `libm` feature at a pinned crate version. If you store derived data
-and need reruns on another machine to match exactly, enable the feature (Cargo features are
-additive: if any crate in your build enables it, it is on for all). The polygon order of
+promised only by the WebAssembly build and by the `libm` feature at a pinned crate version. If
+you store derived data and need reruns on another machine to match exactly, enable the feature
+(Cargo features are additive: if any crate in your build enables it, it is on for all). The polygon order of
 `cellsToMultiPolygon` / `cells_to_linked_multi_polygon` is unspecified and can change with the
 libm, though the polygons themselves do not.
 
