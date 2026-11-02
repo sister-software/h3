@@ -116,8 +116,8 @@ jobs:
       - name: Package tests (npm tarball and native crate in clean consumers)
         run: yarn test:package
 
-      - name: Install Chromium for runtime tests
-        run: yarn playwright-core install --with-deps chromium
+      - name: Install Chromium and Firefox for runtime tests
+        run: yarn playwright-core install --with-deps chromium firefox
 
-      - name: Runtime tests (Node, Worker bundle, wrangler dev, Vite and webpack in Chromium)
+      - name: Runtime tests (Node, Worker bundle, wrangler dev, Vite and webpack in Chromium and Firefox)
         run: yarn test:runtimes
