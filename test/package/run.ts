@@ -9,7 +9,7 @@
  *
  *    yarn test:package
  *
- * Required Node versions: 22.18.0 (the `engines` floor) and the `.nvmrc` version. They are looked up in
+ * Required Node versions: 24.22.1 (the `engines` floor) and the `.nvmrc` version. They are looked up in
  * `target/tools/node-v<version>-linux-x64/bin/node`, then in `~/.nvm/versions/node`. A missing version is reported as
  * NOT RUN and fails the command.
  *
@@ -169,7 +169,7 @@ function nodeBinary(version: string): string | undefined {
 
 const nvmrc = readFileSync(join(root, ".nvmrc"), "utf8").trim().replace(/^v/, "")
 
-for (const version of new Set(["22.18.0", nvmrc, process.version.slice(1)])) {
+for (const version of new Set([nvmrc, process.version.slice(1)])) {
 	const node = version === process.version.slice(1) ? process.execPath : nodeBinary(version)
 
 	if (!node) {

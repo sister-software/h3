@@ -7,7 +7,7 @@
 | Rust               | 1.99.1, target `wasm32-unknown-unknown`   | `rust-toolchain.toml`                          |
 | wasm-bindgen       | 0.2.130 (crate `=0.2.130`, CLI `0.2.130`) | `Cargo.toml`, `scripts/build-wasm.ts`          |
 | wasm-opt           | not used                                  | the correctness build is unoptimized by design |
-| Node               | `.nvmrc` (24.22.1); floor 22.18.0         | `.nvmrc`, `package.json` `engines`             |
+| Node               | `.nvmrc` (>=24.22.1);                     | `.nvmrc`, `package.json` `engines`             |
 | Yarn               | 4.18.1                                    | `packageManager`                               |
 | esbuild            | 0.28.2                                    | `package.json` (exact)                         |
 | webpack            | 5.111.1                                   | `package.json` (exact)                         |
@@ -103,14 +103,14 @@ Reproduced by the `/restrictions` route of the runtime Worker probe on 2026-11-0
 
 `yarn test:package` packs the npm tarball, checks its file list (only `out/`, `wasm/h3.wasm`, the
 README, license and notices), installs it into a fresh consumer, and runs the README example, the
-export-map checks, and the C fixture probe under Node 22.18.0 (the `engines` floor), the `.nvmrc`
+export-map checks, and the C fixture probe under Node >=24.22.1 (the `engines` floor), the `.nvmrc`
 version, and the running Node. It also typechecks a TypeScript consumer against the shipped
 declarations with `skipLibCheck: false`, and builds and tests the unpacked `cargo package` output
 of `sister-h3` from a directory outside the repository.
 
 Node binaries for the version matrix are looked up in `target/tools/node-v<version>-linux-x64/`
 and then `~/.nvm/versions/node/`. Locally they were downloaded from nodejs.org into `target/tools`
-with SHA-256 verification against `SHASUMS256.txt`; CI does the same for 22.18.0.
+with SHA-256 verification against `SHASUMS256.txt`; CI does the same for >=24.22.1.
 
 `cargo package` requires a committed tree; on an uncommitted working tree run it with
 `--allow-dirty` (as `yarn test:package` does). CI runs it without that flag.
