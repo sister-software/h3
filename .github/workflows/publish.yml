@@ -289,7 +289,9 @@ jobs:
           if gh release view "v${VERSION}" >/dev/null 2>&1; then
             echo "GitHub release v${VERSION} already exists (recovery re-run) — skipping"
           else
-            gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
+            PRERELEASE=""
+            case "${VERSION}" in *-*) PRERELEASE="--prerelease" ;; esac
+            gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes ${PRERELEASE}
           fi
           # `delete_branch_on_merge` does not fire for a merge performed by the Actions app, so the
           # release branch outlives the PR. Remove it here; a missing branch is not an error.
@@ -315,6 +317,22 @@ jobs:
             npm publish --provenance --access public --tag "${DIST_TAG}"
           fi
 
+      # The tag exists now, so the crate builds from exactly the commit npm shipped. Dispatching with the workflow token
+      # is the one cross-workflow trigger GitHub allows from it. This runs BEFORE the npm visibility poll: the 0.1.0-rc.1
+      # publish was accepted but not visible within the poll window, and the failed poll skipped this dispatch.
+      - name: Dispatch the crate publish
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh workflow run publish-cargo.yml --ref "v${VERSION}"
+          {
+            echo "## Dispatched"
+            echo ""
+            echo "- publish-cargo.yml at v${VERSION}. Re-dispatch it with that ref to retry."
+          } >> "${GITHUB_STEP_SUMMARY}"
+
       # The registry processes a publish asynchronously — `npm publish` returns "Your package is being
       # processed and may take a few minutes to become available", and a single `npm view` taken 1.9 s
       # after the 6.4.0 publish still reported 6.3.1. The 7.15.0 publish took over 60 s to appear and
@@ -333,20 +351,5 @@ jobs:
             test "${PUBLISHED}" = "${EXPECTED}" && exit 0
             sleep 15
           done
-          echo "::error::npm still reports '${PUBLISHED}' after 10 minutes; expected ${EXPECTED}"
+          echo "::error::npm still reports '${PUBLISHED}' after 10 minutes; expected ${EXPECTED}. If the trusted publisher allows only staged publishes, the version is waiting for maintainer approval on npmjs.com."
           exit 1
-
-      # The tag exists now, so the crate builds from exactly the commit npm shipped. Dispatching with the workflow token
-      # is the one cross-workflow trigger GitHub allows from it.
-      - name: Dispatch the crate publish
-        if: ${{ !inputs.dry_run }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          gh workflow run publish-cargo.yml --ref "v${VERSION}"
-          {
-            echo "## Dispatched"
-            echo ""
-            echo "- publish-cargo.yml at v${VERSION}. Re-dispatch it with that ref to retry."
-          } >> "${GITHUB_STEP_SUMMARY}"
