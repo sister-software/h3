@@ -94,14 +94,14 @@ dependencies = [
 
 [[package]]
 name = "sister-h3"
-version = "0.1.0"
+version = "0.1.0-rc.1"
 dependencies = [
  "serde_json",
 ]
 
 [[package]]
 name = "sister-h3-wasm"
-version = "0.1.0"
+version = "0.1.0-rc.1"
 dependencies = [
  "sister-h3",
  "wasm-bindgen",
