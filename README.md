@@ -168,13 +168,14 @@ few units in the last place (at most about 1e-14 relative on Apple Silicon). Tha
 documented bounds (`docs/api-decisions.md`).
 
 Indexes are computed from those coordinates, so a point that lies extremely close to a cell edge
-can be assigned to a different cell by a different libm. Measured on linux x86-64 (glibc against
-the `libm` crate, `yarn stress:boundary`), that band is under 1e-15 radians, about 6 nanometres on
-the ground: no flips at 1e-15 rad from an edge at any resolution. For a uniformly random point the
-estimated chance of a flip is about 3.5e-13 at resolution 9 and 1.4e-10 at resolution 15. Cross-machine identical integer output is promised only by the
-WebAssembly build and by the `libm` feature at a pinned crate version. If you store derived data
-and need reruns on another machine to match exactly, enable the feature (Cargo features are
-additive: if any crate in your build enables it, it is on for all). The polygon order of
+can be assigned to a different cell by a different libm. Measured with `yarn stress:boundary`
+against the `libm` crate, that band is about 1e-15 radians, a few nanometres on the ground: glibc
+on linux x86-64 has no flips at 1e-15 rad from an edge, and Apple's libm on macOS arm64 has none
+at 1.8e-15 rad. For a uniformly random point the estimated chance of a flip is below 1e-12 at
+resolution 9 and below 3e-10 at resolution 15. Cross-machine identical integer output is
+promised only by the WebAssembly build and by the `libm` feature at a pinned crate version. If
+you store derived data and need reruns on another machine to match exactly, enable the feature
+(Cargo features are additive: if any crate in your build enables it, it is on for all). The polygon order of
 `cellsToMultiPolygon` / `cells_to_linked_multi_polygon` is unspecified and can change with the
 libm, though the polygons themselves do not.
 

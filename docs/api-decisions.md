@@ -260,8 +260,10 @@ across machines").
 
 `yarn stress:boundary` measures the band (`crates/h3-core/examples/boundary_stress.rs`). For 2,000
 random edge crossings per resolution it bisects to the edge and compares `latLngToCell` from the
-platform build and the `libm` build at offsets from 1e-16 to 1e-8 rad on both sides. Linux x86-64
-(glibc vs `libm` 0.2.16), 2026-11-02:
+platform build and the `libm` build at offsets from 1e-16 to 1e-8 rad on both sides. The tables
+give the fraction of points assigned different cells, measured 2026-11-02 against `libm` 0.2.16.
+
+Linux x86-64, glibc:
 
 | Offset from edge   | res 0 | res 3 | res 6 | res 9 | res 12 | res 15 |
 | ------------------ | ----- | ----- | ----- | ----- | ------ | ------ |
@@ -270,9 +272,25 @@ platform build and the `libm` build at offsets from 1e-16 to 1e-8 rad on both si
 | 5.6e-16 rad        | 0.15% | 0     | 0.03% | 0     | 0      | 0.03%  |
 | 1.0e-15 rad and up | 0     | 0     | 0     | 0     | 0      | 0      |
 
+macOS arm64, Apple libm (run by the operator):
+
+| Offset from edge   | res 0 | res 3 | res 6 | res 9 | res 12 | res 15 |
+| ------------------ | ----- | ----- | ----- | ----- | ------ | ------ |
+| 1.0e-16 rad        | 2.8%  | 3.6%  | 4.0%  | 4.0%  | 4.0%   | 3.8%   |
+| 3.2e-16 rad        | 0.43% | 0.75% | 0.88% | 0.95% | 0.80%  | 0.80%  |
+| 5.6e-16 rad        | 0.05% | 0.15% | 0.08% | 0.05% | 0.13%  | 0.05%  |
+| 1.0e-15 rad        | 0     | 0     | 0     | 0     | 0.03%  | 0      |
+| 1.8e-15 rad and up | 0     | 0     | 0     | 0     | 0      | 0      |
+
 The band is the same width in radians at every resolution, so the chance that a uniformly random
-point flips scales with perimeter/area: an estimated 6e-17 at res 0, 3.5e-13 at res 9 and 1.4e-10
-at res 15. None of the 12,000 random control points flipped.
+point flips scales with perimeter/area. Estimated per random point:
+
+| Platform libm | res 0 | res 9   | res 15  |
+| ------------- | ----- | ------- | ------- |
+| glibc         | 6e-17 | 3.5e-13 | 1.4e-10 |
+| Apple         | 7e-17 | 7.5e-13 | 2.4e-10 |
+
+None of the 12,000 random control points flipped on either platform.
 
 ## Differences from h3-js 4.5.0
 

@@ -93,10 +93,11 @@ matching outputs. An authoritative run on an idle machine has not been possible.
     musl, and Windows.
   - Native with the feature equals WASM bit for bit.
   - `cellsToLinkedMultiPolygon` polygon order is declared unspecified.
-  - Cross-libm cell flips near edges, measured with `yarn stress:boundary` (glibc vs `libm`):
-    none beyond 1e-15 rad (about 6 nm) from an edge; an estimated 3.5e-13 per random point at
-    res 9 and 1.4e-10 at res 15. Fable's pre-measurement estimate (1e-9 and 1e-7) was about four
-    orders of magnitude too high. Apple libm not yet measured.
+  - Cross-libm cell flips near edges, measured with `yarn stress:boundary` against `libm`: none
+    at 1e-15 rad (about 6 nm) from an edge with glibc, none at 1.8e-15 rad with Apple libm. Per
+    random point that is an estimated 3.5e-13 (glibc) and 7.5e-13 (Apple) at res 9, and 1.4e-10
+    and 2.4e-10 at res 15. Fable's pre-measurement estimate (1e-9 and 1e-7) was about three to
+    four orders of magnitude too high.
 
 - The clean-checkout gate passed in CI on PR #1 (run 41391165306, ubuntu-24.04, 4 min 55 s),
   including `cargo package` without `--allow-dirty`, runtime tests in Chromium and Firefox, and
