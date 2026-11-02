@@ -1,325 +1,283 @@
 {
 	"environment": {
-		"date": "2026-11-02T04:30:03.141Z",
-		"node": "v26.2.0",
-		"cpu": "AMD Ryzen 9 8945HS w/ Radeon 780M Graphics",
-		"cores": 16,
-		"memoryGiB": 29,
-		"loadAverageBefore": [32.65, 17.81, 10.9],
+		"date": "2026-11-02T15:52:59.511Z",
+		"node": "v24.22.1",
+		"cpu": "Apple Silicon",
+		"cores": 10,
+		"memoryGiB": 64,
+		"loadAverageBefore": [12.39, 32.49, 30.45],
 		"rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
 		"wasmBytes": 175239,
 		"h3js": "4.5.0",
-		"loadAverageAfter": [36.59, 19.94, 11.79]
+		"loadAverageAfter": [8.49, 28.65, 29.15]
 	},
 	"samples": 15,
 	"js": {
 		"latLngToCell": {
 			"ours": {
-				"median": 1111.6708000000017,
-				"p25": 1049.0423500000134,
-				"p75": 1179.317100000003,
+				"median": 789.4458000002487,
+				"p25": 777.3271000000022,
+				"p75": 798.5249999999724,
 				"samples": 15
 			},
 			"h3js": {
-				"median": 2219.9361999999837,
-				"p25": 2067.9574499999944,
-				"p75": 2432.7190499999915,
+				"median": 911.3083000000188,
+				"p25": 902.6145499999984,
+				"p75": 927.2708499998771,
 				"samples": 15
 			},
 			"checksumMatch": true,
-			"oursOpsPerSec": 899546.8802454814,
-			"h3jsOpsPerSec": 450463.3962003085
+			"oursOpsPerSec": 1266711.4069131599,
+			"h3jsOpsPerSec": 1097323.4853671137
 		},
 		"cellToParent": {
 			"ours": {
-				"median": 861.3444000000072,
-				"p25": 828.3938499999977,
-				"p75": 930.2019499999915,
+				"median": 186.3375000000815,
+				"p25": 182.13545000016893,
+				"p75": 198.82704999999987,
 				"samples": 15
 			},
 			"h3js": {
-				"median": 957.6712000000043,
-				"p25": 705.7433000000174,
-				"p75": 1252.8379000000086,
+				"median": 281.9416000002093,
+				"p25": 278.29169999986334,
+				"p75": 297.47500000012224,
 				"samples": 15
 			},
 			"checksumMatch": true,
-			"oursOpsPerSec": 1160975.795512215,
-			"h3jsOpsPerSec": 1044199.7211569018
+			"oursOpsPerSec": 5366606.292343531,
+			"h3jsOpsPerSec": 3546833.8123897207
 		},
 		"cellToLatLng": {
 			"ours": {
-				"median": 949.6372999999948,
-				"p25": 918.6579500000107,
-				"p75": 989.9124499999971,
+				"median": 478.93750000002905,
+				"p25": 472.6541999998517,
+				"p75": 483.6646499999915,
 				"samples": 15
 			},
 			"h3js": {
-				"median": 1186.7970000000241,
-				"p25": 1161.193800000001,
-				"p75": 1225.2378000000135,
+				"median": 491.82919999984733,
+				"p25": 484.82494999989285,
+				"p75": 509.62705000001733,
 				"samples": 15
 			},
 			"checksumMatch": true,
-			"oursOpsPerSec": 1053033.6160974358,
-			"h3jsOpsPerSec": 842604.0847760651
+			"oursOpsPerSec": 2087955.1089650306,
+			"h3jsOpsPerSec": 2033226.1687600296
 		},
 		"gridDisk": {
 			"ours": {
-				"median": 5223.222999999962,
-				"p25": 5079.315000000179,
-				"p75": 5577.655499999992,
+				"median": 1223.7500000010186,
+				"p25": 1203.6044999986188,
+				"p75": 1261.3750000018626,
 				"samples": 15
 			},
 			"h3js": {
-				"median": 8681.00000000004,
-				"p25": 8025.044499999922,
-				"p75": 9392.432999999983,
+				"median": 2976.459000001341,
+				"p25": 2739.8545000014565,
+				"p75": 3067.5625000003492,
 				"samples": 15
 			},
 			"checksumMatch": true,
-			"oursOpsPerSec": 191452.6720379366,
-			"h3jsOpsPerSec": 115194.1020619739
+			"oursOpsPerSec": 817160.3677214853,
+			"h3jsOpsPerSec": 335969.68747076625
 		},
 		"compactCells": {
 			"ours": {
-				"median": 559434.0000002376,
-				"p25": 518733.500000053,
-				"p75": 800194.4999998613,
+				"median": 286958.00000059535,
+				"p25": 281999.9999992433,
+				"p75": 306521.0000004299,
 				"samples": 15
 			},
 			"h3js": {
-				"median": 1876784.9999999271,
-				"p25": 1781531.5000000284,
-				"p75": 3699933.9999999846,
+				"median": 1607916.999997542,
+				"p25": 1579228.9999990317,
+				"p75": 1649312.4999997234,
 				"samples": 15
 			},
 			"checksumMatch": true,
-			"oursOpsPerSec": 1787.5209586824813,
-			"h3jsOpsPerSec": 532.8260829024309
+			"oursOpsPerSec": 3484.8305326839654,
+			"h3jsOpsPerSec": 621.9226489934049
 		},
 		"polygonToCells": {
 			"ours": {
-				"median": 1120312.0000000126,
-				"p25": 1059553.50000022,
-				"p75": 1151299.999999992,
+				"median": 902833.0000001006,
+				"p25": 885021.0000000516,
+				"p75": 924562.5000003201,
 				"samples": 15
 			},
 			"h3js": {
-				"median": 4313604.999999825,
-				"p25": 4017672.4999998896,
-				"p75": 5109375.999999884,
+				"median": 3251959.0000010794,
+				"p25": 3196749.999999156,
+				"p75": 3336103.9999999776,
 				"samples": 15
 			},
 			"checksumMatch": true,
-			"oursOpsPerSec": 892.6084876355773,
-			"h3jsOpsPerSec": 231.82465710236346
+			"oursOpsPerSec": 1107.6245551501647,
+			"h3jsOpsPerSec": 307.50695196331446
 		}
 	},
 	"boundary": {
 		"stringToBigInt": {
-			"median": 103.79579999998896,
-			"p25": 102.17784999999822,
-			"p75": 113.5915999999952,
+			"median": 59.14169999996375,
+			"p25": 58.49374999997963,
+			"p75": 65.68335000010848,
 			"samples": 15
 		},
 		"bigIntToString": {
-			"median": 62.2461999999814,
-			"p25": 55.879349999986516,
-			"p75": 86.70994999999948,
+			"median": 36.16670000010345,
+			"p25": 35.10834999997314,
+			"p75": 36.852100000032806,
 			"samples": 15
 		},
 		"rawWasmCellToParent": {
-			"median": 19.07770000002529,
-			"p25": 17.637899999999718,
-			"p75": 37.50205000001188,
+			"median": 14.095799999995506,
+			"p25": 13.568750000194996,
+			"p75": 26.864600000044447,
 			"samples": 15
 		},
 		"publicCellToParent": {
-			"median": 545.3754000000117,
-			"p25": 413.3613999999852,
-			"p75": 645.1000999999906,
+			"median": 163.7125000001106,
+			"p25": 158.89170000009472,
+			"p75": 170.9167000002708,
 			"samples": 15
 		},
 		"rawWasmLatLngToCell": {
-			"median": 729.2948000000251,
-			"p25": 708.3041000000094,
-			"p75": 757.2239500000023,
+			"median": 705.2374999999302,
+			"p25": 694.5333499999833,
+			"p75": 942.6520999999411,
 			"samples": 15
 		},
 		"publicLatLngToCell": {
-			"median": 845.6540000000132,
-			"p25": 781.5819499999861,
-			"p75": 918.1309499999998,
+			"median": 741.0749999999098,
+			"p25": 727.9979500000991,
+			"p75": 749.8625000000175,
 			"samples": 15
 		}
 	},
 	"init": {
 		"importMs": {
-			"median": 18.872129000000008,
-			"p25": 18.489395000000002,
-			"p75": 23.516521000000004,
+			"median": 5.349999999999998,
+			"p25": 4.915291999999997,
+			"p75": 5.529667,
 			"samples": 9
 		},
 		"firstCallMs": {
-			"median": 7.350234999999998,
-			"p25": 4.610179000000002,
-			"p75": 10.397795000000002,
+			"median": 2.0067090000000007,
+			"p25": 1.9678749999999994,
+			"p75": 2.1396249999999988,
 			"samples": 9
 		},
 		"secondCallMs": {
-			"median": 0.017842999999999165,
-			"p25": 0.015549000000000035,
-			"p75": 0.019115999999996802,
+			"median": 0.004207999999998435,
+			"p25": 0.004125000000001933,
+			"p75": 0.004915999999997922,
 			"samples": 9
 		},
 		"explicitInitMs": {
-			"median": 2.654257000000001,
-			"p25": 2.2905469999999966,
-			"p75": 5.1939490000000035,
+			"median": 1.0151670000000017,
+			"p25": 0.9544999999999995,
+			"p75": 1.0347089999999994,
 			"samples": 9
 		},
 		"explicitFirstCallMs": {
-			"median": 0.694587999999996,
-			"p25": 0.6449439999999953,
-			"p75": 0.7402119999999996,
+			"median": 0.4073750000000018,
+			"p25": 0.38766700000000043,
+			"p75": 0.42195800000000006,
 			"samples": 9
 		}
 	},
 	"native": {
 		"latLngToCell": {
 			"rust": {
-				"median": 459.02,
-				"p25": 450.565,
-				"p75": 463.34000000000003,
+				"median": 542.47,
+				"p25": 532.05,
+				"p75": 576.665,
 				"samples": 15
-			},
-			"c": {
-				"median": 417.37,
-				"p25": 403.14,
-				"p75": 424.445,
-				"samples": 15
-			},
-			"checksumMatch": true
+			}
 		},
 		"cellToParent": {
 			"rust": {
-				"median": 2.19,
-				"p25": 2.16,
-				"p75": 2.59,
+				"median": 2.31,
+				"p25": 2.285,
+				"p75": 2.33,
 				"samples": 15
-			},
-			"c": {
-				"median": 3.62,
-				"p25": 3.59,
-				"p75": 3.685,
-				"samples": 15
-			},
-			"checksumMatch": true
+			}
 		},
 		"cellToLatLng": {
 			"rust": {
-				"median": 231.66,
-				"p25": 229.66000000000003,
-				"p75": 234.66,
+				"median": 275.38,
+				"p25": 272.65999999999997,
+				"p75": 281.53499999999997,
 				"samples": 15
-			},
-			"c": {
-				"median": 230.78,
-				"p25": 225.685,
-				"p75": 233.345,
-				"samples": 15
-			},
-			"checksumMatch": true
+			}
 		},
 		"gridDisk": {
 			"rust": {
-				"median": 237.91,
-				"p25": 235.975,
-				"p75": 243.035,
+				"median": 274.5,
+				"p25": 273.145,
+				"p75": 276.105,
 				"samples": 15
-			},
-			"c": {
-				"median": 292.66,
-				"p25": 285.72,
-				"p75": 297.97,
-				"samples": 15
-			},
-			"checksumMatch": true
+			}
 		},
 		"compactCells": {
 			"rust": {
-				"median": 26440,
-				"p25": 26294,
-				"p75": 26730,
+				"median": 18042,
+				"p25": 17854,
+				"p75": 18458.5,
 				"samples": 15
-			},
-			"c": {
-				"median": 25988,
-				"p25": 25778.5,
-				"p75": 26419,
-				"samples": 15
-			},
-			"checksumMatch": true
+			}
 		},
 		"polygonToCells": {
 			"rust": {
-				"median": 715756,
-				"p25": 711834,
-				"p75": 723106,
+				"median": 674167,
+				"p25": 661104,
+				"p75": 681208.5,
 				"samples": 15
-			},
-			"c": {
-				"median": 672917,
-				"p25": 665453,
-				"p75": 694406.5,
-				"samples": 15
-			},
-			"checksumMatch": true
+			}
 		}
 	},
 	"memory": {
 		"node": {
 			"beforeImport": {
-				"heapUsedBytes": 4178440,
-				"arrayBuffersBytes": 22783,
-				"externalBytes": 1844186,
+				"heapUsedBytes": 4097072,
+				"arrayBuffersBytes": 137487,
+				"externalBytes": 2012914,
 				"wasmMemoryBytes": 0
 			},
 			"afterImport": {
-				"heapUsedBytes": 5065992,
-				"arrayBuffersBytes": 22783,
-				"externalBytes": 1844226,
+				"heapUsedBytes": 5006760,
+				"arrayBuffersBytes": 137487,
+				"externalBytes": 2012954,
 				"wasmMemoryBytes": 0
 			},
 			"afterInit": {
-				"heapUsedBytes": 5119208,
-				"arrayBuffersBytes": 198034,
-				"externalBytes": 2019477,
+				"heapUsedBytes": 5060648,
+				"arrayBuffersBytes": 312738,
+				"externalBytes": 3302317,
 				"wasmMemoryBytes": 1114112
 			},
 			"afterScalar": {
-				"heapUsedBytes": 5154440,
-				"arrayBuffersBytes": 198034,
-				"externalBytes": 2019477,
+				"heapUsedBytes": 5098192,
+				"arrayBuffersBytes": 312738,
+				"externalBytes": 3302317,
 				"wasmMemoryBytes": 1114112
 			},
 			"afterDisk100": {
-				"heapUsedBytes": 5163928,
-				"arrayBuffersBytes": 198034,
-				"externalBytes": 2019477,
+				"heapUsedBytes": 5119408,
+				"arrayBuffersBytes": 312738,
+				"externalBytes": 3564461,
 				"wasmMemoryBytes": 1376256
 			},
 			"afterCompact": {
-				"heapUsedBytes": 5849776,
-				"arrayBuffersBytes": 198034,
-				"externalBytes": 2019477,
+				"heapUsedBytes": 5800600,
+				"arrayBuffersBytes": 312738,
+				"externalBytes": 4154285,
 				"wasmMemoryBytes": 1966080
 			},
 			"afterPolygon": {
-				"heapUsedBytes": 5863640,
-				"arrayBuffersBytes": 198034,
-				"externalBytes": 2019477,
+				"heapUsedBytes": 5809472,
+				"arrayBuffersBytes": 312738,
+				"externalBytes": 4416429,
 				"wasmMemoryBytes": 2228224
 			},
 			"repeatedWorkloadWasmBytes": [2228224, 2228224, 2228224, 2228224, 2228224],
@@ -328,44 +286,44 @@
 		"worker": {
 			"baseline": {
 				"wasmMemoryBytes": 0,
-				"jsHeapUsedBytes": 889752,
+				"jsHeapUsedBytes": 912840,
 				"jsHeapTotalBytes": 1572864,
 				"backingStorageBytes": 226692
 			},
 			"import": {
 				"wasmMemoryBytes": 0,
-				"jsHeapUsedBytes": 610136,
+				"jsHeapUsedBytes": 971196,
 				"jsHeapTotalBytes": 1572864,
 				"backingStorageBytes": 226692
 			},
 			"init": {
 				"wasmMemoryBytes": 1114112,
-				"jsHeapUsedBytes": 683612,
+				"jsHeapUsedBytes": 722240,
 				"jsHeapTotalBytes": 1310720,
 				"backingStorageBytes": 226692
 			},
 			"scalar": {
 				"wasmMemoryBytes": 1114112,
-				"jsHeapUsedBytes": 710748,
-				"jsHeapTotalBytes": 1572864,
+				"jsHeapUsedBytes": 750820,
+				"jsHeapTotalBytes": 1310720,
 				"backingStorageBytes": 226692
 			},
 			"disk": {
 				"wasmMemoryBytes": 1376256,
-				"jsHeapUsedBytes": 717944,
-				"jsHeapTotalBytes": 1572864,
+				"jsHeapUsedBytes": 754708,
+				"jsHeapTotalBytes": 1310720,
 				"backingStorageBytes": 226692
 			},
 			"compact": {
 				"wasmMemoryBytes": 1966080,
-				"jsHeapUsedBytes": 723696,
-				"jsHeapTotalBytes": 1572864,
+				"jsHeapUsedBytes": 777104,
+				"jsHeapTotalBytes": 1310720,
 				"backingStorageBytes": 226692
 			},
 			"polygon": {
 				"wasmMemoryBytes": 2228224,
-				"jsHeapUsedBytes": 728624,
-				"jsHeapTotalBytes": 1572864,
+				"jsHeapUsedBytes": 774644,
+				"jsHeapTotalBytes": 1310720,
 				"backingStorageBytes": 226692
 			}
 		}
