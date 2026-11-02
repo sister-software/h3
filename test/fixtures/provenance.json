@@ -19,13 +19,13 @@
 		}
 	},
 	"platform": {
-		"os": "linux x64",
-		"cc": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
-		"cmake": "cmake version 3.28.3",
+		"os": "darwin arm64",
+		"cc": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+		"cmake": "cmake version 4.4.4",
 		"cFlags": "-ffp-contract=off",
-		"node": "v26.2.0"
+		"node": "v24.22.1"
 	},
-	"ctestRun": true,
+	"ctestRun": false,
 	"files": {
 		"areNeighborCells.jsonl": {
 			"cases": 525,
@@ -33,15 +33,15 @@
 		},
 		"cellAreaKm2.jsonl": {
 			"cases": 397,
-			"sha256": "dc854c32fd7dccaef195c350a049fc6af335bc7af629d6f23e471119820a990a"
+			"sha256": "1f777a3bbbd2a0f6096812355b1e4d7b990c6f3784f795ce93e834d5d1a7d09b"
 		},
 		"cellAreaM2.jsonl": {
 			"cases": 397,
-			"sha256": "22a817356dd37866db0f4c527ad163bc30bfd71860f40c4f1134fda9248308f6"
+			"sha256": "892cc440ac1d66350fd0609c54903d2689715843cca7f626d53e2fb98d0a86a6"
 		},
 		"cellAreaRads2.jsonl": {
 			"cases": 397,
-			"sha256": "473b2bb36831a112f2f8d87e1f1e2e0fc5426d8466b493d0f6cca0c05d8e602d"
+			"sha256": "760ed7d9c3c6c59af1a0d645f2d06431b127c036842642837c09165b702b3df1"
 		},
 		"cellsToDirectedEdge.jsonl": {
 			"cases": 525,
@@ -49,11 +49,11 @@
 		},
 		"cellsToLinkedMultiPolygon.jsonl": {
 			"cases": 16,
-			"sha256": "90ac2067042f46bf7b2e4e30407057d222bee605383cedb84fc2eb5f51e95a54"
+			"sha256": "6ef5a4562180e1571147dd67c2dc891359365917216f108286e18e0c36e50622"
 		},
 		"cellToBoundary.jsonl": {
 			"cases": 778,
-			"sha256": "7ada43afd61ebb347cd8ad6f035c105168f86b6e84982bed76eda5bd097b8c5c"
+			"sha256": "f752b5920ed7845b5ceadd9a31cfd3da4b50b1f482ff61ac4fc8b0290c301660"
 		},
 		"cellToCenterChild.jsonl": {
 			"cases": 1890,
@@ -73,7 +73,7 @@
 		},
 		"cellToLatLng.jsonl": {
 			"cases": 778,
-			"sha256": "e0a5a45295a6c97ddce1ef4e04db56069ba60e76db05be6827ac573b2650e25b"
+			"sha256": "206e2e0db2adb2a9baf15ddd3d76337ee70bcab3cdf5b5e09247e9bf4454310b"
 		},
 		"cellToLocalIj.jsonl": {
 			"cases": 640,
@@ -109,7 +109,7 @@
 		},
 		"directedEdgeToBoundary.jsonl": {
 			"cases": 600,
-			"sha256": "31db0915981028a97979b7b7a111ed50b08899e6cdbba58eda90b722eacff166"
+			"sha256": "0f4ac625ad6c26ac14ae144a503bca3db62a925d7fe8f77fe6ac41bab794260a"
 		},
 		"directedEdgeToCells.jsonl": {
 			"cases": 600,
@@ -117,15 +117,15 @@
 		},
 		"edgeLengthKm.jsonl": {
 			"cases": 600,
-			"sha256": "39ee4fc5ef3dedd88a1f540644fdc46d04e01fc3d759ac1eead2ac7b1296bc8a"
+			"sha256": "ed6828dddeca4373404f119ca41dd102368719e8c24e824f2ee1bfab09624ca1"
 		},
 		"edgeLengthM.jsonl": {
 			"cases": 600,
-			"sha256": "5ab5487eb5a61f36796837f5ea0d8420222d243e7b1e20845d9b08ade34e52c1"
+			"sha256": "6499ce7a362b7cb6b389961525fe08d546734291db6d3f324ce65dd510fb303c"
 		},
 		"edgeLengthRads.jsonl": {
 			"cases": 600,
-			"sha256": "ebca64a81f430552cf26c53807b24928e05829bb75f87853aa085c7e9c5bbce5"
+			"sha256": "5221e144d9fd5a8fd3769cb426e0c3e879479386ee8634db8ac824ae09c83c88"
 		},
 		"getBaseCellNumber.jsonl": {
 			"cases": 778,
@@ -181,15 +181,15 @@
 		},
 		"greatCircleDistanceKm.jsonl": {
 			"cases": 205,
-			"sha256": "2abe887cab9cbbd27b4fbd1e44a8e529b84f0102c6fd3d05924a3d6085ed7c82"
+			"sha256": "e9faa9bea3da8a9d39e553137e076ad27c95145b547d93c432a4f92227d5c5fc"
 		},
 		"greatCircleDistanceM.jsonl": {
 			"cases": 205,
-			"sha256": "39e9b44bdfb1ffdeabd5463e2251702243dc3ebe147a70cdc9cbfd052ecff3d1"
+			"sha256": "118dd9cd84352d9c03ba883aa7ece61010ea56488dc5722eff18140598dcd639"
 		},
 		"greatCircleDistanceRads.jsonl": {
 			"cases": 205,
-			"sha256": "507f077f04953fddd27e460a999bb7c1673cd73ff95c59b023095c98a93f7b9c"
+			"sha256": "b638629090ae06635e62a45d5d5b7e40627343bb06a6ed90e5a4705dde4a3c2a"
 		},
 		"gridDisk.jsonl": {
 			"cases": 756,
@@ -257,7 +257,7 @@
 		},
 		"latLngToCell.jsonl": {
 			"cases": 2128,
-			"sha256": "24cdfb1a9f553067518efba35f89e00a9bb1112f2b613ea039f13229d88f4f54"
+			"sha256": "9d7f0ecbf3dd942758e3beb60e83983287d29ad4c329a8d9ab37534a53091fd2"
 		},
 		"localIjToCell.jsonl": {
 			"cases": 766,
@@ -309,7 +309,7 @@
 		},
 		"vertexToLatLng.jsonl": {
 			"cases": 505,
-			"sha256": "cfd99bc07e50810f18b347b3e95aa58b0dbd820629c7970fb8569d6fcd687bff"
+			"sha256": "b77477e7651d6a9e4c98ec5739a6073b58c4f90c3f82de489a02e6b8bfd163d9"
 		}
 	}
 }
