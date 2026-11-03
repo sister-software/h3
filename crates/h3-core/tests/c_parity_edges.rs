@@ -1,5 +1,5 @@
-//! Native Rust versus pinned H3 C fixtures: (directed edges, vertexes) and Phase F
-//! (measurements). Results computed through libm (coordinates, lengths, areas, distances) are
+//! Native Rust versus pinned H3 C fixtures for directed edges, vertices, and measurements.
+//! Results computed through libm (coordinates, lengths, areas, distances) are
 //! bit-exact on the reference platform and within the documented bounds elsewhere
 //! (`common::EXACT`); unit conversions and the average tables involve no libm and are exact
 //! everywhere.

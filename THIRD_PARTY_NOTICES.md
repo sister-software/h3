@@ -32,8 +32,8 @@ derived from, and how, are listed here. Each translated Rust module also names i
 - Repository: https://github.com/uber/h3-js, version 4.5.0
 - License: Apache License 2.0; Copyright 2017-2021 Uber Technologies, Inc.
 - Use: the JavaScript function names, argument order, and result shapes; the `UNITS` and
-  `POLYGON_TO_CELLS_FLAGS` constants; portions of the README API reference text. No h3-js code is
-  included in the package. h3-js is a development dependency used only by migration tests.
+  `POLYGON_TO_CELLS_FLAGS` constants; API reference descriptions. No h3-js code is
+  included in the package. h3-js is a development dependency used by migration tests and benchmarks.
 
 ## h3o
 

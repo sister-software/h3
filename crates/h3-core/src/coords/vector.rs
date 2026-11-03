@@ -1,4 +1,4 @@
-//! Floating-point vectors preserve the operation order of the H3 C implementation.
+//! Floating-point vectors translated from H3 C `vec2d.c` and `vec3d.h` (Apache-2.0).
 #![allow(clippy::wrong_self_convention)] // Conversion names follow the C coordinate operations.
 use super::CoordIjk;
 use crate::constants::M_RSIN60;

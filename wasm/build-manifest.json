@@ -1,5 +1,5 @@
 {
-	"sourceTreeSha256": "08bd3fc74955386b08c5d6dd80e24b67f8084be3910db2c7766c34428e0c88c8",
+	"sourceTreeSha256": "59ae96ddffe67abf2e7ae5df20acfea736dbac2db664f7ed38689ff3e0dd2670",
 	"rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
 	"target": "wasm32-unknown-unknown",
 	"profile": "release (Cargo.toml [profile.release])",

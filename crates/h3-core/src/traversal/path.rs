@@ -1,4 +1,4 @@
-//! Grid distances and paths in local IJK coordinates.
+//! Grid distances and paths translated from H3 C `localij.c` (Apache-2.0).
 use super::disk::alloc_zeroed;
 use super::localij::{cell_to_local_ijk, local_ijk_to_cell};
 use crate::coords::*;

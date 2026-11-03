@@ -1,4 +1,4 @@
-//! Disk and ring algorithms preserve C output-buffer order and zero slots.
+//! Disks and rings translated from H3 C `algos.c` (Apache-2.0), preserving output-buffer order.
 use super::neighbors::h3_neighbor_rotations;
 use crate::constants::*;
 use crate::coords::*;

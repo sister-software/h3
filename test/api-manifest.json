@@ -5,7 +5,6 @@
 		{
 			"name": "init",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "(JavaScript-only: WASM initialization)",
 			"rustOperation": "(none)",
@@ -19,7 +18,6 @@
 		{
 			"name": "UNITS",
 			"kind": "constant",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "(JavaScript-only: unit names)",
 			"rustOperation": "(none)",
@@ -33,7 +31,6 @@
 		{
 			"name": "POLYGON_TO_CELLS_FLAGS",
 			"kind": "constant",
-			"phase": "G",
 			"usesWasm": false,
 			"cOperation": "ContainmentMode (CONTAINMENT_CENTER..CONTAINMENT_OVERLAPPING_BBOX = 0..3)",
 			"rustOperation": "ContainmentMode",
@@ -47,7 +44,6 @@
 		{
 			"name": "h3IndexToSplitLong",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "(JavaScript-only: index string to 32-bit words)",
 			"rustOperation": "(none)",
@@ -61,7 +57,6 @@
 		{
 			"name": "splitLongToH3Index",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "(JavaScript-only: 32-bit words to index string)",
 			"rustOperation": "(none)",
@@ -75,7 +70,6 @@
 		{
 			"name": "isValidCell",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "isValidCell",
 			"rustOperation": "raw::is_valid_cell",
@@ -95,7 +89,6 @@
 		{
 			"name": "isValidIndex",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "isValidIndex",
 			"rustOperation": "raw::is_valid_index",
@@ -115,7 +108,6 @@
 		{
 			"name": "isPentagon",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "isPentagon",
 			"rustOperation": "raw::is_pentagon",
@@ -135,7 +127,6 @@
 		{
 			"name": "isResClassIII",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "isResClassIII",
 			"rustOperation": "raw::is_res_class_iii",
@@ -155,7 +146,6 @@
 		{
 			"name": "getBaseCellNumber",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "getBaseCellNumber",
 			"rustOperation": "raw::get_base_cell_number",
@@ -175,7 +165,6 @@
 		{
 			"name": "getIndexDigit",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "getIndexDigit",
 			"rustOperation": "raw::get_index_digit",
@@ -195,7 +184,6 @@
 		{
 			"name": "getIcosahedronFaces",
 			"kind": "function",
-			"phase": "B",
 			"usesWasm": true,
 			"cOperation": "maxFaceCount + getIcosahedronFaces",
 			"rustOperation": "raw::get_icosahedron_faces",
@@ -215,7 +203,6 @@
 		{
 			"name": "getResolution",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "getResolution (only after isValidCell)",
 			"rustOperation": "raw::get_resolution",
@@ -235,7 +222,6 @@
 		{
 			"name": "constructCell",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "constructCell (argument order res, baseCellNumber, digits)",
 			"rustOperation": "raw::construct_cell",
@@ -255,7 +241,6 @@
 		{
 			"name": "latLngToCell",
 			"kind": "function",
-			"phase": "B",
 			"usesWasm": true,
 			"cOperation": "latLngToCell",
 			"rustOperation": "raw::lat_lng_to_cell",
@@ -275,7 +260,6 @@
 		{
 			"name": "cellToLatLng",
 			"kind": "function",
-			"phase": "B",
 			"usesWasm": true,
 			"cOperation": "cellToLatLng",
 			"rustOperation": "raw::cell_to_lat_lng",
@@ -295,7 +279,6 @@
 		{
 			"name": "cellToBoundary",
 			"kind": "function",
-			"phase": "B",
 			"usesWasm": true,
 			"cOperation": "cellToBoundary",
 			"rustOperation": "raw::cell_to_boundary",
@@ -315,7 +298,6 @@
 		{
 			"name": "cellToParent",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToParent",
 			"rustOperation": "raw::cell_to_parent",
@@ -335,7 +317,6 @@
 		{
 			"name": "cellToChildren",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToChildrenSize + cellToChildren",
 			"rustOperation": "raw::cell_to_children",
@@ -355,7 +336,6 @@
 		{
 			"name": "cellToChildrenSize",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToChildrenSize",
 			"rustOperation": "raw::cell_to_children_size",
@@ -375,7 +355,6 @@
 		{
 			"name": "cellToCenterChild",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToCenterChild",
 			"rustOperation": "raw::cell_to_center_child",
@@ -395,7 +374,6 @@
 		{
 			"name": "cellToChildPos",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToChildPos",
 			"rustOperation": "raw::cell_to_child_pos",
@@ -415,7 +393,6 @@
 		{
 			"name": "childPosToCell",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "childPosToCell",
 			"rustOperation": "raw::child_pos_to_cell",
@@ -435,7 +412,6 @@
 		{
 			"name": "compactCells",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "compactCells",
 			"rustOperation": "raw::compact_cells",
@@ -455,7 +431,6 @@
 		{
 			"name": "uncompactCells",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "uncompactCellsSize + uncompactCells",
 			"rustOperation": "raw::uncompact_cells",
@@ -475,7 +450,6 @@
 		{
 			"name": "gridDisk",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "maxGridDiskSize + gridDisk",
 			"rustOperation": "raw::grid_disk",
@@ -495,7 +469,6 @@
 		{
 			"name": "gridDiskDistances",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "maxGridDiskSize + gridDiskDistances (regrouped by distance)",
 			"rustOperation": "raw::grid_disk_distances",
@@ -515,7 +488,6 @@
 		{
 			"name": "gridRing",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "maxGridRingSize + gridRing",
 			"rustOperation": "raw::grid_ring",
@@ -535,7 +507,6 @@
 		{
 			"name": "gridRingUnsafe",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "maxGridRingSize + gridRingUnsafe",
 			"rustOperation": "raw::grid_ring_unsafe",
@@ -555,7 +526,6 @@
 		{
 			"name": "polygonToCells",
 			"kind": "function",
-			"phase": "G",
 			"usesWasm": true,
 			"cOperation": "maxPolygonToCellsSize + polygonToCells (flags 0)",
 			"rustOperation": "raw::polygon_to_cells",
@@ -575,7 +545,6 @@
 		{
 			"name": "polygonToCellsExperimental",
 			"kind": "function",
-			"phase": "G",
 			"usesWasm": true,
 			"cOperation": "maxPolygonToCellsSizeExperimental + polygonToCellsExperimental (flags 0..3)",
 			"rustOperation": "raw::polygon_to_cells_experimental",
@@ -595,7 +564,6 @@
 		{
 			"name": "cellsToMultiPolygon",
 			"kind": "function",
-			"phase": "G",
 			"usesWasm": true,
 			"cOperation": "cellsToLinkedMultiPolygon (converted to owned structures)",
 			"rustOperation": "raw::cells_to_multi_polygon",
@@ -615,7 +583,6 @@
 		{
 			"name": "areNeighborCells",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "areNeighborCells",
 			"rustOperation": "raw::are_neighbor_cells",
@@ -635,7 +602,6 @@
 		{
 			"name": "cellsToDirectedEdge",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "cellsToDirectedEdge",
 			"rustOperation": "raw::cells_to_directed_edge",
@@ -655,7 +621,6 @@
 		{
 			"name": "getDirectedEdgeOrigin",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "getDirectedEdgeOrigin",
 			"rustOperation": "raw::get_directed_edge_origin",
@@ -675,7 +640,6 @@
 		{
 			"name": "getDirectedEdgeDestination",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "getDirectedEdgeDestination",
 			"rustOperation": "raw::get_directed_edge_destination",
@@ -695,7 +659,6 @@
 		{
 			"name": "isValidDirectedEdge",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "isValidDirectedEdge",
 			"rustOperation": "raw::is_valid_directed_edge",
@@ -715,7 +678,6 @@
 		{
 			"name": "directedEdgeToCells",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "directedEdgeToCells",
 			"rustOperation": "raw::directed_edge_to_cells",
@@ -735,7 +697,6 @@
 		{
 			"name": "originToDirectedEdges",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "originToDirectedEdges",
 			"rustOperation": "raw::origin_to_directed_edges",
@@ -755,7 +716,6 @@
 		{
 			"name": "directedEdgeToBoundary",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "directedEdgeToBoundary",
 			"rustOperation": "raw::directed_edge_to_boundary",
@@ -775,7 +735,6 @@
 		{
 			"name": "reverseDirectedEdge",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "reverseDirectedEdge",
 			"rustOperation": "raw::reverse_directed_edge",
@@ -795,7 +754,6 @@
 		{
 			"name": "gridDistance",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "gridDistance",
 			"rustOperation": "raw::grid_distance",
@@ -815,7 +773,6 @@
 		{
 			"name": "gridPathCells",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "gridPathCellsSize + gridPathCells",
 			"rustOperation": "raw::grid_path_cells",
@@ -835,7 +792,6 @@
 		{
 			"name": "cellToLocalIj",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "cellToLocalIj (mode 0)",
 			"rustOperation": "raw::cell_to_local_ij",
@@ -855,7 +811,6 @@
 		{
 			"name": "localIjToCell",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "localIjToCell (mode 0)",
 			"rustOperation": "raw::local_ij_to_cell",
@@ -875,7 +830,6 @@
 		{
 			"name": "greatCircleDistance",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "greatCircleDistanceKm | greatCircleDistanceM | greatCircleDistanceRads",
 			"rustOperation": "raw::great_circle_distance_{km,m,rads}",
@@ -897,7 +851,6 @@
 		{
 			"name": "cellArea",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "cellAreaKm2 | cellAreaM2 | cellAreaRads2",
 			"rustOperation": "raw::cell_area_{km2,m2,rads2}",
@@ -919,7 +872,6 @@
 		{
 			"name": "edgeLength",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "edgeLengthKm | edgeLengthM | edgeLengthRads",
 			"rustOperation": "raw::edge_length_{km,m,rads}",
@@ -941,7 +893,6 @@
 		{
 			"name": "getHexagonAreaAvg",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "getHexagonAreaAvgKm2 | getHexagonAreaAvgM2",
 			"rustOperation": "raw::get_hexagon_area_avg_{km2,m2}",
@@ -962,7 +913,6 @@
 		{
 			"name": "getHexagonEdgeLengthAvg",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "getHexagonEdgeLengthAvgKm | getHexagonEdgeLengthAvgM",
 			"rustOperation": "raw::get_hexagon_edge_length_avg_{km,m}",
@@ -983,7 +933,6 @@
 		{
 			"name": "cellToVertex",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "cellToVertex",
 			"rustOperation": "raw::cell_to_vertex",
@@ -1003,7 +952,6 @@
 		{
 			"name": "cellToVertexes",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "cellToVertexes",
 			"rustOperation": "raw::cell_to_vertexes",
@@ -1023,7 +971,6 @@
 		{
 			"name": "vertexToLatLng",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "vertexToLatLng",
 			"rustOperation": "raw::vertex_to_lat_lng",
@@ -1043,7 +990,6 @@
 		{
 			"name": "isValidVertex",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "isValidVertex",
 			"rustOperation": "raw::is_valid_vertex",
@@ -1063,7 +1009,6 @@
 		{
 			"name": "getNumCells",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "getNumCells",
 			"rustOperation": "raw::get_num_cells",
@@ -1083,7 +1028,6 @@
 		{
 			"name": "getRes0Cells",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "res0CellCount + getRes0Cells",
 			"rustOperation": "raw::get_res0_cells",
@@ -1103,7 +1047,6 @@
 		{
 			"name": "getPentagons",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "pentagonCount + getPentagons",
 			"rustOperation": "raw::get_pentagons",
@@ -1123,7 +1066,6 @@
 		{
 			"name": "degsToRads",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "degsToRads",
 			"rustOperation": "degs_to_rads",
@@ -1137,7 +1079,6 @@
 		{
 			"name": "radsToDegs",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "radsToDegs",
 			"rustOperation": "rads_to_degs",

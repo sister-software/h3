@@ -1,4 +1,4 @@
-//! Integer IJK coordinates and H3 direction digits.
+//! IJK coordinates and direction digits translated from H3 C `coordijk.h` (Apache-2.0).
 #![allow(clippy::wrong_self_convention)]
 use super::Vec2d;
 use crate::constants::{M_ONESEVENTH, M_SQRT3_2};

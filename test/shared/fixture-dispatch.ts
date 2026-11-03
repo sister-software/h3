@@ -190,7 +190,7 @@ export const DISPATCH: Record<string, Dispatch> = {
 		check: eqIndexes,
 	},
 
-	// --- Phase D
+	// Traversal and local IJ.
 	gridDisk: {
 		rangeError: (a) => (a.k as number) < 0,
 		run: (h3, a) => h3.gridDisk(a.index, a.k),
@@ -236,7 +236,7 @@ export const DISPATCH: Record<string, Dispatch> = {
 		check: eqIndex,
 	},
 
-	// --- Phase E
+	// Directed edges and vertices.
 	areNeighborCells: { run: (h3, a) => h3.areNeighborCells(a.origin, a.destination), check: eqValue },
 	cellsToDirectedEdge: { run: (h3, a) => h3.cellsToDirectedEdge(a.origin, a.destination), check: eqIndex },
 	isValidDirectedEdge: { run: (h3, a) => h3.isValidDirectedEdge(a.index), check: eqValue },
@@ -264,7 +264,7 @@ export const DISPATCH: Record<string, Dispatch> = {
 			),
 	},
 
-	// --- Phase F
+	// Measurements.
 	edgeLengthRads: {
 		run: (h3, a) => h3.edgeLength(a.index, "rads"),
 		check: (g, rec) => compareMeasure("edgeLength", g, rec.result!.value, UNIT_SCALE.rads!, LENGTH_TOLERANCE_RADS),
@@ -330,7 +330,7 @@ export const DISPATCH: Record<string, Dispatch> = {
 		check: (g, rec) => (Object.is(g, tagged(rec.result!.value)) ? undefined : `got ${String(g)}`),
 	},
 
-	// --- Phase G
+	// Polygons.
 	polygonToCells: {
 		skip: (a) => a.flags !== 0,
 		rangeError: (a) => outOfRes(a.res) || loopsHaveNonFinite(a),
