@@ -172,7 +172,9 @@ can be assigned to a different cell by a different libm. Measured with `yarn str
 against the `libm` crate, that band is about 1e-15 radians, a few nanometres on the ground: glibc
 on linux x86-64 has no flips at 1e-15 rad from an edge, and Apple's libm on macOS arm64 has none
 at 1.8e-15 rad. For a uniformly random point the estimated chance of a flip is below 1e-12 at
-resolution 9 and below 3e-10 at resolution 15. Cross-machine identical integer output is
+resolution 9 and below 3e-10 at resolution 15. Real data can be far denser on edges than random
+points: in one Overture POI layer, 1,490 of 14.7 million places (about 1e-4) lay within 3e-16 rad of
+a res-9 edge and got the neighboring cell from h3-js. Cross-machine identical integer output is
 promised only by the WebAssembly build and by the `libm` feature at a pinned crate version. If
 you store derived data and need reruns on another machine to match exactly, enable the feature
 (Cargo features are additive: if any crate in your build enables it, it is on for all). The polygon order of

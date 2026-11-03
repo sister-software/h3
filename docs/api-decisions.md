@@ -292,6 +292,14 @@ point flips scales with perimeter/area. Estimated per random point:
 
 None of the 12,000 random control points flipped on either platform.
 
+These rates hold only for points placed independently of the grid. Data derived from H3 geometry, or
+snapped to it upstream, can sit exactly on edges. Mailwoman's Overture POI layer (`poi.db`,
+2026-08-19 build) is the measured case. Recomputing its res-9 column with this package moved 1,490
+of 14,664,001 rows (1.0e-4) to an adjacent cell relative to the h3-js 4.5.0 build. Bisection put
+every one of those points within about 3e-16 rad of the edge, with the two libraries' edges at most
+4.6e-16 rad apart. Most of those rows share one Overture confidence score, which points to a
+single upstream source. The UPRN layer (41,629,393 Ordnance Survey points) matched on every row.
+
 ## Differences from h3-js 4.5.0
 
 `test/migration/h3-js.test.ts` runs h3-js 4.5.0 and this package over every JavaScript-expressible
