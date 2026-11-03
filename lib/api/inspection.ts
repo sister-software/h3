@@ -8,7 +8,7 @@
 
 import { ready } from "../runtime/state.ts"
 import { call, checkCount, checkIndex, M_180_PI, M_PI_180, readIndexes } from "./call.ts"
-import { type H3Index, type H3IndexInput, intArg, parseIndex, resArg, tryParseIndex } from "./indexes.ts"
+import { type H3Cell, type H3IndexInput, intArg, parseIndex, resArg, tryParseIndex } from "./indexes.ts"
 
 /**
  * Returns whether a value is a valid H3 cell. Never throws after initialization; `false` for any other value.
@@ -90,7 +90,11 @@ export function getIndexDigit(h3Index: H3IndexInput, digit: number): number {
  * Constructs a cell from its base cell number and digits. `res` defaults to `digits.length` and, when given, must equal
  * it. Out-of-domain base cells and digits throw `H3Error` with the C code.
  */
-export function constructCell(baseCellNumber: number, digits: readonly number[], res?: number): H3Index {
+export function constructCell<T extends string = H3Cell>(
+	baseCellNumber: number,
+	digits: readonly number[],
+	res?: number
+): T {
 	const w = ready()
 
 	if (typeof baseCellNumber !== "number") throw new TypeError("baseCellNumber must be a number")
@@ -123,26 +127,26 @@ export function constructCell(baseCellNumber: number, digits: readonly number[],
 	// Base cells outside 0..121 are reported by C as E_BASE_CELL_DOMAIN.
 	const bc = Math.max(-1, Math.min(122, baseCellNumber))
 
-	return call(() => checkIndex(w, w.construct_cell(resolved, bc, ds)))
+	return call(() => checkIndex<T>(w, w.construct_cell(resolved, bc, ds)))
 }
 
 /**
  * All 122 resolution 0 cells, in base cell order.
  */
-export function getRes0Cells(): H3Index[] {
+export function getRes0Cells<T extends string = H3Cell>(): T[] {
 	const w = ready()
 
-	return call(() => readIndexes(w, w.get_res0_cells()))
+	return call(() => readIndexes<T>(w, w.get_res0_cells()))
 }
 
 /**
  * The 12 pentagons at `res`, in base cell order.
  */
-export function getPentagons(res: number): H3Index[] {
+export function getPentagons<T extends string = H3Cell>(res: number): T[] {
 	const w = ready()
 	const r = resArg(res)
 
-	return call(() => readIndexes(w, w.get_pentagons(r)))
+	return call(() => readIndexes<T>(w, w.get_pentagons(r)))
 }
 
 /**

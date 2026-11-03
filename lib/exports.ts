@@ -16,6 +16,9 @@ export {
 	splitLongToH3Index,
 	type CoordPair,
 	type H3Index,
+	type H3Cell,
+	type H3DirectedEdge,
+	type H3Vertex,
 	type H3IndexInput,
 	type SplitLong,
 } from "./api/indexes.ts"

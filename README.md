@@ -94,6 +94,27 @@ cellsToMultiPolygon(hexagons, true)
 - Coordinates are degrees, `[lat, lng]`, or `[lng, lat]` when a GeoJSON switch is `true` (GeoJSON
   loops are closed). Measurement units come from `UNITS` (`km`, `m`, `rads`, `km2`, `m2`, `rads2`).
 
+### TypeScript index brands
+
+Cell, directed-edge, and vertex outputs default to `H3Cell`, `H3DirectedEdge`, and `H3Vertex`.
+These are distinct string brands with no runtime representation. Existing string and split-long inputs remain accepted,
+and `H3Index` remains the general string type.
+
+An index-producing function accepts a string type parameter for an application's existing brand:
+
+```ts
+import { latLngToCell, gridDisk } from "@sister.software/h3"
+
+declare const appCellBrand: unique symbol
+type AppCell = string & { readonly [appCellBrand]: true }
+
+const origin = latLngToCell<AppCell>(37.3615593, -122.0553238, 7)
+const nearby = gridDisk<AppCell>(origin, 1) // AppCell[]
+```
+
+Omit the type argument for this package's default brand, or use `<string>` for unbranded outputs.
+The type argument changes the annotation; it does not convert index values or validate application-specific rules.
+
 ### Errors
 
 | Situation                                                                                                                                   | Error                                                                             |

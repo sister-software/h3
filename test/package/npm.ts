@@ -50,6 +50,7 @@ export function checkTarball(tarball: string): string {
 
 export function checkDeclarations(consumer: string): string {
 	copyFileSync(join(root, "test/package/consumers/types.ts"), join(consumer, "consumer.ts"))
+	copyFileSync(join(root, "test/package/consumers/brands.ts"), join(consumer, "brands.ts"))
 
 	writeFileSync(
 		join(consumer, "tsconfig.json"),
@@ -64,11 +65,11 @@ export function checkDeclarations(consumer: string): string {
 				lib: ["ESNext", "DOM"],
 				types: [],
 			},
-			files: ["consumer.ts"],
+			files: ["consumer.ts", "brands.ts"],
 		})
 	)
 
 	sh(bin("tsc"), ["-p", join(consumer, "tsconfig.json")], consumer)
 
-	return "consumer.ts typechecks (including @ts-expect-error cases) with skipLibCheck false"
+	return "consumer.ts and brands.ts typecheck (including default brands, overrides, and @ts-expect-error cases) with skipLibCheck false"
 }

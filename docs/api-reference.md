@@ -6,6 +6,8 @@ Run `yarn docs:api` to update it after changing a public signature or descriptio
 Indexes use `H3IndexInput` (a hexadecimal string or a pair of 32-bit words) and return canonical lowercase `H3Index` strings.
 Coordinates use degree pairs. GeoJSON switches reverse the coordinate order and close output loops.
 
+Cell, directed-edge, and vertex outputs default to the string brands `H3Cell`, `H3DirectedEdge`, and `H3Vertex`. Index-producing functions accept `T extends string` to select an application brand or plain `string`. The type argument changes only the output annotation. Existing string and split-long inputs remain accepted; `H3Index` remains the general string alias.
+
 Argument type errors throw `TypeError`; invalid binding ranges throw `RangeError`; algorithm failures throw an error named `H3Error` with its numeric C `code`.
 Predicates and inspection functions document their sentinel results below. [API decisions](api-decisions.md) describe the shared behavior and migration differences.
 
@@ -68,7 +70,7 @@ Converts an H3 index to a split long: `[lower, upper]` unsigned 32-bit words. Pu
 ### splitLongToH3Index
 
 ```ts
-function splitLongToH3Index(lower: number, upper: number): H3Index
+function splitLongToH3Index<T extends string = H3Index>(lower: number, upper: number): T
 ```
 
 Converts a split long to an index string: the upper word in unpadded lowercase hex followed by exactly eight hex
@@ -131,7 +133,7 @@ unused digit (7 for a valid cell).
 ### constructCell
 
 ```ts
-function constructCell(baseCellNumber: number, digits: readonly number[], res?: number): H3Index
+function constructCell<T extends string = H3Cell>(baseCellNumber: number, digits: readonly number[], res?: number): T
 ```
 
 Constructs a cell from its base cell number and digits. `res` defaults to `digits.length` and, when given, must equal
@@ -140,7 +142,7 @@ it. Out-of-domain base cells and digits throw `H3Error` with the C code.
 ### getRes0Cells
 
 ```ts
-function getRes0Cells(): H3Index[]
+function getRes0Cells<T extends string = H3Cell>(): T[]
 ```
 
 All 122 resolution 0 cells, in base cell order.
@@ -148,7 +150,7 @@ All 122 resolution 0 cells, in base cell order.
 ### getPentagons
 
 ```ts
-function getPentagons(res: number): H3Index[]
+function getPentagons<T extends string = H3Cell>(res: number): T[]
 ```
 
 The 12 pentagons at `res`, in base cell order.
@@ -182,7 +184,7 @@ Radians to degrees (C `radsToDegs`). Pure; works before initialization.
 ### latLngToCell
 
 ```ts
-function latLngToCell(lat: number, lng: number, res: number): H3Index
+function latLngToCell<T extends string = H3Cell>(lat: number, lng: number, res: number): T
 ```
 
 Returns the cell containing a point (degrees) at `res`. Non-finite coordinates throw `RangeError`.
@@ -217,7 +219,7 @@ Returns the icosahedron faces (0–19) a cell intersects.
 ### cellToParent
 
 ```ts
-function cellToParent(h3Index: H3IndexInput, res: number): H3Index
+function cellToParent<T extends string = H3Cell>(h3Index: H3IndexInput, res: number): T
 ```
 
 Returns the parent of a cell at `res`.
@@ -225,7 +227,7 @@ Returns the parent of a cell at `res`.
 ### cellToChildren
 
 ```ts
-function cellToChildren(h3Index: H3IndexInput, res: number): H3Index[]
+function cellToChildren<T extends string = H3Cell>(h3Index: H3IndexInput, res: number): T[]
 ```
 
 All children of a cell at `res`, in C iteration order.
@@ -241,7 +243,7 @@ Returns the number of children of a cell at `res`.
 ### cellToCenterChild
 
 ```ts
-function cellToCenterChild(h3Index: H3IndexInput, res: number): H3Index
+function cellToCenterChild<T extends string = H3Cell>(h3Index: H3IndexInput, res: number): T
 ```
 
 Returns the center child of a cell at `res`.
@@ -257,7 +259,7 @@ Returns the position of a cell within its parent's ordered children at `parentRe
 ### childPosToCell
 
 ```ts
-function childPosToCell(childPos: number, h3Index: H3IndexInput, childRes: number): H3Index
+function childPosToCell<T extends string = H3Cell>(childPos: number, h3Index: H3IndexInput, childRes: number): T
 ```
 
 The child of `h3Index` at `childRes` with ordered position `childPos`.
@@ -265,7 +267,7 @@ The child of `h3Index` at `childRes` with ordered position `childPos`.
 ### compactCells
 
 ```ts
-function compactCells(h3Set: readonly H3IndexInput[]): H3Index[]
+function compactCells<T extends string = H3Cell>(h3Set: readonly H3IndexInput[]): T[]
 ```
 
 Compacts a set of same-resolution cells into the minimal covering set (C order).
@@ -273,7 +275,7 @@ Compacts a set of same-resolution cells into the minimal covering set (C order).
 ### uncompactCells
 
 ```ts
-function uncompactCells(compactedSet: readonly H3IndexInput[], res: number): H3Index[]
+function uncompactCells<T extends string = H3Cell>(compactedSet: readonly H3IndexInput[], res: number): T[]
 ```
 
 Expands a compacted set to cells at `res`.
@@ -283,7 +285,7 @@ Expands a compacted set to cells at `res`.
 ### gridDisk
 
 ```ts
-function gridDisk(h3Index: H3IndexInput, ringSize: number): H3Index[]
+function gridDisk<T extends string = H3Cell>(h3Index: H3IndexInput, ringSize: number): T[]
 ```
 
 Returns all cells within grid distance `ringSize` of a cell (unspecified order, no gaps).
@@ -291,7 +293,7 @@ Returns all cells within grid distance `ringSize` of a cell (unspecified order, 
 ### gridDiskDistances
 
 ```ts
-function gridDiskDistances(h3Index: H3IndexInput, ringSize: number): H3Index[][]
+function gridDiskDistances<T extends string = H3Cell>(h3Index: H3IndexInput, ringSize: number): T[][]
 ```
 
 Returns cells within `ringSize`, grouped by distance: element `d` holds the cells at distance `d`.
@@ -299,7 +301,7 @@ Returns cells within `ringSize`, grouped by distance: element `d` holds the cell
 ### gridRing
 
 ```ts
-function gridRing(h3Index: H3IndexInput, ringSize: number): H3Index[]
+function gridRing<T extends string = H3Cell>(h3Index: H3IndexInput, ringSize: number): T[]
 ```
 
 Returns the hollow ring of cells at exactly grid distance `ringSize`.
@@ -307,7 +309,7 @@ Returns the hollow ring of cells at exactly grid distance `ringSize`.
 ### gridRingUnsafe
 
 ```ts
-function gridRingUnsafe(h3Index: H3IndexInput, ringSize: number): H3Index[]
+function gridRingUnsafe<T extends string = H3Cell>(h3Index: H3IndexInput, ringSize: number): T[]
 ```
 
 Returns the hollow ring at `ringSize`; throws `H3Error` (`E_PENTAGON`) near pentagon distortion.
@@ -323,7 +325,7 @@ Returns the grid distance between two cells.
 ### gridPathCells
 
 ```ts
-function gridPathCells(origin: H3IndexInput, destination: H3IndexInput): H3Index[]
+function gridPathCells<T extends string = H3Cell>(origin: H3IndexInput, destination: H3IndexInput): T[]
 ```
 
 Returns a line of adjacent cells from `origin` to `destination`, inclusive.
@@ -339,7 +341,7 @@ Local IJ coordinates of `destination` anchored at `origin` (C mode 0).
 ### localIjToCell
 
 ```ts
-function localIjToCell(origin: H3IndexInput, coords: CoordIJ): H3Index
+function localIjToCell<T extends string = H3Cell>(origin: H3IndexInput, coords: CoordIJ): T
 ```
 
 The cell at local IJ coordinates anchored at `origin` (C mode 0).
@@ -357,7 +359,7 @@ Returns whether two cells are neighbors. Throws `H3Error` for invalid cells or m
 ### cellsToDirectedEdge
 
 ```ts
-function cellsToDirectedEdge(origin: H3IndexInput, destination: H3IndexInput): H3Index
+function cellsToDirectedEdge<T extends string = H3DirectedEdge>(origin: H3IndexInput, destination: H3IndexInput): T
 ```
 
 Returns the directed edge from `origin` to neighboring `destination`.
@@ -365,7 +367,7 @@ Returns the directed edge from `origin` to neighboring `destination`.
 ### getDirectedEdgeOrigin
 
 ```ts
-function getDirectedEdgeOrigin(edgeIndex: H3IndexInput): H3Index
+function getDirectedEdgeOrigin<T extends string = H3Cell>(edgeIndex: H3IndexInput): T
 ```
 
 Returns the origin cell of a directed edge.
@@ -373,7 +375,7 @@ Returns the origin cell of a directed edge.
 ### getDirectedEdgeDestination
 
 ```ts
-function getDirectedEdgeDestination(edgeIndex: H3IndexInput): H3Index
+function getDirectedEdgeDestination<T extends string = H3Cell>(edgeIndex: H3IndexInput): T
 ```
 
 Returns the destination cell of a directed edge.
@@ -397,7 +399,7 @@ Returns whether a value is a valid cell, directed edge, or vertex. Never throws 
 ### directedEdgeToCells
 
 ```ts
-function directedEdgeToCells(edgeIndex: H3IndexInput): [H3Index, H3Index]
+function directedEdgeToCells<T extends string = H3Cell>(edgeIndex: H3IndexInput): [T, T]
 ```
 
 `[origin, destination]` of a directed edge.
@@ -405,7 +407,7 @@ function directedEdgeToCells(edgeIndex: H3IndexInput): [H3Index, H3Index]
 ### originToDirectedEdges
 
 ```ts
-function originToDirectedEdges(h3Index: H3IndexInput): H3Index[]
+function originToDirectedEdges<T extends string = H3DirectedEdge>(h3Index: H3IndexInput): T[]
 ```
 
 Returns the directed edges originating at a cell (five for a pentagon).
@@ -421,7 +423,7 @@ The boundary of a directed edge, in degrees. GeoJSON order is `[lng, lat]` (not 
 ### reverseDirectedEdge
 
 ```ts
-function reverseDirectedEdge(edgeIndex: H3IndexInput): H3Index
+function reverseDirectedEdge<T extends string = H3DirectedEdge>(edgeIndex: H3IndexInput): T
 ```
 
 The reverse of a directed edge.
@@ -429,7 +431,7 @@ The reverse of a directed edge.
 ### cellToVertex
 
 ```ts
-function cellToVertex(h3Index: H3IndexInput, vertexNum: number): H3Index
+function cellToVertex<T extends string = H3Vertex>(h3Index: H3IndexInput, vertexNum: number): T
 ```
 
 Returns the vertex `vertexNum` (0–5, or 0–4 for pentagons) of a cell.
@@ -437,7 +439,7 @@ Returns the vertex `vertexNum` (0–5, or 0–4 for pentagons) of a cell.
 ### cellToVertexes
 
 ```ts
-function cellToVertexes(h3Index: H3IndexInput): H3Index[]
+function cellToVertexes<T extends string = H3Vertex>(h3Index: H3IndexInput): T[]
 ```
 
 All vertexes of a cell (five for a pentagon).
@@ -505,7 +507,11 @@ Returns the average hexagon edge length at `res`, in `km` or `m`.
 ### polygonToCells
 
 ```ts
-function polygonToCells(coordinates: number[][] | number[][][], res: number, isGeoJson?: boolean): H3Index[]
+function polygonToCells<T extends string = H3Cell>(
+	coordinates: number[][] | number[][][],
+	res: number,
+	isGeoJson?: boolean
+): T[]
 ```
 
 Returns cells whose centers lie inside a polygon (C `polygonToCells`). `coordinates` is one loop or an array of loops
@@ -515,12 +521,12 @@ unspecified.
 ### polygonToCellsExperimental
 
 ```ts
-function polygonToCellsExperimental(
+function polygonToCellsExperimental<T extends string = H3Cell>(
 	coordinates: number[][] | number[][][],
 	res: number,
 	flags: string,
 	isGeoJson?: boolean
-): H3Index[]
+): T[]
 ```
 
 Returns cells covering a polygon under a containment mode from `POLYGON_TO_CELLS_FLAGS` (C

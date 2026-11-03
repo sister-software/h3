@@ -8,19 +8,19 @@
 
 import { ready, statusError } from "../runtime/state.ts"
 import { call, checkIndex, checkVec, M_180_PI, radPairsToDegrees, readF64 } from "./call.ts"
-import { boolArg, type CoordPair, finiteArg, type H3Index, type H3IndexInput, parseIndex, resArg } from "./indexes.ts"
+import { boolArg, type CoordPair, finiteArg, type H3Cell, type H3IndexInput, parseIndex, resArg } from "./indexes.ts"
 
 /**
  * Returns the cell containing a point (degrees) at `res`. Non-finite coordinates throw `RangeError`.
  */
-export function latLngToCell(lat: number, lng: number, res: number): H3Index {
+export function latLngToCell<T extends string = H3Cell>(lat: number, lng: number, res: number): T {
 	const w = ready()
 	const la = finiteArg(lat, "lat")
 	const ln = finiteArg(lng, "lng")
 	const r = resArg(res)
 	const h = call(() => w.lat_lng_to_cell(la, ln, r))
 
-	return checkIndex(w, h)
+	return checkIndex<T>(w, h)
 }
 
 /**

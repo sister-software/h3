@@ -39,6 +39,8 @@ const lines = [
 	"Indexes use `H3IndexInput` (a hexadecimal string or a pair of 32-bit words) and return canonical lowercase `H3Index` strings.",
 	"Coordinates use degree pairs. GeoJSON switches reverse the coordinate order and close output loops.",
 	"",
+	"Cell, directed-edge, and vertex outputs default to the string brands `H3Cell`, `H3DirectedEdge`, and `H3Vertex`. Index-producing functions accept `T extends string` to select an application brand or plain `string`. The type argument changes only the output annotation. Existing string and split-long inputs remain accepted; `H3Index` remains the general string alias.",
+	"",
 	"Argument type errors throw `TypeError`; invalid binding ranges throw `RangeError`; algorithm failures throw an error named `H3Error` with its numeric C `code`.",
 	"Predicates and inspection functions document their sentinel results below. [API decisions](api-decisions.md) describe the shared behavior and migration differences.",
 	"",

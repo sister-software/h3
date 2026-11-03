@@ -11,7 +11,9 @@ import { call, checkIndex, M_180_PI, radPairsToDegrees, readF64, readIndexes } f
 import {
 	boolArg,
 	type CoordPair,
-	type H3Index,
+	type H3Cell,
+	type H3DirectedEdge,
+	type H3Vertex,
 	type H3IndexInput,
 	intArg,
 	parseIndex,
@@ -35,32 +37,35 @@ export function areNeighborCells(origin: H3IndexInput, destination: H3IndexInput
 /**
  * Returns the directed edge from `origin` to neighboring `destination`.
  */
-export function cellsToDirectedEdge(origin: H3IndexInput, destination: H3IndexInput): H3Index {
+export function cellsToDirectedEdge<T extends string = H3DirectedEdge>(
+	origin: H3IndexInput,
+	destination: H3IndexInput
+): T {
 	const w = ready()
 	const a = parseIndex(origin, "origin")
 	const b = parseIndex(destination, "destination")
 
-	return call(() => checkIndex(w, w.cells_to_directed_edge(a, b)))
+	return call(() => checkIndex<T>(w, w.cells_to_directed_edge(a, b)))
 }
 
 /**
  * Returns the origin cell of a directed edge.
  */
-export function getDirectedEdgeOrigin(edgeIndex: H3IndexInput): H3Index {
+export function getDirectedEdgeOrigin<T extends string = H3Cell>(edgeIndex: H3IndexInput): T {
 	const w = ready()
 	const e = parseIndex(edgeIndex, "edgeIndex")
 
-	return call(() => checkIndex(w, w.get_directed_edge_origin(e)))
+	return call(() => checkIndex<T>(w, w.get_directed_edge_origin(e)))
 }
 
 /**
  * Returns the destination cell of a directed edge.
  */
-export function getDirectedEdgeDestination(edgeIndex: H3IndexInput): H3Index {
+export function getDirectedEdgeDestination<T extends string = H3Cell>(edgeIndex: H3IndexInput): T {
 	const w = ready()
 	const e = parseIndex(edgeIndex, "edgeIndex")
 
-	return call(() => checkIndex(w, w.get_directed_edge_destination(e)))
+	return call(() => checkIndex<T>(w, w.get_directed_edge_destination(e)))
 }
 
 /**
@@ -90,10 +95,10 @@ export function isValidIndex(h3Index: unknown): boolean {
 /**
  * `[origin, destination]` of a directed edge.
  */
-export function directedEdgeToCells(edgeIndex: H3IndexInput): [H3Index, H3Index] {
+export function directedEdgeToCells<T extends string = H3Cell>(edgeIndex: H3IndexInput): [T, T] {
 	const w = ready()
 	const e = parseIndex(edgeIndex, "edgeIndex")
-	const v = call(() => readIndexes(w, w.directed_edge_to_cells(e)))
+	const v = call(() => readIndexes<T>(w, w.directed_edge_to_cells(e)))
 
 	return [v[0]!, v[1]!]
 }
@@ -101,11 +106,11 @@ export function directedEdgeToCells(edgeIndex: H3IndexInput): [H3Index, H3Index]
 /**
  * Returns the directed edges originating at a cell (five for a pentagon).
  */
-export function originToDirectedEdges(h3Index: H3IndexInput): H3Index[] {
+export function originToDirectedEdges<T extends string = H3DirectedEdge>(h3Index: H3IndexInput): T[] {
 	const w = ready()
 	const h = parseIndex(h3Index, "h3Index")
 
-	return call(() => readIndexes(w, w.origin_to_directed_edges(h)))
+	return call(() => readIndexes<T>(w, w.origin_to_directed_edges(h)))
 }
 
 /**
@@ -123,33 +128,33 @@ export function directedEdgeToBoundary(edgeIndex: H3IndexInput, formatAsGeoJson?
 /**
  * The reverse of a directed edge.
  */
-export function reverseDirectedEdge(edgeIndex: H3IndexInput): H3Index {
+export function reverseDirectedEdge<T extends string = H3DirectedEdge>(edgeIndex: H3IndexInput): T {
 	const w = ready()
 	const e = parseIndex(edgeIndex, "edgeIndex")
 
-	return call(() => checkIndex(w, w.reverse_directed_edge(e)))
+	return call(() => checkIndex<T>(w, w.reverse_directed_edge(e)))
 }
 
 /**
  * Returns the vertex `vertexNum` (0–5, or 0–4 for pentagons) of a cell.
  */
-export function cellToVertex(h3Index: H3IndexInput, vertexNum: number): H3Index {
+export function cellToVertex<T extends string = H3Vertex>(h3Index: H3IndexInput, vertexNum: number): T {
 	const w = ready()
 	const h = parseIndex(h3Index, "h3Index")
 	// Integers outside the cell's vertex range are reported by C as E_DOMAIN.
 	const v = intArg(vertexNum, "vertexNum", -0x80_00_00_00, 0x7f_ff_ff_ff)
 
-	return call(() => checkIndex(w, w.cell_to_vertex(h, v)))
+	return call(() => checkIndex<T>(w, w.cell_to_vertex(h, v)))
 }
 
 /**
  * All vertexes of a cell (five for a pentagon).
  */
-export function cellToVertexes(h3Index: H3IndexInput): H3Index[] {
+export function cellToVertexes<T extends string = H3Vertex>(h3Index: H3IndexInput): T[] {
 	const w = ready()
 	const h = parseIndex(h3Index, "h3Index")
 
-	return call(() => readIndexes(w, w.cell_to_vertexes(h)))
+	return call(() => readIndexes<T>(w, w.cell_to_vertexes(h)))
 }
 
 /**

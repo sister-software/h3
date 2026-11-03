@@ -8,19 +8,20 @@
  */
 
 import { type Bindings, memoryBuffer, statusError, trapped } from "../runtime/state.ts"
+import type { H3Index } from "./indexes.ts"
 
 /**
  * An index result. `0n` is either a failure or C returning `H3_NULL` successfully (possible for some operations on
  * invalid input), distinguished by `last_error()`. @internal
  */
-export function checkIndex(w: Bindings, h: bigint): string {
+export function checkIndex<T extends string = H3Index>(w: Bindings, h: bigint): T {
 	if (h === 0n) {
 		const status = w.last_error()
 
 		if (status !== 0) throw statusError(w, status)
 	}
 
-	return h.toString(16)
+	return h.toString(16) as T
 }
 
 /**
@@ -80,14 +81,14 @@ export const M_PI_180 = 0.017453292519943295
  *
  * @internal
  */
-export function readIndexes(w: Bindings, n: number): string[] {
+export function readIndexes<T extends string = H3Index>(w: Bindings, n: number): T[] {
 	if (n < 0) throw statusError(w, -n)
 
 	const view = new BigUint64Array(memoryBuffer(), w.out_u64_ptr(), n)
-	const out: string[] = new Array(n)
+	const out: T[] = new Array(n)
 
 	for (let i = 0; i < n; i++) {
-		out[i] = view[i]!.toString(16)
+		out[i] = view[i]!.toString(16) as T
 	}
 
 	return out

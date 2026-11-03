@@ -13,7 +13,7 @@ import {
 	boolArg,
 	type CoordPair,
 	finiteArg,
-	type H3Index,
+	type H3Cell,
 	type H3IndexInput,
 	parseIndexArray,
 	resArg,
@@ -81,24 +81,28 @@ function flattenPolygon(coordinates: unknown, geoJson: boolean): { coords: Float
  * (exterior first, then holes) of `[lat, lng]` degree pairs, or `[lng, lat]` with `isGeoJson`. Output order is
  * unspecified.
  */
-export function polygonToCells(coordinates: number[][] | number[][][], res: number, isGeoJson?: boolean): H3Index[] {
+export function polygonToCells<T extends string = H3Cell>(
+	coordinates: number[][] | number[][][],
+	res: number,
+	isGeoJson?: boolean
+): T[] {
 	const w = ready()
 	const r = resArg(res)
 	const { coords, lengths } = flattenPolygon(coordinates, boolArg(isGeoJson, "isGeoJson"))
 
-	return call(() => readIndexes(w, w.polygon_to_cells(coords, lengths, r)))
+	return call(() => readIndexes<T>(w, w.polygon_to_cells(coords, lengths, r)))
 }
 
 /**
  * Returns cells covering a polygon under a containment mode from {@link POLYGON_TO_CELLS_FLAGS} (C
  * `polygonToCellsExperimental`). Output is in C iteration order.
  */
-export function polygonToCellsExperimental(
+export function polygonToCellsExperimental<T extends string = H3Cell>(
 	coordinates: number[][] | number[][][],
 	res: number,
 	flags: string,
 	isGeoJson?: boolean
-): H3Index[] {
+): T[] {
 	const w = ready()
 	const r = resArg(res)
 
@@ -108,7 +112,7 @@ export function polygonToCellsExperimental(
 	if (code === undefined) throw new RangeError(`unknown POLYGON_TO_CELLS_FLAGS value ${JSON.stringify(flags)}`)
 	const { coords, lengths } = flattenPolygon(coordinates, boolArg(isGeoJson, "isGeoJson"))
 
-	return call(() => readIndexes(w, w.polygon_to_cells_experimental(coords, lengths, r, code)))
+	return call(() => readIndexes<T>(w, w.polygon_to_cells_experimental(coords, lengths, r, code)))
 }
 
 /**
