@@ -1,4 +1,4 @@
-//! Native Rust versus pinned H3 C fixtures: Phase D (traversal and local IJ).
+//! Native Rust versus pinned H3 C fixtures: (traversal and local IJ).
 //!
 //! Disk and ring outputs are compared against C's whole output buffer, in C order, including
 //! unused `0` slots.

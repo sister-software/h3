@@ -1,12 +1,13 @@
 /**
- * Measurements (Phase F): distances, areas, edge lengths, resolution averages.
+ * Measurements: distances, areas, edge lengths, resolution averages.
  *
  * @license MIT
  * @author Teffen Ellis, et al.
  * @copyright Sister Software
  */
 
-import { type Bindings, ready, statusError, trapped } from "../runtime/state.ts"
+import { type Bindings, ready, statusError } from "../runtime/state.ts"
+import { call } from "./call.ts"
 import { type CoordPair, finiteArg, type H3IndexInput, parseIndex, resArg } from "./indexes.ts"
 
 function unitArg(unit: unknown, allowed: Record<string, number>): number {
@@ -38,7 +39,7 @@ const LENGTH_UNITS = { rads: 0, km: 1, m: 2 }
 const AREA_UNITS = { rads2: 0, km2: 1, m2: 2 }
 
 /**
- * Great-circle distance between two `[lat, lng]` degree points, in `km`, `m`, or `rads`.
+ * Returns the great-circle distance between two `[lat, lng]` degree points, in `km`, `m`, or `rads`.
  */
 export function greatCircleDistance(latLng1: CoordPair, latLng2: CoordPair, unit: "km" | "m" | "rads"): number {
 	const w = ready()
@@ -46,69 +47,49 @@ export function greatCircleDistance(latLng1: CoordPair, latLng2: CoordPair, unit
 	const b = coordArg(latLng2, "latLng2")
 	const u = unitArg(unit, LENGTH_UNITS)
 
-	try {
-		return w.great_circle_distance(a[0], a[1], b[0], b[1], u)
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => w.great_circle_distance(a[0], a[1], b[0], b[1], u))
 }
 
 /**
- * The exact area of a cell, in `km2`, `m2`, or `rads2`.
+ * Returns the exact area of a cell, in `km2`, `m2`, or `rads2`.
  */
 export function cellArea(h3Index: H3IndexInput, unit: "km2" | "m2" | "rads2"): number {
 	const w = ready()
 	const h = parseIndex(h3Index, "h3Index")
 	const u = unitArg(unit, AREA_UNITS)
 
-	try {
-		return checkFloat(w, w.cell_area(h, u))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => checkFloat(w, w.cell_area(h, u)))
 }
 
 /**
- * The exact length of a directed edge, in `km`, `m`, or `rads`.
+ * Returns the exact length of a directed edge, in `km`, `m`, or `rads`.
  */
 export function edgeLength(edge: H3IndexInput, unit: "km" | "m" | "rads"): number {
 	const w = ready()
 	const e = parseIndex(edge, "edge")
 	const u = unitArg(unit, LENGTH_UNITS)
 
-	try {
-		return checkFloat(w, w.edge_length(e, u))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => checkFloat(w, w.edge_length(e, u)))
 }
 
 /**
- * The average hexagon area at `res`, in `km2` or `m2`.
+ * Returns the average hexagon area at `res`, in `km2` or `m2`.
  */
 export function getHexagonAreaAvg(res: number, unit: "km2" | "m2"): number {
 	const w = ready()
 	const r = resArg(res)
 	const u = unitArg(unit, { km2: 1, m2: 2 })
 
-	try {
-		return checkFloat(w, w.get_hexagon_area_avg(r, u))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => checkFloat(w, w.get_hexagon_area_avg(r, u)))
 }
 
 /**
- * The average hexagon edge length at `res`, in `km` or `m`.
+ * Returns the average hexagon edge length at `res`, in `km` or `m`.
  */
 export function getHexagonEdgeLengthAvg(res: number, unit: "km" | "m"): number {
 	const w = ready()
 	const r = resArg(res)
 	const u = unitArg(unit, { km: 1, m: 2 })
 
-	try {
-		return checkFloat(w, w.get_hexagon_edge_length_avg(r, u))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => checkFloat(w, w.get_hexagon_edge_length_avg(r, u)))
 }

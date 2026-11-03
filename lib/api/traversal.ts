@@ -1,13 +1,13 @@
 /**
- * Grid traversal (Phase D): disks, rings, distances, paths, local IJ.
+ * Grid traversal: disks, rings, distances, paths, local IJ.
  *
  * @license MIT
  * @author Teffen Ellis, et al.
  * @copyright Sister Software
  */
 
-import { ready, statusError, trapped } from "../runtime/state.ts"
-import { checkCount, checkIndex, checkVec, readIndexes } from "./call.ts"
+import { ready, statusError } from "../runtime/state.ts"
+import { call, checkCount, checkIndex, checkVec, readIndexes } from "./call.ts"
 import { type H3Index, type H3IndexInput, intArg, parseIndex } from "./indexes.ts"
 
 /**
@@ -25,34 +25,24 @@ function ringSizeArg(x: unknown): number {
 }
 
 /**
- * All cells within grid distance `ringSize` of a cell (unspecified order, no gaps).
+ * Returns all cells within grid distance `ringSize` of a cell (unspecified order, no gaps).
  */
 export function gridDisk(h3Index: H3IndexInput, ringSize: number): H3Index[] {
 	const w = ready()
 	const h = parseIndex(h3Index, "h3Index")
 	const k = ringSizeArg(ringSize)
 
-	try {
-		return readIndexes(w, w.grid_disk(h, k))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => readIndexes(w, w.grid_disk(h, k)))
 }
 
 /**
- * Cells within `ringSize`, grouped by distance: element `d` holds the cells at distance `d`.
+ * Returns cells within `ringSize`, grouped by distance: element `d` holds the cells at distance `d`.
  */
 export function gridDiskDistances(h3Index: H3IndexInput, ringSize: number): H3Index[][] {
 	const w = ready()
 	const h = parseIndex(h3Index, "h3Index")
 	const k = ringSizeArg(ringSize)
-	let flat: BigUint64Array
-
-	try {
-		flat = checkVec(w, w.grid_disk_distances(h, k))
-	} catch (error) {
-		throw trapped(error)
-	}
+	const flat = call(() => checkVec(w, w.grid_disk_distances(h, k)))
 
 	const out: H3Index[][] = Array.from({ length: k + 1 }, () => [])
 
@@ -64,63 +54,47 @@ export function gridDiskDistances(h3Index: H3IndexInput, ringSize: number): H3In
 }
 
 /**
- * The hollow ring of cells at exactly grid distance `ringSize`.
+ * Returns the hollow ring of cells at exactly grid distance `ringSize`.
  */
 export function gridRing(h3Index: H3IndexInput, ringSize: number): H3Index[] {
 	const w = ready()
 	const h = parseIndex(h3Index, "h3Index")
 	const k = ringSizeArg(ringSize)
 
-	try {
-		return readIndexes(w, w.grid_ring(h, k))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => readIndexes(w, w.grid_ring(h, k)))
 }
 
 /**
- * The hollow ring at `ringSize`; throws `H3Error` (`E_PENTAGON`) near pentagon distortion.
+ * Returns the hollow ring at `ringSize`; throws `H3Error` (`E_PENTAGON`) near pentagon distortion.
  */
 export function gridRingUnsafe(h3Index: H3IndexInput, ringSize: number): H3Index[] {
 	const w = ready()
 	const h = parseIndex(h3Index, "h3Index")
 	const k = ringSizeArg(ringSize)
 
-	try {
-		return readIndexes(w, w.grid_ring_unsafe(h, k))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => readIndexes(w, w.grid_ring_unsafe(h, k)))
 }
 
 /**
- * The grid distance between two cells.
+ * Returns the grid distance between two cells.
  */
 export function gridDistance(origin: H3IndexInput, destination: H3IndexInput): number {
 	const w = ready()
 	const a = parseIndex(origin, "origin")
 	const b = parseIndex(destination, "destination")
 
-	try {
-		return checkCount(w, w.grid_distance(a, b))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => checkCount(w, w.grid_distance(a, b)))
 }
 
 /**
- * A line of adjacent cells from `origin` to `destination`, inclusive.
+ * Returns a line of adjacent cells from `origin` to `destination`, inclusive.
  */
 export function gridPathCells(origin: H3IndexInput, destination: H3IndexInput): H3Index[] {
 	const w = ready()
 	const a = parseIndex(origin, "origin")
 	const b = parseIndex(destination, "destination")
 
-	try {
-		return readIndexes(w, w.grid_path_cells(a, b))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => readIndexes(w, w.grid_path_cells(a, b)))
 }
 
 /**
@@ -130,13 +104,7 @@ export function cellToLocalIj(origin: H3IndexInput, destination: H3IndexInput): 
 	const w = ready()
 	const a = parseIndex(origin, "origin")
 	const b = parseIndex(destination, "destination")
-	let status: number
-
-	try {
-		status = w.cell_to_local_ij(a, b)
-	} catch (error) {
-		throw trapped(error)
-	}
+	const status = call(() => w.cell_to_local_ij(a, b))
 
 	if (status !== 0) throw statusError(w, status)
 
@@ -154,9 +122,5 @@ export function localIjToCell(origin: H3IndexInput, coords: CoordIJ): H3Index {
 	const i = intArg(coords.i, "coords.i", -0x80_00_00_00, 0x7f_ff_ff_ff)
 	const j = intArg(coords.j, "coords.j", -0x80_00_00_00, 0x7f_ff_ff_ff)
 
-	try {
-		return checkIndex(w, w.local_ij_to_cell(a, i, j))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => checkIndex(w, w.local_ij_to_cell(a, i, j)))
 }

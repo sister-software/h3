@@ -75,7 +75,9 @@
 		"lint:oxfmt": "oxfmt --check .",
 		"lint:fix": "run-s fix:oxlint format",
 		"fix:oxlint": "oxlint --fix",
-		"format": "oxfmt ."
+		"format": "oxfmt .",
+		"docs:api": "yarn compile && node scripts/api-reference.ts",
+		"check:docs": "node scripts/api-reference.ts --check"
 	},
 	"devDependencies": {
 		"@sister.software/oxfmt-config": "^14.7.0",

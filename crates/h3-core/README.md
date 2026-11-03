@@ -6,7 +6,7 @@ verified against it: bit for bit on linux x86-64 glibc, within documented bounds
 
 ```toml
 [dependencies]
-sister-h3 = "0.1"
+sister-h3 = "1.0"
 ```
 
 ```rust
@@ -22,14 +22,16 @@ assert_eq!(raw::cell_to_parent(cell.get(), 9).unwrap_err().code(), 12);
 
 - `sister_h3::raw` mirrors the C API (snake-case names, `Result<T, H3Error>`), including C's
   behaviour on unvalidated input and C output-buffer shapes for disks, rings and polygon fill.
-- `CellIndex`, `DirectedEdgeIndex`, and `VertexIndex` validate on construction.
+- `CellIndex`, `DirectedEdgeIndex`, and `VertexIndex` validate on construction and support text parsing and raw-index conversion.
+- Cells expose typed disks, rings, paths, distances, and area measurements. Traversal iterators omit unused C buffer slots.
+- Resolution arguments remain `i32` for compatibility and are validated by each operation.
 - Angles are radians; use `LatLng::from_degrees`, `degs_to_rads`, and `rads_to_degs` to convert.
 - No `unsafe`, no C, no JavaScript, and no runtime dependencies by default.
 
 ## The `libm` feature
 
 ```toml
-sister-h3 = { version = "0.1", features = ["libm"] }
+sister-h3 = { version = "1.0", features = ["libm"] }
 ```
 
 By default, `sin`, `cos`, `tan`, `acos`, `atan`, and `atan2` come from the platform's libm, the

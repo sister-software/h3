@@ -7,7 +7,7 @@
  * @copyright Sister Software
  */
 
-import { type Bindings, memoryBuffer, statusError } from "../runtime/state.ts"
+import { type Bindings, memoryBuffer, statusError, trapped } from "../runtime/state.ts"
 
 /**
  * An index result. `0n` is either a failure or C returning `H3_NULL` successfully (possible for some operations on
@@ -102,4 +102,18 @@ export function readF64(w: Bindings, n: number): Float64Array {
 	if (n < 0) throw statusError(w, -n)
 
 	return new Float64Array(memoryBuffer(), w.out_f64_ptr(), n).slice()
+}
+
+/**
+ * Runs a WASM operation and preserves the runtime's trap-poisoning behavior. Argument validation stays in the caller so
+ * it retains the public error order.
+ *
+ * @internal
+ */
+export function call<T>(operation: () => T): T {
+	try {
+		return operation()
+	} catch (error) {
+		throw trapped(error)
+	}
 }

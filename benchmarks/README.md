@@ -1,27 +1,42 @@
 # Benchmarks
 
 ```sh
-yarn benchmark                 # writes benchmarks/RESULTS.md and benchmarks/results/latest.json
+yarn benchmark
 H3_BENCH_SAMPLES=31 yarn benchmark
+H3_BENCH_SAMPLES=3 H3_BENCH_OUTPUT="$PWD/target/benchmark-smoke" yarn benchmark
 ```
 
-What is measured (`benchmarks/run.ts`):
+The default output is `benchmarks/RESULTS.md` and `benchmarks/results/latest.json`.
+`H3_BENCH_OUTPUT` selects a separate report directory for smoke runs.
 
-| Section                                  | Method                                                                                                                                                                                                                                                                                     |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Public JavaScript API versus h3-js 4.5.0 | The six priority functions on fixed seeded inputs (10,000 points at res 9; see `RESULTS.md` for each workload). Three warmup runs, then interleaved samples that alternate which implementation runs first; median and interquartile range of ns per operation; output checksums compared. |
-| Boundary costs                           | Index string to `BigInt` and back alone; the raw WASM export alone; the public function.                                                                                                                                                                                                   |
-| Cold start                               | Fresh Node processes: module import, `init({ bytes })` (compile and instantiate), first call.                                                                                                                                                                                              |
-| Native Rust versus C                     | `crates/h3-core/examples/bench.rs` and `benchmarks/c/bench.c` on identical workloads and inputs (same SplitMix64 sequence), with checksums. C runs only if `target/reference/h3-c` exists (`yarn generate:fixtures` builds it).                                                            |
-| Memory (Node)                            | Fresh process with `--expose-gc`: JS heap used, `ArrayBuffer` bytes, and WASM `memory.buffer.byteLength` before import, after import, after `init`, and after scalar, disk, compact, and polygon workloads; then five rounds of the same workloads to show the plateau.                    |
-| Memory (workerd)                         | Local `wrangler dev`; the Worker imports a workspace bundle on demand and runs the same stages; JS heap and backing storage come from the inspector's `Runtime.getHeapUsage` (which excludes WASM memory, reported separately).                                                            |
+| Measurement           | Method                                                                                                                                                                                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public JavaScript API | Six operations use fixed seeded inputs. Each implementation receives three warmup runs. Samples alternate execution order and report median and interquartile range in nanoseconds per operation.                      |
+| Boundary costs        | Separate loops measure index conversion, raw WASM exports, and public functions.                                                                                                                                       |
+| Cold start            | Fresh Node processes measure import, first-use initialization, subsequent calls, and explicit preloading.                                                                                                              |
+| Native Rust and C     | Matching seeded workloads run in the native Rust example and C benchmark. Rust uses both default math and portable `libm`. C is included when `target/reference/h3-c/lib/libh3.a` exists.                              |
+| Node memory           | A fresh process with `--expose-gc` records JavaScript heap, array buffers, and WASM linear memory after each workload and repeated rounds.                                                                             |
+| workerd memory        | A managed Wrangler process exposes heap usage through its inspector. The report distinguishes measured data, an unavailable inspector target, and failed execution. Failed execution makes the benchmark command fail. |
 
-Caveats:
+## Measurement schema 2
 
-- The development machine is shared. Every report records the load average before and after, and
-  results taken with nonzero load are indicative, not authoritative. Compare ratios within one run
-  rather than absolute numbers across runs.
-- h3-js and this package use different WebAssembly math libraries and C revisions, so `cellToLatLng`
-  outputs are compared after rounding to 1e-6 degrees.
-- WASM memory never shrinks; a plateau across repeated identical workloads (rather than growth)
-  distinguishes reusable capacity from a leak.
+JavaScript timings include API calls and collection of their returned results. They exclude validation,
+string joining, checksums, and report formatting. The outer collection cost remains part of bulk workloads.
+
+Validation runs before warmup. Index operations compare every index; unordered outputs compare sorted
+collections with multiplicity preserved. Coordinate operations compare both coordinates of every center
+with an absolute tolerance of `1e-12` degrees. A validation mismatch aborts the run.
+
+Schema 1 included string joining, reductions, and formatting inside timed workloads. Its abbreviated
+checks did not compare full outputs. Schema 2 results are not directly comparable with those measurements.
+The committed result files retain their original measurement conditions until a new full run replaces them.
+Native checksum comparisons remain checksums and are labelled accordingly.
+
+## Implementation
+
+`run.ts` sequences measurements and writes reports. `javascript.ts`, `boundary.ts`, `native.ts`,
+`probes.ts`, and `worker.ts` own their measurement protocols. Executable probes live under `probes/`.
+`report.ts` renders measured data without running workloads. Shared process helpers own readiness and termination.
+
+Machine load is recorded with each report and affects interpretation of timing samples.
+WASM linear memory does not shrink; repeated workloads measure whether its capacity reaches a plateau.
