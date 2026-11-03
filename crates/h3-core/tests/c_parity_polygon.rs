@@ -1,4 +1,4 @@
-//! Native Rust versus pinned H3 C fixtures: Phase G (polygons).
+//! Native Rust versus pinned H3 C fixtures: (polygons).
 //!
 //! `polygonToCells` output order is unspecified by contract, but the native port reproduces C's
 //! hash-set buffer, so the non-zero entries are compared in C buffer order (stronger than set

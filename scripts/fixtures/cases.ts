@@ -294,7 +294,7 @@ export function cases(ref: RefQuery): Case[] {
 	const cells = sampleCells(rng)
 	const invalid = invalidIndexes(rng)
 
-	// --- Phase A: validation and inspection ------------------------------------------------------
+	// Validation and inspection.
 	for (const h of [...cells, ...invalid]) {
 		out.push(indexCase("isValidCell", h, boolResult))
 		out.push(indexCase("isPentagon", h, boolResult))
@@ -359,7 +359,7 @@ export function cases(ref: RefQuery): Case[] {
 		out.push({ operation: "getNumCells", args: { res }, tokens: [String(res)], decode: intResult })
 	}
 
-	// --- Phase B: coordinates and boundaries ---------------------------------------------------------
+	// Coordinates and boundaries.
 	for (let res = 0; res <= 15; res++) {
 		for (let i = 0; i < 120; i++) {
 			const lat = Math.asin(2 * rng.float() - 1) / M_PI_180
@@ -436,7 +436,7 @@ export function cases(ref: RefQuery): Case[] {
 		)
 	}
 
-	// --- Phase C: hierarchy ------------------------------------------------------------------------
+	// Hierarchy.
 	for (const h of [...cells.filter((_, i) => i % 3 === 0), ...invalid]) {
 		const res = Number((h >> 52n) & 15n)
 
@@ -564,7 +564,7 @@ export function cases(ref: RefQuery): Case[] {
 		}
 	}
 
-	// --- Phase D: traversal and local IJ ---------------------------------------------------------
+	// Traversal and local IJ.
 	const diskIndexes = (t: string[]) => {
 		const x = r(t)
 		const n = x.n()
@@ -759,7 +759,7 @@ export function cases(ref: RefQuery): Case[] {
 		})
 	}
 
-	// --- Phase E: directed edges and vertexes -------------------------------------------------------
+	// Directed edges and vertices.
 	const edgeOrigins = [...cells.filter((_, i) => i % 6 === 0), ...pentNeighborhood.filter((_, i) => i % 4 === 0)]
 	const edgeRows = ref(edgeOrigins.map((h) => `originToDirectedEdges ${hex(h)}`))
 	const edges: bigint[] = []
@@ -907,7 +907,7 @@ export function cases(ref: RefQuery): Case[] {
 		out.push(indexCase("isValidIndex", h, boolResult))
 	}
 
-	// --- Phase F: measurements ----------------------------------------------------------------------
+	// Measurements.
 	for (const h of [...cells.filter((_, i) => i % 2 === 0), ...invalid]) {
 		for (const op of ["cellAreaRads2", "cellAreaKm2", "cellAreaM2"]) {
 			out.push(indexCase(op, h, (t) => ({ value: r(t).f() })))
@@ -998,7 +998,7 @@ export function cases(ref: RefQuery): Case[] {
 		})
 	}
 
-	// --- Phase G: polygons --------------------------------------------------------------------------
+	// Polygons.
 	// Polygons are defined in degrees; C receives deg * M_PI_180, exactly what the JavaScript
 	// adapter computes, so JS and C fixtures describe the same doubles.
 	type Loop = [number, number][]

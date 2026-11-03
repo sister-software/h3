@@ -183,3 +183,17 @@ One version ships to both registries, following the same two-phase flow as split
 
 Every step is idempotent: a tag, release, or version that already exists is skipped, so
 re-dispatching is the recovery path.
+
+## Private module imports and command arguments
+
+The package `imports` map gives tooling stable names: `#benchmarks/*`, `#scripts/*`, and `#test/*`
+resolve source roles, while `#*` resolves compiled library modules. `#diagnostics` describes the
+internal state module using its source types and loads the same compiled module as the public API.
+`#worker` selects the compiled workerd entry. These private maps do not add public package subpaths.
+
+Node probes import the package by name and remain in their source location, so module resolution and
+TypeScript inference agree. The workerd probe is prebuilt with an external runtime module and runs
+without Wrangler rebundling; its dynamic import still occurs only in the measured import stage.
+
+Command entry points use `node:util` `parseArgs`. Use named options such as `yarn benchmark --samples 15`,
+`yarn stress:boundary --samples 2000`, and `yarn check:wasm-artifact` (which passes `--check`).

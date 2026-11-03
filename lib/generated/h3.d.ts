@@ -102,7 +102,7 @@ export function get_res0_cells(): number;
 export function get_resolution(h: bigint): number;
 
 /**
- * Great-circle distance between two degree coordinates. `unit`: 0 rads, 1 km, 2 m.
+ * Returns the great-circle distance between degree coordinates. Units: 0 radians, 1 kilometres, 2 metres.
  */
 export function great_circle_distance(lat1: number, lng1: number, lat2: number, lng2: number, unit: number): number;
 

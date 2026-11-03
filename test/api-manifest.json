@@ -5,7 +5,6 @@
 		{
 			"name": "init",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "(JavaScript-only: WASM initialization)",
 			"rustOperation": "(none)",
@@ -19,7 +18,6 @@
 		{
 			"name": "UNITS",
 			"kind": "constant",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "(JavaScript-only: unit names)",
 			"rustOperation": "(none)",
@@ -33,7 +31,6 @@
 		{
 			"name": "POLYGON_TO_CELLS_FLAGS",
 			"kind": "constant",
-			"phase": "G",
 			"usesWasm": false,
 			"cOperation": "ContainmentMode (CONTAINMENT_CENTER..CONTAINMENT_OVERLAPPING_BBOX = 0..3)",
 			"rustOperation": "ContainmentMode",
@@ -47,7 +44,6 @@
 		{
 			"name": "h3IndexToSplitLong",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "(JavaScript-only: index string to 32-bit words)",
 			"rustOperation": "(none)",
@@ -61,11 +57,10 @@
 		{
 			"name": "splitLongToH3Index",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "(JavaScript-only: 32-bit words to index string)",
 			"rustOperation": "(none)",
-			"typescriptSignature": "splitLongToH3Index(lower: number, upper: number): H3Index",
+			"typescriptSignature": "splitLongToH3Index<T extends string = H3Index>(lower: number, upper: number): T",
 			"successSemantics": "Upper word unpadded hex + eight hex digits of the lower word.",
 			"invalidInputSemantics": "RangeError for non-integer or out-of-range words; TypeError for non-numbers.",
 			"tests": ["test/js/contract.test.ts", "test/js/init.test.ts"],
@@ -75,7 +70,6 @@
 		{
 			"name": "isValidCell",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "isValidCell",
 			"rustOperation": "raw::is_valid_cell",
@@ -95,7 +89,6 @@
 		{
 			"name": "isValidIndex",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "isValidIndex",
 			"rustOperation": "raw::is_valid_index",
@@ -115,7 +108,6 @@
 		{
 			"name": "isPentagon",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "isPentagon",
 			"rustOperation": "raw::is_pentagon",
@@ -135,7 +127,6 @@
 		{
 			"name": "isResClassIII",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "isResClassIII",
 			"rustOperation": "raw::is_res_class_iii",
@@ -155,7 +146,6 @@
 		{
 			"name": "getBaseCellNumber",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "getBaseCellNumber",
 			"rustOperation": "raw::get_base_cell_number",
@@ -175,7 +165,6 @@
 		{
 			"name": "getIndexDigit",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "getIndexDigit",
 			"rustOperation": "raw::get_index_digit",
@@ -195,7 +184,6 @@
 		{
 			"name": "getIcosahedronFaces",
 			"kind": "function",
-			"phase": "B",
 			"usesWasm": true,
 			"cOperation": "maxFaceCount + getIcosahedronFaces",
 			"rustOperation": "raw::get_icosahedron_faces",
@@ -215,7 +203,6 @@
 		{
 			"name": "getResolution",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "getResolution (only after isValidCell)",
 			"rustOperation": "raw::get_resolution",
@@ -235,11 +222,10 @@
 		{
 			"name": "constructCell",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "constructCell (argument order res, baseCellNumber, digits)",
 			"rustOperation": "raw::construct_cell",
-			"typescriptSignature": "constructCell(baseCellNumber: number, digits: readonly number[], res?: number): H3Index",
+			"typescriptSignature": "constructCell<T extends string = H3Cell>(baseCellNumber: number, digits: readonly number[], res?: number): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -255,11 +241,10 @@
 		{
 			"name": "latLngToCell",
 			"kind": "function",
-			"phase": "B",
 			"usesWasm": true,
 			"cOperation": "latLngToCell",
 			"rustOperation": "raw::lat_lng_to_cell",
-			"typescriptSignature": "latLngToCell(lat: number, lng: number, res: number): H3Index",
+			"typescriptSignature": "latLngToCell<T extends string = H3Cell>(lat: number, lng: number, res: number): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -275,7 +260,6 @@
 		{
 			"name": "cellToLatLng",
 			"kind": "function",
-			"phase": "B",
 			"usesWasm": true,
 			"cOperation": "cellToLatLng",
 			"rustOperation": "raw::cell_to_lat_lng",
@@ -295,7 +279,6 @@
 		{
 			"name": "cellToBoundary",
 			"kind": "function",
-			"phase": "B",
 			"usesWasm": true,
 			"cOperation": "cellToBoundary",
 			"rustOperation": "raw::cell_to_boundary",
@@ -315,11 +298,10 @@
 		{
 			"name": "cellToParent",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToParent",
 			"rustOperation": "raw::cell_to_parent",
-			"typescriptSignature": "cellToParent(h3Index: H3IndexInput, res: number): H3Index",
+			"typescriptSignature": "cellToParent<T extends string = H3Cell>(h3Index: H3IndexInput, res: number): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -335,11 +317,10 @@
 		{
 			"name": "cellToChildren",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToChildrenSize + cellToChildren",
 			"rustOperation": "raw::cell_to_children",
-			"typescriptSignature": "cellToChildren(h3Index: H3IndexInput, res: number): H3Index[]",
+			"typescriptSignature": "cellToChildren<T extends string = H3Cell>(h3Index: H3IndexInput, res: number): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -355,7 +336,6 @@
 		{
 			"name": "cellToChildrenSize",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToChildrenSize",
 			"rustOperation": "raw::cell_to_children_size",
@@ -375,11 +355,10 @@
 		{
 			"name": "cellToCenterChild",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToCenterChild",
 			"rustOperation": "raw::cell_to_center_child",
-			"typescriptSignature": "cellToCenterChild(h3Index: H3IndexInput, res: number): H3Index",
+			"typescriptSignature": "cellToCenterChild<T extends string = H3Cell>(h3Index: H3IndexInput, res: number): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -395,7 +374,6 @@
 		{
 			"name": "cellToChildPos",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "cellToChildPos",
 			"rustOperation": "raw::cell_to_child_pos",
@@ -415,11 +393,10 @@
 		{
 			"name": "childPosToCell",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "childPosToCell",
 			"rustOperation": "raw::child_pos_to_cell",
-			"typescriptSignature": "childPosToCell(childPos: number, h3Index: H3IndexInput, childRes: number): H3Index",
+			"typescriptSignature": "childPosToCell<T extends string = H3Cell>(childPos: number, h3Index: H3IndexInput, childRes: number): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -435,11 +412,10 @@
 		{
 			"name": "compactCells",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "compactCells",
 			"rustOperation": "raw::compact_cells",
-			"typescriptSignature": "compactCells(h3Set: readonly H3IndexInput[]): H3Index[]",
+			"typescriptSignature": "compactCells<T extends string = H3Cell>(h3Set: readonly H3IndexInput[]): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -455,11 +431,10 @@
 		{
 			"name": "uncompactCells",
 			"kind": "function",
-			"phase": "C",
 			"usesWasm": true,
 			"cOperation": "uncompactCellsSize + uncompactCells",
 			"rustOperation": "raw::uncompact_cells",
-			"typescriptSignature": "uncompactCells(compactedSet: readonly H3IndexInput[], res: number): H3Index[]",
+			"typescriptSignature": "uncompactCells<T extends string = H3Cell>(compactedSet: readonly H3IndexInput[], res: number): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -475,11 +450,10 @@
 		{
 			"name": "gridDisk",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "maxGridDiskSize + gridDisk",
 			"rustOperation": "raw::grid_disk",
-			"typescriptSignature": "gridDisk(h3Index: H3IndexInput, ringSize: number): H3Index[]",
+			"typescriptSignature": "gridDisk<T extends string = H3Cell>(h3Index: H3IndexInput, ringSize: number): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -495,11 +469,10 @@
 		{
 			"name": "gridDiskDistances",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "maxGridDiskSize + gridDiskDistances (regrouped by distance)",
 			"rustOperation": "raw::grid_disk_distances",
-			"typescriptSignature": "gridDiskDistances(h3Index: H3IndexInput, ringSize: number): H3Index[][]",
+			"typescriptSignature": "gridDiskDistances<T extends string = H3Cell>(h3Index: H3IndexInput, ringSize: number): T[][]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -515,11 +488,10 @@
 		{
 			"name": "gridRing",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "maxGridRingSize + gridRing",
 			"rustOperation": "raw::grid_ring",
-			"typescriptSignature": "gridRing(h3Index: H3IndexInput, ringSize: number): H3Index[]",
+			"typescriptSignature": "gridRing<T extends string = H3Cell>(h3Index: H3IndexInput, ringSize: number): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -535,11 +507,10 @@
 		{
 			"name": "gridRingUnsafe",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "maxGridRingSize + gridRingUnsafe",
 			"rustOperation": "raw::grid_ring_unsafe",
-			"typescriptSignature": "gridRingUnsafe(h3Index: H3IndexInput, ringSize: number): H3Index[]",
+			"typescriptSignature": "gridRingUnsafe<T extends string = H3Cell>(h3Index: H3IndexInput, ringSize: number): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -555,11 +526,10 @@
 		{
 			"name": "polygonToCells",
 			"kind": "function",
-			"phase": "G",
 			"usesWasm": true,
 			"cOperation": "maxPolygonToCellsSize + polygonToCells (flags 0)",
 			"rustOperation": "raw::polygon_to_cells",
-			"typescriptSignature": "polygonToCells(coordinates: number[][] | number[][][], res: number, isGeoJson?: boolean): H3Index[]",
+			"typescriptSignature": "polygonToCells<T extends string = H3Cell>(coordinates: number[][] | number[][][], res: number, isGeoJson?: boolean): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -575,11 +545,10 @@
 		{
 			"name": "polygonToCellsExperimental",
 			"kind": "function",
-			"phase": "G",
 			"usesWasm": true,
 			"cOperation": "maxPolygonToCellsSizeExperimental + polygonToCellsExperimental (flags 0..3)",
 			"rustOperation": "raw::polygon_to_cells_experimental",
-			"typescriptSignature": "polygonToCellsExperimental(coordinates: number[][] | number[][][], res: number, flags: string, isGeoJson?: boolean): H3Index[]",
+			"typescriptSignature": "polygonToCellsExperimental<T extends string = H3Cell>( coordinates: number[][] | number[][][], res: number, flags: string, isGeoJson?: boolean ): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -595,7 +564,6 @@
 		{
 			"name": "cellsToMultiPolygon",
 			"kind": "function",
-			"phase": "G",
 			"usesWasm": true,
 			"cOperation": "cellsToLinkedMultiPolygon (converted to owned structures)",
 			"rustOperation": "raw::cells_to_multi_polygon",
@@ -615,7 +583,6 @@
 		{
 			"name": "areNeighborCells",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "areNeighborCells",
 			"rustOperation": "raw::are_neighbor_cells",
@@ -635,11 +602,10 @@
 		{
 			"name": "cellsToDirectedEdge",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "cellsToDirectedEdge",
 			"rustOperation": "raw::cells_to_directed_edge",
-			"typescriptSignature": "cellsToDirectedEdge(origin: H3IndexInput, destination: H3IndexInput): H3Index",
+			"typescriptSignature": "cellsToDirectedEdge<T extends string = H3DirectedEdge>(origin: H3IndexInput, destination: H3IndexInput): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -655,11 +621,10 @@
 		{
 			"name": "getDirectedEdgeOrigin",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "getDirectedEdgeOrigin",
 			"rustOperation": "raw::get_directed_edge_origin",
-			"typescriptSignature": "getDirectedEdgeOrigin(edgeIndex: H3IndexInput): H3Index",
+			"typescriptSignature": "getDirectedEdgeOrigin<T extends string = H3Cell>(edgeIndex: H3IndexInput): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -675,11 +640,10 @@
 		{
 			"name": "getDirectedEdgeDestination",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "getDirectedEdgeDestination",
 			"rustOperation": "raw::get_directed_edge_destination",
-			"typescriptSignature": "getDirectedEdgeDestination(edgeIndex: H3IndexInput): H3Index",
+			"typescriptSignature": "getDirectedEdgeDestination<T extends string = H3Cell>(edgeIndex: H3IndexInput): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -695,7 +659,6 @@
 		{
 			"name": "isValidDirectedEdge",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "isValidDirectedEdge",
 			"rustOperation": "raw::is_valid_directed_edge",
@@ -715,11 +678,10 @@
 		{
 			"name": "directedEdgeToCells",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "directedEdgeToCells",
 			"rustOperation": "raw::directed_edge_to_cells",
-			"typescriptSignature": "directedEdgeToCells(edgeIndex: H3IndexInput): [H3Index, H3Index]",
+			"typescriptSignature": "directedEdgeToCells<T extends string = H3Cell>(edgeIndex: H3IndexInput): [T, T]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -735,11 +697,10 @@
 		{
 			"name": "originToDirectedEdges",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "originToDirectedEdges",
 			"rustOperation": "raw::origin_to_directed_edges",
-			"typescriptSignature": "originToDirectedEdges(h3Index: H3IndexInput): H3Index[]",
+			"typescriptSignature": "originToDirectedEdges<T extends string = H3DirectedEdge>(h3Index: H3IndexInput): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -755,7 +716,6 @@
 		{
 			"name": "directedEdgeToBoundary",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "directedEdgeToBoundary",
 			"rustOperation": "raw::directed_edge_to_boundary",
@@ -775,11 +735,10 @@
 		{
 			"name": "reverseDirectedEdge",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "reverseDirectedEdge",
 			"rustOperation": "raw::reverse_directed_edge",
-			"typescriptSignature": "reverseDirectedEdge(edgeIndex: H3IndexInput): H3Index",
+			"typescriptSignature": "reverseDirectedEdge<T extends string = H3DirectedEdge>(edgeIndex: H3IndexInput): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -795,7 +754,6 @@
 		{
 			"name": "gridDistance",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "gridDistance",
 			"rustOperation": "raw::grid_distance",
@@ -815,11 +773,10 @@
 		{
 			"name": "gridPathCells",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "gridPathCellsSize + gridPathCells",
 			"rustOperation": "raw::grid_path_cells",
-			"typescriptSignature": "gridPathCells(origin: H3IndexInput, destination: H3IndexInput): H3Index[]",
+			"typescriptSignature": "gridPathCells<T extends string = H3Cell>(origin: H3IndexInput, destination: H3IndexInput): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -835,7 +792,6 @@
 		{
 			"name": "cellToLocalIj",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "cellToLocalIj (mode 0)",
 			"rustOperation": "raw::cell_to_local_ij",
@@ -855,11 +811,10 @@
 		{
 			"name": "localIjToCell",
 			"kind": "function",
-			"phase": "D",
 			"usesWasm": true,
 			"cOperation": "localIjToCell (mode 0)",
 			"rustOperation": "raw::local_ij_to_cell",
-			"typescriptSignature": "localIjToCell(origin: H3IndexInput, coords: CoordIJ): H3Index",
+			"typescriptSignature": "localIjToCell<T extends string = H3Cell>(origin: H3IndexInput, coords: CoordIJ): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -875,7 +830,6 @@
 		{
 			"name": "greatCircleDistance",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "greatCircleDistanceKm | greatCircleDistanceM | greatCircleDistanceRads",
 			"rustOperation": "raw::great_circle_distance_{km,m,rads}",
@@ -897,7 +851,6 @@
 		{
 			"name": "cellArea",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "cellAreaKm2 | cellAreaM2 | cellAreaRads2",
 			"rustOperation": "raw::cell_area_{km2,m2,rads2}",
@@ -919,7 +872,6 @@
 		{
 			"name": "edgeLength",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "edgeLengthKm | edgeLengthM | edgeLengthRads",
 			"rustOperation": "raw::edge_length_{km,m,rads}",
@@ -941,7 +893,6 @@
 		{
 			"name": "getHexagonAreaAvg",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "getHexagonAreaAvgKm2 | getHexagonAreaAvgM2",
 			"rustOperation": "raw::get_hexagon_area_avg_{km2,m2}",
@@ -962,7 +913,6 @@
 		{
 			"name": "getHexagonEdgeLengthAvg",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "getHexagonEdgeLengthAvgKm | getHexagonEdgeLengthAvgM",
 			"rustOperation": "raw::get_hexagon_edge_length_avg_{km,m}",
@@ -983,11 +933,10 @@
 		{
 			"name": "cellToVertex",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "cellToVertex",
 			"rustOperation": "raw::cell_to_vertex",
-			"typescriptSignature": "cellToVertex(h3Index: H3IndexInput, vertexNum: number): H3Index",
+			"typescriptSignature": "cellToVertex<T extends string = H3Vertex>(h3Index: H3IndexInput, vertexNum: number): T",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -1003,11 +952,10 @@
 		{
 			"name": "cellToVertexes",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "cellToVertexes",
 			"rustOperation": "raw::cell_to_vertexes",
-			"typescriptSignature": "cellToVertexes(h3Index: H3IndexInput): H3Index[]",
+			"typescriptSignature": "cellToVertexes<T extends string = H3Vertex>(h3Index: H3IndexInput): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -1023,7 +971,6 @@
 		{
 			"name": "vertexToLatLng",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "vertexToLatLng",
 			"rustOperation": "raw::vertex_to_lat_lng",
@@ -1043,7 +990,6 @@
 		{
 			"name": "isValidVertex",
 			"kind": "function",
-			"phase": "E",
 			"usesWasm": true,
 			"cOperation": "isValidVertex",
 			"rustOperation": "raw::is_valid_vertex",
@@ -1063,7 +1009,6 @@
 		{
 			"name": "getNumCells",
 			"kind": "function",
-			"phase": "F",
 			"usesWasm": true,
 			"cOperation": "getNumCells",
 			"rustOperation": "raw::get_num_cells",
@@ -1083,11 +1028,10 @@
 		{
 			"name": "getRes0Cells",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "res0CellCount + getRes0Cells",
 			"rustOperation": "raw::get_res0_cells",
-			"typescriptSignature": "getRes0Cells(): H3Index[]",
+			"typescriptSignature": "getRes0Cells<T extends string = H3Cell>(): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -1103,11 +1047,10 @@
 		{
 			"name": "getPentagons",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": true,
 			"cOperation": "pentagonCount + getPentagons",
 			"rustOperation": "raw::get_pentagons",
-			"typescriptSignature": "getPentagons(res: number): H3Index[]",
+			"typescriptSignature": "getPentagons<T extends string = H3Cell>(res: number): T[]",
 			"successSemantics": "C result in the documented JavaScript shape (degrees, canonical index strings, zero slots removed unless C returns H3_NULL as a value).",
 			"invalidInputSemantics": "TypeError for wrong types; RangeError for binding range violations; H3Error with the C code for C failures.",
 			"tests": [
@@ -1123,7 +1066,6 @@
 		{
 			"name": "degsToRads",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "degsToRads",
 			"rustOperation": "degs_to_rads",
@@ -1137,7 +1079,6 @@
 		{
 			"name": "radsToDegs",
 			"kind": "function",
-			"phase": "A",
 			"usesWasm": false,
 			"cOperation": "radsToDegs",
 			"rustOperation": "rads_to_degs",

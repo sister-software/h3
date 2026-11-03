@@ -12,6 +12,26 @@
  */
 export type H3Index = string
 
+declare const h3CellBrand: unique symbol
+declare const h3DirectedEdgeBrand: unique symbol
+declare const h3VertexBrand: unique symbol
+
+/**
+ * Represents a cell index returned by an H3 operation. The brand distinguishes cell outputs at compile time; input
+ * validation remains operation-specific.
+ */
+export type H3Cell = string & { readonly [h3CellBrand]: true }
+
+/**
+ * Represents a directed edge index returned by an H3 operation.
+ */
+export type H3DirectedEdge = string & { readonly [h3DirectedEdgeBrand]: true }
+
+/**
+ * Represents a vertex index returned by an H3 operation.
+ */
+export type H3Vertex = string & { readonly [h3VertexBrand]: true }
+
 /**
  * A split 64-bit index: `[lower, upper]` 32-bit words.
  */
@@ -105,18 +125,18 @@ export function parseIndexArray(xs: unknown, name: string): BigUint64Array {
 /**
  * @internal
  */
-export function formatIndex(h: bigint): H3Index {
-	return h.toString(16)
+export function formatIndex<T extends string = H3Index>(h: bigint): T {
+	return h.toString(16) as T
 }
 
 /**
  * @internal
  */
-export function formatIndexArray(xs: BigUint64Array): H3Index[] {
-	const out: H3Index[] = new Array(xs.length)
+export function formatIndexArray<T extends string = H3Index>(xs: BigUint64Array): T[] {
+	const out: T[] = new Array(xs.length)
 
 	for (let i = 0; i < xs.length; i++) {
-		out[i] = xs[i]!.toString(16)
+		out[i] = xs[i]!.toString(16) as T
 	}
 
 	return out
@@ -177,12 +197,12 @@ export function h3IndexToSplitLong(h3Index: H3IndexInput): SplitLong {
  * Converts a split long to an index string: the upper word in unpadded lowercase hex followed by exactly eight hex
  * digits of the lower word. Pure; works before initialization.
  */
-export function splitLongToH3Index(lower: number, upper: number): H3Index {
+export function splitLongToH3Index<T extends string = H3Index>(lower: number, upper: number): T {
 	if (typeof lower !== "number" || typeof upper !== "number") throw new TypeError("lower and upper must be numbers")
 
 	if (!isWord(lower) || !isWord(upper)) {
 		throw new RangeError("lower and upper must be integers from -0x80000000 to 0xffffffff")
 	}
 
-	return (upper >>> 0).toString(16) + (lower >>> 0).toString(16).padStart(8, "0")
+	return ((upper >>> 0).toString(16) + (lower >>> 0).toString(16).padStart(8, "0")) as T
 }

@@ -1,19 +1,19 @@
 /**
- * Polygons (Phase G): polygon fill in every containment mode and cell set outlines.
+ * Polygons: polygon fill in every containment mode and cell set outlines.
  *
  * @license MIT
  * @author Teffen Ellis, et al.
  * @copyright Sister Software
  */
 
-import { ready, trapped } from "../runtime/state.ts"
-import { checkVec, M_180_PI, readIndexes } from "./call.ts"
+import { ready } from "../runtime/state.ts"
+import { call, checkVec, M_180_PI, readIndexes } from "./call.ts"
 import { POLYGON_TO_CELLS_FLAGS } from "./constants.ts"
 import {
 	boolArg,
 	type CoordPair,
 	finiteArg,
-	type H3Index,
+	type H3Cell,
 	type H3IndexInput,
 	parseIndexArray,
 	resArg,
@@ -77,32 +77,32 @@ function flattenPolygon(coordinates: unknown, geoJson: boolean): { coords: Float
 }
 
 /**
- * Cells whose centers lie inside a polygon (C `polygonToCells`). `coordinates` is one loop or an array of loops
+ * Returns cells whose centers lie inside a polygon (C `polygonToCells`). `coordinates` is one loop or an array of loops
  * (exterior first, then holes) of `[lat, lng]` degree pairs, or `[lng, lat]` with `isGeoJson`. Output order is
  * unspecified.
  */
-export function polygonToCells(coordinates: number[][] | number[][][], res: number, isGeoJson?: boolean): H3Index[] {
+export function polygonToCells<T extends string = H3Cell>(
+	coordinates: number[][] | number[][][],
+	res: number,
+	isGeoJson?: boolean
+): T[] {
 	const w = ready()
 	const r = resArg(res)
 	const { coords, lengths } = flattenPolygon(coordinates, boolArg(isGeoJson, "isGeoJson"))
 
-	try {
-		return readIndexes(w, w.polygon_to_cells(coords, lengths, r))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => readIndexes<T>(w, w.polygon_to_cells(coords, lengths, r)))
 }
 
 /**
- * Cells covering a polygon under a containment mode from {@link POLYGON_TO_CELLS_FLAGS} (C
+ * Returns cells covering a polygon under a containment mode from {@link POLYGON_TO_CELLS_FLAGS} (C
  * `polygonToCellsExperimental`). Output is in C iteration order.
  */
-export function polygonToCellsExperimental(
+export function polygonToCellsExperimental<T extends string = H3Cell>(
 	coordinates: number[][] | number[][][],
 	res: number,
 	flags: string,
 	isGeoJson?: boolean
-): H3Index[] {
+): T[] {
 	const w = ready()
 	const r = resArg(res)
 
@@ -112,29 +112,19 @@ export function polygonToCellsExperimental(
 	if (code === undefined) throw new RangeError(`unknown POLYGON_TO_CELLS_FLAGS value ${JSON.stringify(flags)}`)
 	const { coords, lengths } = flattenPolygon(coordinates, boolArg(isGeoJson, "isGeoJson"))
 
-	try {
-		return readIndexes(w, w.polygon_to_cells_experimental(coords, lengths, r, code))
-	} catch (error) {
-		throw trapped(error)
-	}
+	return call(() => readIndexes<T>(w, w.polygon_to_cells_experimental(coords, lengths, r, code)))
 }
 
 /**
- * The outlines of a set of same-resolution unique cells, as polygons of loops (outer loop first, then holes) of degree
- * coordinate pairs, ordered by decreasing outer area. With `formatAsGeoJson`, pairs are `[lng, lat]` and every loop is
- * closed.
+ * Returns the outlines of a set of same-resolution unique cells, as polygons of loops (outer loop first, then holes) of
+ * degree coordinate pairs, ordered by decreasing outer area. With `formatAsGeoJson`, pairs are `[lng, lat]` and every
+ * loop is closed.
  */
 export function cellsToMultiPolygon(h3Indexes: readonly H3IndexInput[], formatAsGeoJson?: boolean): CoordPair[][][] {
 	const w = ready()
 	const cells = parseIndexArray(h3Indexes, "h3Indexes")
 	const geoJson = boolArg(formatAsGeoJson, "formatAsGeoJson")
-	let flat: Float64Array
-
-	try {
-		flat = checkVec(w, w.cells_to_multi_polygon(cells))
-	} catch (error) {
-		throw trapped(error)
-	}
+	const flat = call(() => checkVec(w, w.cells_to_multi_polygon(cells)))
 
 	if (!flat.length) return []
 	let at = 0

@@ -2,7 +2,7 @@
  * Measures how often the platform math library and the `libm` crate (the one the WASM build uses) put a point near a
  * cell edge in different cells. See `crates/h3-core/examples/boundary_stress.rs` for the method.
  *
- * Yarn stress:boundary [samples]
+ * Yarn stress:boundary --samples 2000
  *
  * Writes its points and cells under `target/boundary-stress/` and prints a Markdown table. On linux x86-64 glibc the
  * platform build matches the C reference, so the table is the npm package's disagreement with C there; on macOS it is
@@ -16,10 +16,17 @@
 import { execFileSync } from "node:child_process"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+import { parseArgs } from "node:util"
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const dir = join(root, "target/boundary-stress")
-const samples = process.argv[2] ?? "2000"
+
+const {
+	values: { samples },
+} = parseArgs({ options: { samples: { type: "string", default: "2000" } } })
+
+if (!Number.isSafeInteger(Number(samples)) || Number(samples) < 1)
+	throw new RangeError("samples must be a positive integer")
 
 const example = (features: string[], ...args: string[]) =>
 	execFileSync(

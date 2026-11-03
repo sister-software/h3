@@ -43,6 +43,23 @@
 		"./workerd.ts"
 	],
 	"types": "./out/index.d.ts",
+	"imports": {
+		"#*": {
+			"types": "./out/lib/*.d.ts",
+			"default": "./out/lib/*.js"
+		},
+		"#diagnostics": {
+			"types": "./lib/runtime/state.ts",
+			"default": "./out/lib/runtime/state.js"
+		},
+		"#benchmarks/*": "./benchmarks/*.ts",
+		"#scripts/*": "./scripts/*.ts",
+		"#test/*": "./test/*.ts",
+		"#worker": {
+			"types": "./out/workerd.d.ts",
+			"default": "./out/workerd.js"
+		}
+	},
 	"exports": {
 		"./package.json": "./package.json",
 		".": {
@@ -75,7 +92,9 @@
 		"lint:oxfmt": "oxfmt --check .",
 		"lint:fix": "run-s fix:oxlint format",
 		"fix:oxlint": "oxlint --fix",
-		"format": "oxfmt ."
+		"format": "oxfmt .",
+		"docs:api": "yarn compile && node scripts/api-reference.ts",
+		"check:docs": "node scripts/api-reference.ts --check"
 	},
 	"devDependencies": {
 		"@sister.software/oxfmt-config": "^14.7.0",

@@ -56,6 +56,23 @@ nothing else; it is deliberately stricter than C `sscanf("%" PRIx64)`.
 - Counts and positions are `number`s; Rust checks the safe-integer bound before conversion and
   throws `RangeError` rather than rounding.
 
+### TypeScript output brands
+
+`H3Cell`, `H3DirectedEdge`, and `H3Vertex` use separate private `unique symbol` properties on `string`.
+Their declarations are exported as types; they add no runtime symbols, values, or validation.
+`H3Index` remains a general string alias for compatibility.
+
+Index-producing functions use `T extends string` with a default for the output category.
+For example, `gridDisk<T extends string = H3Cell>(index, ringSize)` returns `T[]`;
+`gridDiskDistances` returns `T[][]`, and `directedEdgeToCells` returns `[T, T]` with the cell default.
+Directed-edge and vertex producers default to their corresponding brands.
+`splitLongToH3Index` defaults to `H3Index` because arbitrary words do not establish an index category.
+
+Callers can select their existing full-index string brand through the type argument, or select `string`.
+This annotation does not shorten an index, constrain its resolution, or check application-specific rules.
+Inputs retain `H3IndexInput`, so existing ordinary strings, external brands, and split-long tuples remain accepted.
+The brands describe output categories; algorithm validity and failure behavior remain operation-specific.
+
 ### Errors
 
 | Situation                                                                               | Thrown                                                                            |

@@ -121,6 +121,9 @@ jobs:
       - name: Compile
         run: yarn compile
 
+      - name: Check API reference
+        run: yarn check:docs
+
       - name: Type check
         run: yarn check-types
 

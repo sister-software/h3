@@ -16,17 +16,22 @@
 
 import { execFileSync } from "node:child_process"
 import { createHash } from "node:crypto"
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+import { parseArgs } from "node:util"
 
 export const WASM_BINDGEN_VERSION = "0.2.130"
 export const RUST_VERSION = "1.99.1"
 const TARGET = "wasm32-unknown-unknown"
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-const check = process.argv.includes("--check")
+
+const {
+	values: { check },
+} = parseArgs({ options: { check: { type: "boolean", default: false } } })
+
 const jobs = process.env.H3_BUILD_JOBS ?? "4"
 
 function fail(message: string): never {
@@ -144,22 +149,19 @@ outputs["lib/generated/h3-embedded.d.ts"] = Buffer.from(
 
 const sha = (b: Buffer | string) => createHash("sha256").update(b).digest("hex")
 
+const sourceFiles = ["crates/h3-core/src", "crates/h3-wasm/src"]
+	.flatMap((dir) =>
+		readdirSync(join(root, dir), { recursive: true })
+			.map(String)
+			.filter((file) => statSync(join(root, dir, file)).isFile())
+			.map((file) => `${dir}/${file.replaceAll("\\", "/")}`)
+	)
+	.toSorted()
+
 const manifest = {
 	sourceTreeSha256: sha(
 		["Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "crates/h3-wasm/Cargo.toml", "crates/h3-core/Cargo.toml"]
-			.concat(
-				run("git", [
-					"ls-files",
-					"--cached",
-					"--others",
-					"--exclude-standard",
-					"crates/h3-core/src",
-					"crates/h3-wasm/src",
-				])
-					.split("\n")
-					.filter(Boolean)
-					.toSorted()
-			)
+			.concat(sourceFiles)
 			.map((f) => `${f}\0${sha(readFileSync(join(root, f)))}`)
 			.join("\n")
 	),
