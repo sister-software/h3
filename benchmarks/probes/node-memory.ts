@@ -6,7 +6,7 @@
 
 import { readFileSync } from "node:fs"
 
-import type { MemorySnapshot, NodeMemory } from "../types.ts"
+import type { MemorySnapshot, NodeMemory } from "#benchmarks/types"
 
 const gc = globalThis.gc!
 
@@ -24,10 +24,10 @@ const snap = (wasm: () => number): MemorySnapshot => {
 }
 
 const stages: Record<string, MemorySnapshot> = { beforeImport: snap(() => 0) }
-const h3 = (await import(process.argv[2]!)) as typeof import("../../index.ts")
-const state = (await import(process.argv[3]!)) as typeof import("../../lib/runtime/state.ts")
+const h3 = await import("@sister.software/h3")
+const state = await import("#diagnostics")
 stages.afterImport = snap(state.wasmMemoryBytes)
-await h3.init({ bytes: readFileSync(process.argv[4]!) })
+await h3.init({ bytes: readFileSync(new URL(import.meta.resolve("@sister.software/h3/h3.wasm"))) })
 stages.afterInit = snap(state.wasmMemoryBytes)
 const cell = h3.latLngToCell(37.3615593, -122.0553238, 9)
 

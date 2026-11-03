@@ -8,7 +8,7 @@ import { existsSync, readFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { join } from "node:path"
 
-import { root } from "../../scripts/support/paths.ts"
+import { root } from "#scripts/support/paths"
 
 export function nodeBinary(version: string): string | undefined {
 	for (const p of [

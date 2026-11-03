@@ -7,7 +7,7 @@
 import * as h3 from "@sister.software/h3"
 import cases from "h3-probe-cases"
 
-import { runFixtureCases, type CaseOutcome } from "../../shared/fixture-cases.ts"
+import { runFixtureCases, type CaseOutcome } from "#test/shared/fixture-cases"
 
 export type BrowserResult = { first: string; outcomes: CaseOutcome[] } | { error: string }
 

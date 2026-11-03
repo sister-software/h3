@@ -6,10 +6,10 @@
 
 import { deepStrictEqual } from "node:assert"
 
-import { samples } from "./context.ts"
-import { points } from "./inputs.ts"
-import { stat } from "./stats.ts"
-import type { JavaScriptMeasurement } from "./types.ts"
+import { samples } from "#benchmarks/context"
+import { points } from "#benchmarks/inputs"
+import { stat } from "#benchmarks/stats"
+import type { JavaScriptMeasurement } from "#benchmarks/types"
 
 interface BenchmarkApi {
 	latLngToCell(lat: number, lng: number, res: number): string

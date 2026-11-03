@@ -19,7 +19,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
-import { cases, FIXTURE_SCHEMA_VERSION, SEED } from "./fixtures/cases.ts"
+import { cases, FIXTURE_SCHEMA_VERSION, SEED } from "#scripts/fixtures/cases"
 
 export const PINNED_C_REVISION = "24946ad1c5e9016a6eab96d4f9ee4d0c993720e5"
 

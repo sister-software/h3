@@ -9,9 +9,10 @@ import { join } from "node:path"
 
 import { format } from "oxfmt"
 
+import type { Stat } from "#benchmarks/stats"
+import type { BenchmarkReport } from "#benchmarks/types"
+
 import config from "../oxfmt.config.ts"
-import type { Stat } from "./stats.ts"
-import type { BenchmarkReport } from "./types.ts"
 
 export function renderReport(report: BenchmarkReport): string {
 	const {

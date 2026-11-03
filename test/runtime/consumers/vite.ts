@@ -4,6 +4,6 @@
  * @copyright Sister Software
  */
 
-import { runBrowser } from "./browser.ts"
+import { runBrowser } from "#test/runtime/consumers/browser"
 
 runBrowser()

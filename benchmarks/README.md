@@ -2,12 +2,13 @@
 
 ```sh
 yarn benchmark
-H3_BENCH_SAMPLES=31 yarn benchmark
-H3_BENCH_SAMPLES=3 H3_BENCH_OUTPUT="$PWD/target/benchmark-smoke" yarn benchmark
+yarn benchmark --samples 31
+yarn benchmark --samples 3 --output "$PWD/target/benchmark-smoke"
 ```
 
 The default output is `benchmarks/RESULTS.md` and `benchmarks/results/latest.json`.
-`H3_BENCH_OUTPUT` selects a separate report directory for smoke runs.
+`--output` selects a separate report directory for smoke runs. `--samples` and `--jobs` set sample and build counts.
+The existing `H3_BENCH_OUTPUT`, `H3_BENCH_SAMPLES`, and `H3_BUILD_JOBS` variables supply defaults.
 
 | Measurement           | Method                                                                                                                                                                                                                 |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

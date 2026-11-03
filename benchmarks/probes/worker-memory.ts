@@ -4,15 +4,16 @@
  * @copyright Sister Software
  */
 
-const workerModule = "./h3.mjs"
-let h3: (typeof import("../../index.ts") & { wasmMemoryBytes(): number }) | undefined
+import type * as H3 from "#benchmarks/probes/worker-entry"
+
+let h3: typeof H3 | undefined
 
 export default {
 	async fetch(request: Request) {
 		const step = new URL(request.url).pathname.slice(1)
 
 		if (step === "import") {
-			h3 = (await import(workerModule)) as typeof h3
+			h3 = await import("#benchmarks/probes/worker-entry")
 		}
 
 		if (step === "baseline") return Response.json({ step, wasmMemoryBytes: 0 })

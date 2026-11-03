@@ -7,8 +7,8 @@
 import { copyFileSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { bin, root } from "../../scripts/support/paths.ts"
-import { run as sh } from "../../scripts/support/process.ts"
+import { bin, root } from "#scripts/support/paths"
+import { run as sh } from "#scripts/support/process"
 
 export function checkTarball(tarball: string): string {
 	const listing = sh("tar", ["-tzf", tarball])

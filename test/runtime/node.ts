@@ -7,10 +7,10 @@
 import { copyFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { buildConsumer, installConsumer } from "../../scripts/support/consumer.ts"
-import { root } from "../../scripts/support/paths.ts"
-import { run } from "../../scripts/support/process.ts"
-import type { RuntimeChecks, ProbeResult } from "./checks.ts"
+import { buildConsumer, installConsumer } from "#scripts/support/consumer"
+import { root } from "#scripts/support/paths"
+import { run } from "#scripts/support/process"
+import type { RuntimeChecks, ProbeResult } from "#test/runtime/checks"
 
 interface NodeResult extends ProbeResult {
 	afterImport: Record<string, number>
@@ -24,7 +24,7 @@ export function checkNode(work: string, tarball: string, checks: RuntimeChecks):
 	buildConsumer(join(root, "test/runtime/consumers/node.ts"), dir, "main.mjs")
 
 	for (const variant of ["lazy", "bytes", "module"]) {
-		const out = JSON.parse(run(process.execPath, [join(dir, "main.mjs"), variant], dir)) as NodeResult
+		const out = JSON.parse(run(process.execPath, [join(dir, "main.mjs"), "--mode", variant], dir)) as NodeResult
 		const label = variant === "lazy" ? "no init (first-use instantiation)" : `init({ ${variant} })`
 		checks.judge(`node ${process.version} ${label}`, out)
 		const importClean = Object.values(out.afterImport).every((n) => n === 0)

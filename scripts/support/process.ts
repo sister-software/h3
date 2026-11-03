@@ -8,7 +8,7 @@ import { execFileSync, spawn } from "node:child_process"
 import { once } from "node:events"
 import { setTimeout as delay } from "node:timers/promises"
 
-import { root } from "./paths.ts"
+import { root } from "#scripts/support/paths"
 
 export function run(command: string, args: string[], cwd = root, env = process.env): string {
 	return execFileSync(command, args, {

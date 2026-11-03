@@ -7,10 +7,10 @@
 import { existsSync } from "node:fs"
 import { join } from "node:path"
 
-import { root } from "../scripts/support/paths.ts"
-import { run } from "../scripts/support/process.ts"
-import { jobs, samples } from "./context.ts"
-import { stat } from "./stats.ts"
+import { jobs, samples } from "#benchmarks/context"
+import { stat } from "#benchmarks/stats"
+import { root } from "#scripts/support/paths"
+import { run } from "#scripts/support/process"
 
 export function measureNative() {
 	run("cargo", ["build", "--release", "-p", "sister-h3", "--example", "bench", "--locked", "-j", jobs])

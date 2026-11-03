@@ -6,15 +6,14 @@
 
 import { readdirSync } from "node:fs"
 
-import type { Browser } from "playwright-core"
+import type { Browser, BrowserType } from "playwright-core"
 
-import { closeServer, serve } from "../../scripts/support/server.ts"
-import { browserBuilds } from "./builds.ts"
-import type { RuntimeChecks } from "./checks.ts"
-import type {} from "./consumers/browser.ts"
+import { closeServer, serve } from "#scripts/support/server"
+import { browserBuilds } from "#test/runtime/builds"
+import type { RuntimeChecks } from "#test/runtime/checks"
+import type {} from "#test/runtime/consumers/browser"
 
 export async function checkBrowsers(work: string, tarball: string, checks: RuntimeChecks): Promise<void> {
-	type BrowserType = typeof import("playwright-core").chromium
 	let engines: [string, BrowserType][] = []
 
 	try {

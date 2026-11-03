@@ -5,8 +5,9 @@
  */
 
 import { readFile } from "node:fs/promises"
+import { parseArgs } from "node:util"
 
-import { runFixtureCases } from "../../shared/fixture-cases.ts"
+import { runFixtureCases } from "#test/shared/fixture-cases"
 
 const counts = { compile: 0, instantiate: 0, Module: 0, Instance: 0, Memory: 0 }
 
@@ -46,7 +47,12 @@ const pure = {
 
 const bytes = await readFile(new URL(import.meta.resolve("@sister.software/h3/h3.wasm")))
 const cases = JSON.parse(await readFile(new URL("./cases.json", import.meta.url), "utf8"))
-const mode = process.argv[2]
+
+const {
+	values: { mode },
+} = parseArgs({ options: { mode: { type: "string", default: "lazy" } } })
+
+if (mode !== "lazy" && mode !== "bytes" && mode !== "module") throw new RangeError("Unknown initialization mode")
 
 if (mode === "bytes") {
 	await h3.init({ bytes })

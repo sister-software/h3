@@ -4,7 +4,7 @@
  * @copyright Sister Software
  */
 
-import type { CaseOutcome } from "../shared/fixture-cases.ts"
+import type { CaseOutcome } from "#test/shared/fixture-cases"
 
 export interface Check {
 	name: string

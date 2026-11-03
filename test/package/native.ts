@@ -8,8 +8,8 @@ import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
-import { root } from "../../scripts/support/paths.ts"
-import { run as sh } from "../../scripts/support/process.ts"
+import { root } from "#scripts/support/paths"
+import { run as sh } from "#scripts/support/process"
 
 const cargo = process.env.CARGO ?? "cargo"
 

@@ -4,5 +4,5 @@
  * @copyright Sister Software
  */
 
-export * from "../../workerd.ts"
-export { wasmMemoryBytes } from "../../lib/runtime/state.ts"
+export * from "#worker"
+export { wasmMemoryBytes } from "#diagnostics"

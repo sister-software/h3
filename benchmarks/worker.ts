@@ -8,12 +8,12 @@ import { copyFileSync, mkdirSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { setTimeout as delay } from "node:timers/promises"
 
-import { bin, root } from "../scripts/support/paths.ts"
-import { run, startService } from "../scripts/support/process.ts"
-import { freePort } from "../scripts/support/server.ts"
-import { out } from "./context.ts"
-import { connectInspector } from "./inspector.ts"
-import type { WorkerMemory, WorkerSnapshot } from "./types.ts"
+import { out } from "#benchmarks/context"
+import { connectInspector } from "#benchmarks/inspector"
+import type { WorkerMemory, WorkerSnapshot } from "#benchmarks/types"
+import { bin, root } from "#scripts/support/paths"
+import { run, startService } from "#scripts/support/process"
+import { freePort } from "#scripts/support/server"
 
 export async function measureWorkerMemory(): Promise<WorkerMemory> {
 	const dir = join(out, "worker")
@@ -36,7 +36,7 @@ export async function measureWorkerMemory(): Promise<WorkerMemory> {
 			"--bundle",
 			"--format=esm",
 			"--platform=neutral",
-			"--alias:h3-memory=./h3.mjs",
+			"--alias:#benchmarks/probes/worker-entry=./h3.mjs",
 			"--external:./h3.mjs",
 			`--outfile=${join(dir, "worker.mjs")}`,
 		])
@@ -45,7 +45,7 @@ export async function measureWorkerMemory(): Promise<WorkerMemory> {
 
 		writeFileSync(
 			join(dir, "wrangler.toml"),
-			'name = "h3-memory"\nmain = "worker.mjs"\ncompatibility_date = "2026-10-01"\nfind_additional_modules = true\nrules = [{ type = "ESModule", globs = ["**/*.mjs"], fallthrough = true }]\n'
+			'name = "h3-memory"\nmain = "worker.mjs"\ncompatibility_date = "2026-10-01"\nno_bundle = true\nfind_additional_modules = true\nrules = [{ type = "ESModule", globs = ["**/*.mjs"], fallthrough = true }]\n'
 		)
 	} catch (error) {
 		return { status: "failed", detail: String(error) }

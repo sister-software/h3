@@ -22,12 +22,12 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { buildConsumer, fixtureRecords, installConsumer, pack } from "../../scripts/support/consumer.ts"
-import { root } from "../../scripts/support/paths.ts"
-import { run as sh } from "../../scripts/support/process.ts"
-import { checkNativePackage } from "./native.ts"
-import { nodeBinary, nodeVersions } from "./node-versions.ts"
-import { checkTarball, checkDeclarations } from "./npm.ts"
+import { buildConsumer, fixtureRecords, installConsumer, pack } from "#scripts/support/consumer"
+import { root } from "#scripts/support/paths"
+import { run as sh } from "#scripts/support/process"
+import { checkNativePackage } from "#test/package/native"
+import { nodeBinary, nodeVersions } from "#test/package/node-versions"
+import { checkTarball, checkDeclarations } from "#test/package/npm"
 
 const work = join(root, "target", "package-test")
 const results: { name: string; status: "pass" | "fail" | "not run"; detail: string }[] = []

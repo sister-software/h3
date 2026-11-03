@@ -8,14 +8,19 @@ import { join } from "node:path"
 
 import { expect, test } from "vitest"
 
-import { root } from "../../scripts/support/paths.ts"
-import { startService } from "../../scripts/support/process.ts"
-import { freePort } from "../../scripts/support/server.ts"
+import { root } from "#scripts/support/paths"
+import { startService } from "#scripts/support/process"
+import { freePort } from "#scripts/support/server"
 
 test("closing a ready service releases its listener", async () => {
 	const port = await freePort()
 	const url = `http://127.0.0.1:${port}`
-	const service = startService(process.execPath, [join(root, "test/tools/fixtures/service.ts"), String(port)], root)
+
+	const service = startService(
+		process.execPath,
+		[join(root, "test/tools/fixtures/service.ts"), "--port", String(port)],
+		root
+	)
 
 	try {
 		await service.ready(url, 5000)

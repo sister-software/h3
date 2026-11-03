@@ -7,11 +7,11 @@
 import { copyFileSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { buildConsumer, installConsumer } from "../../scripts/support/consumer.ts"
-import { bin, root } from "../../scripts/support/paths.ts"
-import { run, startService } from "../../scripts/support/process.ts"
-import { freePort } from "../../scripts/support/server.ts"
-import type { RuntimeChecks, ProbeResult } from "./checks.ts"
+import { buildConsumer, installConsumer } from "#scripts/support/consumer"
+import { bin, root } from "#scripts/support/paths"
+import { run, startService } from "#scripts/support/process"
+import { freePort } from "#scripts/support/server"
+import type { RuntimeChecks, ProbeResult } from "#test/runtime/checks"
 
 export async function checkWorker(work: string, tarball: string, checks: RuntimeChecks): Promise<void> {
 	const dir = installConsumer(work, "worker", tarball)

@@ -5,15 +5,19 @@
  */
 
 import { readFileSync } from "node:fs"
+import { parseArgs } from "node:util"
 
-const indexUrl = process.argv[3]!
-const mode = process.argv[2]
+const {
+	values: { mode },
+} = parseArgs({ options: { mode: { type: "string", default: "lazy" } } })
+
+if (mode !== "lazy" && mode !== "explicit") throw new RangeError("mode must be lazy or explicit")
 const t0 = performance.now()
-const h3 = (await import(indexUrl)) as typeof import("../../index.ts")
+const h3 = await import("@sister.software/h3")
 const t1 = performance.now()
 
 if (mode === "explicit") {
-	await h3.init({ bytes: readFileSync(process.argv[4]!) })
+	await h3.init({ bytes: readFileSync(new URL(import.meta.resolve("@sister.software/h3/h3.wasm"))) })
 }
 
 const t2 = performance.now()

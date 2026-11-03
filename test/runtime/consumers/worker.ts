@@ -8,7 +8,7 @@ import * as h3 from "@sister.software/h3"
 import wasmBytes from "h3-probe-bytes"
 import cases from "h3-probe-cases"
 
-import { runFixtureCases } from "../../shared/fixture-cases.ts"
+import { runFixtureCases } from "#test/shared/fixture-cases"
 
 async function restrictions() {
 	const out: Record<string, string | boolean> = {

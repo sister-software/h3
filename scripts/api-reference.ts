@@ -7,14 +7,19 @@
  */
 import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
-import { pathToFileURL } from "node:url"
+import { parseArgs } from "node:util"
 
 import { format } from "oxfmt"
 
-import config from "../oxfmt.config.ts"
-import { root } from "./support/paths.ts"
+import { root } from "#scripts/support/paths"
 
-const api = (await import(pathToFileURL(join(root, "out/index.js")).href)) as typeof import("../index.ts")
+import config from "../oxfmt.config.ts"
+
+const {
+	values: { check },
+} = parseArgs({ options: { check: { type: "boolean", default: false } } })
+
+const api = await import("@sister.software/h3")
 const publicNames = new Set(Object.keys(api))
 
 const sections = [
@@ -83,7 +88,7 @@ const formatted = await format(file, lines.join("\n"), config)
 if (formatted.errors.length) throw new Error(JSON.stringify(formatted.errors))
 const contents = formatted.code
 
-if (process.argv.includes("--check")) {
+if (check) {
 	if (readFileSync(file, "utf8") !== contents) throw new Error("API reference is stale; run yarn docs:api")
 } else {
 	writeFileSync(file, contents)

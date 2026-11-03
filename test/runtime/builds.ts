@@ -6,10 +6,9 @@
 
 import { writeFileSync } from "node:fs"
 import { join } from "node:path"
-import { pathToFileURL } from "node:url"
 
-import { buildConsumer, installConsumer } from "../../scripts/support/consumer.ts"
-import { root } from "../../scripts/support/paths.ts"
+import { buildConsumer, installConsumer } from "#scripts/support/consumer"
+import { root } from "#scripts/support/paths"
 
 export interface BrowserBuild {
 	name: string
@@ -39,7 +38,7 @@ export function browserBuilds(work: string, tarball: string): BrowserBuild[] {
 }
 
 async function buildVite(viteDir: string): Promise<string> {
-	const { build } = await import(pathToFileURL(join(root, "node_modules/vite/dist/node/index.js")).href)
+	const { build } = await import("vite")
 	await build({ root: viteDir, logLevel: "warn", build: { outDir: join(viteDir, "dist"), emptyOutDir: true } })
 
 	return join(viteDir, "dist")

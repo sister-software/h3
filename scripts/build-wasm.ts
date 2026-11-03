@@ -20,13 +20,18 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, statSync
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+import { parseArgs } from "node:util"
 
 export const WASM_BINDGEN_VERSION = "0.2.130"
 export const RUST_VERSION = "1.99.1"
 const TARGET = "wasm32-unknown-unknown"
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-const check = process.argv.includes("--check")
+
+const {
+	values: { check },
+} = parseArgs({ options: { check: { type: "boolean", default: false } } })
+
 const jobs = process.env.H3_BUILD_JOBS ?? "4"
 
 function fail(message: string): never {

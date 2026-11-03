@@ -7,16 +7,27 @@
 import { mkdirSync, readFileSync } from "node:fs"
 import { cpus, loadavg, totalmem } from "node:os"
 import { join } from "node:path"
+import { parseArgs } from "node:util"
 
-import { root } from "../scripts/support/paths.ts"
-import { run } from "../scripts/support/process.ts"
+import { root } from "#scripts/support/paths"
+import { run } from "#scripts/support/process"
 
-export const reportDir = process.env.H3_BENCH_OUTPUT ?? join(root, "benchmarks")
+const { values } = parseArgs({
+	options: {
+		samples: { type: "string", default: process.env.H3_BENCH_SAMPLES ?? "15" },
+		output: { type: "string", default: process.env.H3_BENCH_OUTPUT ?? join(root, "benchmarks") },
+		jobs: { type: "string", default: process.env.H3_BUILD_JOBS ?? "4" },
+	},
+})
+
+export const reportDir = values.output
 export const out = join(root, "target/benchmark")
-export const samples = Number(process.env.H3_BENCH_SAMPLES ?? 15)
+export const samples = Number(values.samples)
 
-if (!Number.isSafeInteger(samples) || samples < 1) throw new RangeError("H3_BENCH_SAMPLES must be a positive integer")
-export const jobs = process.env.H3_BUILD_JOBS ?? "4"
+if (!Number.isSafeInteger(samples) || samples < 1) throw new RangeError("samples must be a positive integer")
+export const jobs = values.jobs
+
+if (!Number.isSafeInteger(Number(jobs)) || Number(jobs) < 1) throw new RangeError("jobs must be a positive integer")
 
 export function prepare() {
 	mkdirSync(out, { recursive: true })

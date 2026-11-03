@@ -7,7 +7,7 @@
 import * as h3 from "@sister.software/h3"
 import wasmUrl from "@sister.software/h3/h3.wasm"
 
-import { failBrowser, runBrowser } from "./browser.ts"
+import { failBrowser, runBrowser } from "#test/runtime/consumers/browser"
 
 async function main(): Promise<void> {
 	const response = await fetch(wasmUrl)

@@ -7,9 +7,9 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { SUPPORTED_OPERATIONS, type FixtureRecord } from "../../test/shared/fixture-cases.ts"
-import { bin, root } from "./paths.ts"
-import { run } from "./process.ts"
+import { bin, root } from "#scripts/support/paths"
+import { run } from "#scripts/support/process"
+import { SUPPORTED_OPERATIONS, type FixtureRecord } from "#test/shared/fixture-cases"
 
 export function pack(work: string): string {
 	mkdirSync(work, { recursive: true })

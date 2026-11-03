@@ -4,7 +4,7 @@
  * @copyright Sister Software
  */
 
-import type { Stat } from "./stats.ts"
+import type { Stat } from "#benchmarks/stats"
 
 export interface MemorySnapshot {
 	heapUsedBytes: number

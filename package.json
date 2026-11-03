@@ -43,6 +43,23 @@
 		"./workerd.ts"
 	],
 	"types": "./out/index.d.ts",
+	"imports": {
+		"#*": {
+			"types": "./out/lib/*.d.ts",
+			"default": "./out/lib/*.js"
+		},
+		"#diagnostics": {
+			"types": "./lib/runtime/state.ts",
+			"default": "./out/lib/runtime/state.js"
+		},
+		"#benchmarks/*": "./benchmarks/*.ts",
+		"#scripts/*": "./scripts/*.ts",
+		"#test/*": "./test/*.ts",
+		"#worker": {
+			"types": "./out/workerd.d.ts",
+			"default": "./out/workerd.js"
+		}
+	},
 	"exports": {
 		"./package.json": "./package.json",
 		".": {

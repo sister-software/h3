@@ -6,12 +6,12 @@
 import { rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 
-import { fixtureRecords, pack } from "../../scripts/support/consumer.ts"
-import { root } from "../../scripts/support/paths.ts"
-import { checkBrowsers } from "./browsers.ts"
-import { RuntimeChecks } from "./checks.ts"
-import { checkNode } from "./node.ts"
-import { checkWorker } from "./worker.ts"
+import { fixtureRecords, pack } from "#scripts/support/consumer"
+import { root } from "#scripts/support/paths"
+import { checkBrowsers } from "#test/runtime/browsers"
+import { RuntimeChecks } from "#test/runtime/checks"
+import { checkNode } from "#test/runtime/node"
+import { checkWorker } from "#test/runtime/worker"
 
 const work = join(root, "target/runtime")
 rmSync(work, { recursive: true, force: true })

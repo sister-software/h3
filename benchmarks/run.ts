@@ -6,20 +6,19 @@
 import { readFileSync } from "node:fs"
 import { loadavg } from "node:os"
 import { join } from "node:path"
-import { pathToFileURL } from "node:url"
 
-import { root } from "../scripts/support/paths.ts"
-import { measureBoundary } from "./boundary.ts"
-import { prepare, samples, reportDir } from "./context.ts"
-import { measureJavaScript } from "./javascript.ts"
-import { measureNative } from "./native.ts"
-import { measureInit, measureNodeMemory } from "./probes.ts"
-import { writeReports } from "./report.ts"
-import type { BenchmarkReport } from "./types.ts"
-import { measureWorkerMemory } from "./worker.ts"
+import { measureBoundary } from "#benchmarks/boundary"
+import { prepare, samples, reportDir } from "#benchmarks/context"
+import { measureJavaScript } from "#benchmarks/javascript"
+import { measureNative } from "#benchmarks/native"
+import { measureInit, measureNodeMemory } from "#benchmarks/probes"
+import { writeReports } from "#benchmarks/report"
+import type { BenchmarkReport } from "#benchmarks/types"
+import { measureWorkerMemory } from "#benchmarks/worker"
+import { root } from "#scripts/support/paths"
 
 const environment = prepare()
-const ours = (await import(pathToFileURL(join(root, "out/index.js")).href)) as typeof import("../index.ts")
+const ours = await import("@sister.software/h3")
 const reference = await import("h3-js")
 await ours.init({ bytes: readFileSync(join(root, "wasm/h3.wasm")) })
 const { js, cells, pts } = measureJavaScript(ours, reference)
